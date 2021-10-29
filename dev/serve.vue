@@ -43,12 +43,14 @@ export default defineComponent({
   computed: {
     trackSrc() {
       // return require("./lost-in-the-fog.wav");
-      // return require("./maenads.wav");
-      return require("./baccata.wav");
+      return require("./maenads.wav");
+      // return require("./baccata.wav");
     }
   },
   mounted(): void {
-    // this.osc.frequency.setValueAtTime(440, this.audioCtx.currentTime );
+    // const f = 2000;
+
+    // this.osc.frequency.setValueAtTime(f, this.audioCtx.currentTime );
     // this.osc.connect(this.audioCtx.destination);
     // this.osc.start();
 
@@ -56,12 +58,11 @@ export default defineComponent({
     // this.osc.connect(this.leftGain);
     // this.osc.connect(this.rightGain);
 
+    // window.setTimeout(() => this.osc.frequency.setValueAtTime(f + 20, this.audioCtx.currentTime), 2000);
+
     // window.setTimeout(() => this.osc.stop(), 2000);
 
-    // this.requestMicrophoneAccess();
-
-    
-
+    // this.requestMicrophoneAccess();    
     
     // get the audio element
     const audioElement = document.querySelector('audio')!;

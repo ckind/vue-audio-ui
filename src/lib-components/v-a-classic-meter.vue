@@ -96,7 +96,7 @@ export default defineComponent({
         db = this.getRmsDb(dataArray);
       }
 
-      const dbRange = 60;
+      const dbRange = 80;
       db = db < -dbRange ? -dbRange : db;
       const mult = (dbRange + db) / dbRange;
 

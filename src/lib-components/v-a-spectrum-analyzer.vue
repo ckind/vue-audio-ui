@@ -57,8 +57,8 @@ export default defineComponent({
 
     return {
       ...useMetering(input.context, props.fftSize),
-      ...useRendering()
-    }
+      ...useRendering(),
+    };
   },
   computed: {
     cssVars() {
@@ -98,7 +98,7 @@ export default defineComponent({
         const noiseFloor = -120; // noise floor in dB
         const yRange = 0 - noiseFloor;
         const highPassCutoff = 20; // don't plot frequencies below cutoff
-        const nyquistFrequency = this.input.context.sampleRate / 2;
+        const nyquist = this.input.context.sampleRate / 2;
 
         const dataArray = this.getFloatFrequencyData();
 
@@ -111,8 +111,7 @@ export default defineComponent({
 
         let x = 0;
         let y =
-          this.height -
-          ((dataArray[0] - noiseFloor) / yRange) * this.height;
+          this.height - ((dataArray[0] - noiseFloor) / yRange) * this.height;
 
         this.canvasContext.beginPath();
 
@@ -121,17 +120,36 @@ export default defineComponent({
           const barHeight =
             ((dataArray[i] - noiseFloor) / yRange) * this.height;
 
-          const f = i * (nyquistFrequency / dataArray.length);
+          const f = i * (nyquist / dataArray.length);
 
           this.canvasContext.moveTo(x, y);
 
           // only stretch the graph over the 20hz to nyquist range
           if (f >= highPassCutoff) {
+
+            // todo: need to find a better way to stretch this over the x-axis
+            // if (f < 1000) {
+            //   // prettier-ignore
+            //   x = Math.floor(
+            //     Math.log2(f - highPassCutoff) / Math.log2(1000 - highPassCutoff) * this.width/2
+            //   );
+            // } else {
+            //   // prettier-ignore
+            //   x = Math.floor(
+            //     Math.log2(f - highPassCutoff - 1000) / Math.log2(nyquist - highPassCutoff) * this.width/2 + this.width/2
+            //   );
+            // }
+
+            // prettier-ignore
             x = Math.floor(
-              (Math.log2(f - highPassCutoff) /
-                Math.log2(nyquistFrequency - highPassCutoff)) *
-                this.width
+              Math.log2(f - highPassCutoff) / Math.log2(nyquist - highPassCutoff) * this.width
             );
+
+            // prettier-ignore
+            // x = Math.floor(
+            //   (f - highPassCutoff) / (nyquist - highPassCutoff) * this.width
+            // );
+
             y = this.height - barHeight;
 
             // this.canvasContext.fillRect(x, y, barWidth, barHeight);
@@ -139,13 +157,13 @@ export default defineComponent({
 
           this.canvasContext.lineTo(x, y);
         }
-        
+
         this.canvasContext.stroke();
 
-        this.drawFrequencyMarkers(highPassCutoff, nyquistFrequency);
+        this.drawFrequencyMarkers(highPassCutoff, nyquist);
       }
     },
-    drawFrequencyMarkers(highPassCutoff: number, nyquistFrequency: number) {
+    drawFrequencyMarkers(highPassCutoff: number, nyquist: number) {
       if (this.canvasContext) {
         let f = highPassCutoff;
         let x = 0;
@@ -156,7 +174,7 @@ export default defineComponent({
         f = 30;
         x = Math.floor(
           (Math.log2(f - highPassCutoff) /
-            Math.log2(nyquistFrequency - highPassCutoff)) *
+            Math.log2(nyquist - highPassCutoff)) *
             this.width
         );
 
@@ -166,7 +184,7 @@ export default defineComponent({
         f = 100;
         x = Math.floor(
           (Math.log2(f - highPassCutoff) /
-            Math.log2(nyquistFrequency - highPassCutoff)) *
+            Math.log2(nyquist - highPassCutoff)) *
             this.width
         );
 
@@ -176,7 +194,7 @@ export default defineComponent({
         f = 1000;
         x = Math.floor(
           (Math.log2(f - highPassCutoff) /
-            Math.log2(nyquistFrequency - highPassCutoff)) *
+            Math.log2(nyquist - highPassCutoff)) *
             this.width
         );
 
@@ -186,14 +204,14 @@ export default defineComponent({
         f = 10000;
         x = Math.floor(
           (Math.log2(f - highPassCutoff) /
-            Math.log2(nyquistFrequency - highPassCutoff)) *
+            Math.log2(nyquist - highPassCutoff)) *
             this.width
         );
 
         this.canvasContext.font = "14px Arial";
         this.canvasContext.fillText(`${f / 1000}khz`, x, 100);
 
-        f = nyquistFrequency;
+        f = nyquist;
         x = this.width;
 
         this.canvasContext.font = "14px Arial";
