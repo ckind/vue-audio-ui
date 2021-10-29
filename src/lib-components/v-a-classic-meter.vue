@@ -88,13 +88,17 @@ export default defineComponent({
     draw(): void {
       const dataArray = this.getFloatTimeDomainData();
 
-      let mult = 0;
+      let db = 0;
 
       if (this.type === "peak") {
-        mult = this.getPeak(dataArray);
+        db = this.getPeakDb(dataArray);
       } else if (this.type === "rms") {
-        mult = this.getRms(dataArray);
+        db = this.getRmsDb(dataArray);
       }
+
+      const dbRange = 60;
+      db = db < -dbRange ? -dbRange : db;
+      const mult = (dbRange + db) / dbRange;
 
       this.value = mult * 2 - 1;
     },

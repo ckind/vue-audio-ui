@@ -42,8 +42,9 @@ export default defineComponent({
   },
   computed: {
     trackSrc() {
-      return require("./lost-in-the-fog.wav");
+      // return require("./lost-in-the-fog.wav");
       // return require("./maenads.wav");
+      return require("./baccata.wav");
     }
   },
   mounted(): void {
@@ -51,7 +52,15 @@ export default defineComponent({
     // this.osc.connect(this.audioCtx.destination);
     // this.osc.start();
 
+    // this.osc.connect(this.monoGain);
+    // this.osc.connect(this.leftGain);
+    // this.osc.connect(this.rightGain);
+
     // window.setTimeout(() => this.osc.stop(), 2000);
+
+    // this.requestMicrophoneAccess();
+
+    
 
     
     // get the audio element
@@ -67,6 +76,21 @@ export default defineComponent({
     splitter.connect(this.rightGain, 1);
 
     track.connect(this.audioCtx.destination);
+  },
+  methods: {
+    requestMicrophoneAccess() {
+      navigator.mediaDevices
+        .getUserMedia({ video: false, audio: true })
+        .then((stream) => {
+          const source = this.audioCtx.createMediaStreamSource(stream);
+          source.connect(this.monoGain);
+          source.connect(this.leftGain);
+          source.connect(this.rightGain);
+        })
+        .catch((err) => {
+          console.log("error requesting microphone access:" + err);
+        });
+    },
   }
 });
 </script>

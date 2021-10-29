@@ -19,12 +19,12 @@ export default defineComponent({
     type: {
       required: false,
       type: String as PropType<MeterType>,
-      default: "peak"
+      default: "peak",
     },
     fftSize: {
       required: false,
       type: Number,
-      default: 2048
+      default: 2048,
     },
   },
   setup(props) {
@@ -32,14 +32,14 @@ export default defineComponent({
 
     return {
       ...useMetering(input.context, props.fftSize),
-      ...useRendering()
-    }
+      ...useRendering(),
+    };
   },
   data() {
     return {
       height: 200,
       width: 20,
-      canvasCxt: null as CanvasRenderingContext2D | null
+      canvasCxt: null as CanvasRenderingContext2D | null,
     };
   },
   created() {
@@ -56,13 +56,17 @@ export default defineComponent({
       if (this.canvasCxt) {
         const dataArray = this.getFloatTimeDomainData();
 
-        let mult = 0;
+        let db = 0;
 
         if (this.type === "peak") {
-          mult = this.getPeak(dataArray);
+          db = this.getPeakDb(dataArray);
         } else if (this.type === "rms") {
-          mult = this.getRms(dataArray);
+          db = this.getRmsDb(dataArray);
         }
+
+        const dbRange = 60;
+        db = db < -dbRange ? -dbRange : db;
+        const mult = (dbRange + db) / dbRange;
 
         const meterHeight = this.height * mult;
 
@@ -84,5 +88,4 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 </style>

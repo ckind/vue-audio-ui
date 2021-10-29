@@ -19,7 +19,7 @@ const useMetering = (audioCtx: BaseAudioContext, fftSize: number) => {
 		return dataArray;
 	}
 
-	const getPeak = (buffer: Float32Array): number => {
+	const getPeakDb = (buffer: Float32Array): number => {
 		let peak = 0;
 		let value;
 
@@ -30,10 +30,10 @@ const useMetering = (audioCtx: BaseAudioContext, fftSize: number) => {
 			}
 		}
 
-		return peak;
+		return 20 * Math.log10(peak);
 	}
 
-	const getRms = (buffer: Float32Array): number => {
+	const getRmsDb = (buffer: Float32Array): number => {
 		let squareSum = 0;
 		let value;
 
@@ -42,10 +42,10 @@ const useMetering = (audioCtx: BaseAudioContext, fftSize: number) => {
 			squareSum += value * value;
 		}
 
-		return Math.sqrt(squareSum / buffer.length);
+		return 20 * Math.log10(Math.sqrt(squareSum / buffer.length));
 	};
 
-	return { getPeak, getRms, getFloatTimeDomainData, getFloatFrequencyData, analyzer };
+	return { getPeakDb, getRmsDb, getFloatTimeDomainData, getFloatFrequencyData, analyzer };
 }
 
 export default useMetering;
