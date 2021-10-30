@@ -85,6 +85,7 @@ export default defineComponent({
     this.startRendering(this.draw);
   },
   methods: {
+    
     draw(): void {
       const dataArray = this.getFloatTimeDomainData();
 

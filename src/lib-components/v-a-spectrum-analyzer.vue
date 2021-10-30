@@ -9,6 +9,9 @@ import { defineComponent } from "vue";
 import useMetering from "@/composables/metering";
 import useRendering from "@/composables/rendering";
 
+const HIGH_PASS_CUTOFF = 20;
+const NOISE_FLOOR = -120;
+
 export default defineComponent({
   name: "VASpectrumAnalyzer",
   data() {
@@ -93,11 +96,43 @@ export default defineComponent({
         this.height = rect.height;
       }
     },
+    scaleX(
+      f: number,
+      rangeMinHz: number,
+      rangeMaxHz: number,
+      width: number
+    ): number {
+      const baseXAxisLogFactor = 1 / 3.321; // magic number.
+
+      let xAxisLogFactor = (rangeMaxHz - rangeMinHz) / rangeMaxHz;
+      xAxisLogFactor *= 1.0 - baseXAxisLogFactor;
+      xAxisLogFactor = 1.0 - xAxisLogFactor;
+
+      let x = (f - rangeMinHz) / (rangeMaxHz - rangeMinHz);
+      x = Math.pow(x, xAxisLogFactor);
+      if (x < 1.0) {
+        x *= width;
+      }
+
+      return x;
+    },
+    scaleXLegacy(
+      f: number,
+      rangeMinHz: number,
+      rangeMaxHz: number,
+      width: number
+    ): number {
+      // old way of doing it
+      // prettier-ignore
+      const x = Math.floor(
+        Math.log2(f - rangeMinHz) / Math.log2(rangeMaxHz - rangeMinHz) * width
+      );
+
+      return x;
+    },
     drawFrequencyDomain() {
       if (this.canvasContext) {
-        const noiseFloor = -120; // noise floor in dB
-        const yRange = 0 - noiseFloor;
-        const highPassCutoff = 20; // don't plot frequencies below cutoff
+        const yRange = 0 - NOISE_FLOOR;
         const nyquist = this.input.context.sampleRate / 2;
 
         const dataArray = this.getFloatFrequencyData();
@@ -111,44 +146,22 @@ export default defineComponent({
 
         let x = 0;
         let y =
-          this.height - ((dataArray[0] - noiseFloor) / yRange) * this.height;
+          this.height - ((dataArray[0] - NOISE_FLOOR) / yRange) * this.height;
 
         this.canvasContext.beginPath();
 
         for (let i = 0; i < dataArray.length; i++) {
           // const barWidth = 1;
           const barHeight =
-            ((dataArray[i] - noiseFloor) / yRange) * this.height;
+            ((dataArray[i] - NOISE_FLOOR) / yRange) * this.height;
 
           const f = i * (nyquist / dataArray.length);
 
           this.canvasContext.moveTo(x, y);
 
           // only stretch the graph over the 20hz to nyquist range
-          if (f >= highPassCutoff) {
-
-            // todo: need to find a better way to stretch this over the x-axis
-            // if (f < 1000) {
-            //   // prettier-ignore
-            //   x = Math.floor(
-            //     Math.log2(f - highPassCutoff) / Math.log2(1000 - highPassCutoff) * this.width/2
-            //   );
-            // } else {
-            //   // prettier-ignore
-            //   x = Math.floor(
-            //     Math.log2(f - highPassCutoff - 1000) / Math.log2(nyquist - highPassCutoff) * this.width/2 + this.width/2
-            //   );
-            // }
-
-            // prettier-ignore
-            x = Math.floor(
-              Math.log2(f - highPassCutoff) / Math.log2(nyquist - highPassCutoff) * this.width
-            );
-
-            // prettier-ignore
-            // x = Math.floor(
-            //   (f - highPassCutoff) / (nyquist - highPassCutoff) * this.width
-            // );
+          if (f >= HIGH_PASS_CUTOFF) {
+            x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.width);
 
             y = this.height - barHeight;
 
@@ -160,62 +173,74 @@ export default defineComponent({
 
         this.canvasContext.stroke();
 
-        this.drawFrequencyMarkers(highPassCutoff, nyquist);
+        this.drawDbMarkers();
+        this.drawFrequencyMarkers(nyquist);
       }
     },
-    drawFrequencyMarkers(highPassCutoff: number, nyquist: number) {
+    drawDbMarkers() {
+      this.drawDbMarker(-20);
+      this.drawDbMarker(-40);
+      this.drawDbMarker(-60);
+      this.drawDbMarker(-80);
+      this.drawDbMarker(-100);
+    },
+    drawDbMarker(db: number) {
       if (this.canvasContext) {
-        let f = highPassCutoff;
-        let x = 0;
+        const y =
+          this.height - ((NOISE_FLOOR - db) / NOISE_FLOOR) * this.height;
 
-        this.canvasContext.font = "14px Arial";
-        this.canvasContext.fillText(`${f}hz`, x, 100);
+        this.canvasContext.strokeStyle = "gray";
+        this.canvasContext.beginPath();
+        this.canvasContext.moveTo(0, y);
+        this.canvasContext.lineTo(this.width, y);
+        this.canvasContext.stroke();
 
-        f = 30;
-        x = Math.floor(
-          (Math.log2(f - highPassCutoff) /
-            Math.log2(nyquist - highPassCutoff)) *
-            this.width
-        );
+        this.canvasContext.font = "12px Arial";
+        this.canvasContext.fillStyle = "gray";
+        this.canvasContext.fillText(`${db}db`, 10, y);
+      }
+    },
+    drawFrequencyMarkers(nyquist: number) {
+      this.drawFrequencyMarker(HIGH_PASS_CUTOFF, nyquist, true);
+      this.drawFrequencyMarker(25, nyquist);
+      this.drawFrequencyMarker(50, nyquist, true);
+      this.drawFrequencyMarker(100, nyquist);
+      this.drawFrequencyMarker(200, nyquist, true);
+      this.drawFrequencyMarker(500, nyquist, true);
+      this.drawFrequencyMarker(1000, nyquist, true);
+      this.drawFrequencyMarker(1500, nyquist);
+      this.drawFrequencyMarker(2000, nyquist, true);
+      this.drawFrequencyMarker(3000, nyquist, true);
+      this.drawFrequencyMarker(5000, nyquist, true);
+      this.drawFrequencyMarker(7000, nyquist, true);
+      this.drawFrequencyMarker(10000, nyquist, true);
+      this.drawFrequencyMarker(15000, nyquist, true);
+      this.drawFrequencyMarker(20000, nyquist, true);
+    },
+    drawFrequencyMarker(
+      f: number,
+      nyquist: number,
+      drawLabel: boolean = false
+    ) {
+      if (this.canvasContext && f >= HIGH_PASS_CUTOFF) {
+        const x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.width);
 
-        this.canvasContext.font = "14px Arial";
-        this.canvasContext.fillText(`${f}hz`, x, 100);
+        this.canvasContext.strokeStyle = "gray";
+        this.canvasContext.beginPath();
+        this.canvasContext.moveTo(x, 0);
+        this.canvasContext.lineTo(x, this.height);
+        this.canvasContext.stroke();
 
-        f = 100;
-        x = Math.floor(
-          (Math.log2(f - highPassCutoff) /
-            Math.log2(nyquist - highPassCutoff)) *
-            this.width
-        );
+        if (drawLabel) {
+          this.canvasContext.font = "14px Arial";
 
-        this.canvasContext.font = "14px Arial";
-        this.canvasContext.fillText(`${f}hz`, x, 100);
-
-        f = 1000;
-        x = Math.floor(
-          (Math.log2(f - highPassCutoff) /
-            Math.log2(nyquist - highPassCutoff)) *
-            this.width
-        );
-
-        this.canvasContext.font = "14px Arial";
-        this.canvasContext.fillText(`${f / 1000}khz`, x, 100);
-
-        f = 10000;
-        x = Math.floor(
-          (Math.log2(f - highPassCutoff) /
-            Math.log2(nyquist - highPassCutoff)) *
-            this.width
-        );
-
-        this.canvasContext.font = "14px Arial";
-        this.canvasContext.fillText(`${f / 1000}khz`, x, 100);
-
-        f = nyquist;
-        x = this.width;
-
-        this.canvasContext.font = "14px Arial";
-        this.canvasContext.fillText(`${f / 1000}khz`, x, 100);
+          this.canvasContext.fillStyle = this.lineColor;
+          if (f < 1000) {
+            this.canvasContext.fillText(`${f}hz`, x, 50);
+          } else {
+            this.canvasContext.fillText(`${f / 1000}khz`, x, 50);
+          }
+        }
       }
     },
   },

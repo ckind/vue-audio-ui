@@ -10,8 +10,10 @@
     <v-a-simple-meter class="ui-component" type="rms" :input="leftGain" />
     <v-a-simple-meter class="ui-component" type="rms" :input="rightGain" />
 
-    <div class="ui-component" style="height: 200px; width: 600px; display: inline-block">
-      <v-a-spectrum-analyzer :input="monoGain" :audioContext="audioCtx" :fftSize="8192" />
+    <br />
+
+    <div class="ui-component">
+      <v-a-spectrum-analyzer :input="monoGain" :audioContext="audioCtx" :fftSize="2048" />
     </div>
     
   </div>
