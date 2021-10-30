@@ -1,30 +1,35 @@
 <template>
   <div id="app">
     <audio controls :src="trackSrc" />
+    
+    Peak
+    <v-a-digital-meter-stereo class="ui-component" type="peak" :leftInput="leftGain" :rightInput="rightGain" :drawMarkers="true" />
+    RMS
+    <v-a-digital-meter-stereo class="ui-component" type="rms" :leftInput="leftGain" :rightInput="rightGain" :drawMarkers="true" />
+    RMS (Mono)
+    <v-a-digital-meter class="ui-component" type="rms" :input="monoGain" />
 
-    <v-a-simple-meter class="ui-component" :input="leftGain" />
-    <v-a-simple-meter class="ui-component" :input="rightGain" />
-
-    <v-a-classic-meter class="ui-component" type="rms" :input="monoGain" />
-
-    <v-a-simple-meter class="ui-component" type="rms" :input="leftGain" />
-    <v-a-simple-meter class="ui-component" type="rms" :input="rightGain" />
+    <!-- <v-a-classic-meter class="ui-component" type="rms" :input="monoGain" /> -->
 
     <br />
 
     <div class="ui-component">
-      <v-a-spectrum-analyzer :input="monoGain" :audioContext="audioCtx" :fftSize="2048" />
+      <v-a-spectrum-analyzer
+        :input="monoGain"
+        :audioContext="audioCtx"
+        :fftSize="2048"
+        :drawLines="true"
+      />
     </div>
-    
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from 'vue';
-import WebAudioHelpers from '@/util/web-audio-helpers';
+import { defineComponent, reactive } from "vue";
+import WebAudioHelpers from "@/util/web-audio-helpers";
 
 export default defineComponent({
-  name: 'ServeDev',
+  name: "ServeDev",
   setup() {
     const ctx = WebAudioHelpers.setupAudioContext();
     const osc = ctx.createOscillator();
@@ -37,17 +42,17 @@ export default defineComponent({
       rightGain: rightGain,
       monoGain: monoGain,
       audioCtx: ctx,
-      osc: osc
+      osc: osc,
     });
 
     return state;
   },
   computed: {
     trackSrc() {
-      // return require("./lost-in-the-fog.wav");
-      return require("./maenads.wav");
+      return require("./lost-in-the-fog.wav");
+      // return require("./maenads.wav");
       // return require("./baccata.wav");
-    }
+    },
   },
   mounted(): void {
     // const f = 2000;
@@ -64,10 +69,10 @@ export default defineComponent({
 
     // window.setTimeout(() => this.osc.stop(), 2000);
 
-    // this.requestMicrophoneAccess();    
-    
+    // this.requestMicrophoneAccess();
+
     // get the audio element
-    const audioElement = document.querySelector('audio')!;
+    const audioElement = document.querySelector("audio")!;
 
     // pass it into the audio context
     const track = this.audioCtx.createMediaElementSource(audioElement);
@@ -94,7 +99,7 @@ export default defineComponent({
           console.log("error requesting microphone access:" + err);
         });
     },
-  }
+  },
 });
 </script>
 
@@ -102,5 +107,8 @@ export default defineComponent({
 <style scoped>
 .ui-component {
   margin: 2px;
+}
+.stereo-meter-container {
+  display: inline-block;
 }
 </style>

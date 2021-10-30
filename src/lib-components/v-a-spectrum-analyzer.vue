@@ -32,7 +32,12 @@ export default defineComponent({
     fftSize: {
       type: Number,
       required: false,
-      default: 2048,
+      default: 1024,
+    },
+    drawLines: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     lineColor: {
       type: String,
@@ -151,7 +156,7 @@ export default defineComponent({
         this.canvasContext.beginPath();
 
         for (let i = 0; i < dataArray.length; i++) {
-          // const barWidth = 1;
+          const barWidth = 1;
           const barHeight =
             ((dataArray[i] - NOISE_FLOOR) / yRange) * this.height;
 
@@ -165,7 +170,9 @@ export default defineComponent({
 
             y = this.height - barHeight;
 
-            // this.canvasContext.fillRect(x, y, barWidth, barHeight);
+            if (this.drawLines) {
+              this.canvasContext.fillRect(x, y, barWidth, barHeight);
+            }
           }
 
           this.canvasContext.lineTo(x, y);

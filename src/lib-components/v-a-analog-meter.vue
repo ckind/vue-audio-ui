@@ -35,11 +35,10 @@
 import { defineComponent, PropType } from "vue";
 import useMetering from "@/composables/metering";
 import useRendering from "@/composables/rendering";
-
-type MeterType = "peak" | "rms";
+import { MeterType } from "@/types/v-audio-ui-types";
 
 export default defineComponent({
-  name: "VAClassicMeter",
+  name: "VAAnalogMeter",
   props: {
     input: {
       required: true,
