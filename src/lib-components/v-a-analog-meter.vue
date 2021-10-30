@@ -1,7 +1,7 @@
 <template>
   <div class="meter-container">
     <svg
-      width="300px"
+      :width="`${this.width}px`"
       version="1.1"
       viewBox="0 0 88.598 57.562"
       xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +35,7 @@
 import { defineComponent, PropType } from "vue";
 import useMetering from "@/composables/metering";
 import useRendering from "@/composables/rendering";
-import { MeterType } from "@/types/v-audio-ui-types";
+import { AnalogMeterType } from "@/types/v-audio-ui-types";
 
 export default defineComponent({
   name: "VAAnalogMeter",
@@ -46,13 +46,18 @@ export default defineComponent({
     },
     type: {
       required: false,
-      type: String as PropType<MeterType>,
+      type: String as PropType<AnalogMeterType>,
       default: "peak",
     },
     fftSize: {
       required: false,
       type: Number,
       default: 2048,
+    },
+    width: {
+      required: false,
+      type: Number,
+      default: 300,
     },
   },
   setup(props) {

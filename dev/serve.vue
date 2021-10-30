@@ -1,24 +1,50 @@
 <template>
   <div id="app">
     <audio controls :src="trackSrc" />
-    
-    Peak
-    <v-a-digital-meter-stereo class="ui-component" type="peak" :leftInput="leftGain" :rightInput="rightGain" :drawMarkers="true" />
-    RMS
-    <v-a-digital-meter-stereo class="ui-component" type="rms" :leftInput="leftGain" :rightInput="rightGain" :drawMarkers="true" />
-    RMS (Mono)
-    <v-a-digital-meter class="ui-component" type="rms" :input="monoGain" />
 
-    <!-- <v-a-classic-meter class="ui-component" type="rms" :input="monoGain" /> -->
+    Peak
+    <v-a-digital-meter-stereo
+      class="ui-component"
+      type="peak"
+      :leftInput="leftGain"
+      :rightInput="rightGain"
+      :drawMarkers="true"
+    />
+    RMS
+    <v-a-digital-meter-stereo
+      class="ui-component"
+      type="rms"
+      :leftInput="leftGain"
+      :rightInput="rightGain"
+      :drawMarkers="true"
+    />
+    RMS (Mono)
+    <v-a-digital-meter
+      class="ui-component"
+      type="rms"
+      :input="monoGain"
+      :drawMarkers="true"
+    />
+
+    <v-a-analog-meter-stereo
+      :width="200"
+      class="ui-component"
+      type="rms"
+      :leftInput="leftGain"
+      :rightInput="rightGain"
+    />
 
     <br />
 
-    <div class="ui-component">
+    <div class="ui-component spectrum">
       <v-a-spectrum-analyzer
         :input="monoGain"
         :audioContext="audioCtx"
         :fftSize="2048"
         :drawLines="true"
+        gridColor="gray"
+        lineColor="black"
+        backgroundColor="white"
       />
     </div>
   </div>
@@ -49,13 +75,13 @@ export default defineComponent({
   },
   computed: {
     trackSrc() {
-      return require("./lost-in-the-fog.wav");
-      // return require("./maenads.wav");
+      // return require("./lost-in-the-fog.wav");
+      return require("./maenads.wav");
       // return require("./baccata.wav");
     },
   },
   mounted(): void {
-    // const f = 2000;
+    // const f = 200;
 
     // this.osc.frequency.setValueAtTime(f, this.audioCtx.currentTime );
     // this.osc.connect(this.audioCtx.destination);
@@ -110,5 +136,8 @@ export default defineComponent({
 }
 .stereo-meter-container {
   display: inline-block;
+}
+.spectrum {
+  border: 1px solid black;
 }
 </style>

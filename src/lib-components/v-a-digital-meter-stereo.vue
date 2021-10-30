@@ -7,6 +7,9 @@
       :type="type"
       :height="height"
       :width="width"
+      :barColor="barColor"
+      :backgroundColor="backgroundColor"
+      :markerColor="markerColor"
       :drawMarkers="false"
     />
     <v-a-digital-meter
@@ -16,6 +19,9 @@
       :type="type"
       :height="height"
       :width="width"
+      :barColor="barColor"
+      :backgroundColor="backgroundColor"
+      :markerColor="markerColor"
       :drawMarkers="drawMarkers"
     />
   </div>
@@ -23,7 +29,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { MeterType } from "@/types/v-audio-ui-types";
+import { DigitalMeterType } from "@/types/v-audio-ui-types";
 
 export default defineComponent({
   name: "VADigitalMeterStereo",
@@ -38,13 +44,28 @@ export default defineComponent({
     },
     type: {
       required: false,
-      type: String as PropType<MeterType>,
+      type: String as PropType<DigitalMeterType>,
       default: "peak",
     },
     fftSize: {
       required: false,
       type: Number,
       default: 2048,
+    },
+    barColor: {
+      required: false,
+      type: String,
+      default: "black",
+    },
+    backgroundColor: {
+      required: false,
+      type: String,
+      default: "#E3E3E3",
+    },
+    markerColor: {
+      required: false,
+      type: String,
+      default: "gray",
     },
     drawMarkers: {
       required: false,

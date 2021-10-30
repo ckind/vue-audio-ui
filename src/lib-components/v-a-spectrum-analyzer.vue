@@ -42,12 +42,17 @@ export default defineComponent({
     lineColor: {
       type: String,
       required: false,
-      default: "white",
+      default: "black",
     },
     backgroundColor: {
       type: String,
       required: false,
-      default: "black",
+      default: "white",
+    },
+    gridColor: {
+      type: String,
+      required: false,
+      default: "gray",
     },
     graphHeight: {
       type: String,
@@ -196,14 +201,14 @@ export default defineComponent({
         const y =
           this.height - ((NOISE_FLOOR - db) / NOISE_FLOOR) * this.height;
 
-        this.canvasContext.strokeStyle = "gray";
+        this.canvasContext.strokeStyle = this.gridColor;
         this.canvasContext.beginPath();
         this.canvasContext.moveTo(0, y);
         this.canvasContext.lineTo(this.width, y);
         this.canvasContext.stroke();
 
         this.canvasContext.font = "12px Arial";
-        this.canvasContext.fillStyle = "gray";
+        this.canvasContext.fillStyle = this.gridColor;
         this.canvasContext.fillText(`${db}db`, 10, y);
       }
     },
@@ -232,7 +237,7 @@ export default defineComponent({
       if (this.canvasContext && f >= HIGH_PASS_CUTOFF) {
         const x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.width);
 
-        this.canvasContext.strokeStyle = "gray";
+        this.canvasContext.strokeStyle = this.gridColor;
         this.canvasContext.beginPath();
         this.canvasContext.moveTo(x, 0);
         this.canvasContext.lineTo(x, this.height);

@@ -11,10 +11,9 @@
 import { defineComponent, PropType } from "vue";
 import useMetering from "@/composables/metering";
 import useRendering from "@/composables/rendering";
-import { MeterType } from "@/types/v-audio-ui-types";
+import { DigitalMeterType } from "@/types/v-audio-ui-types";
 
 const DB_RANGE = 80;
-// const MARKER_WIDTH = 8;
 
 export default defineComponent({
   name: "VADigitalMeter",
@@ -25,13 +24,28 @@ export default defineComponent({
     },
     type: {
       required: false,
-      type: String as PropType<MeterType>,
+      type: String as PropType<DigitalMeterType>,
       default: "peak",
     },
     fftSize: {
       required: false,
       type: Number,
       default: 2048,
+    },
+    barColor: {
+      required: false,
+      type: String,
+      default: "black",
+    },
+    backgroundColor: {
+      required: false,
+      type: String,
+      default: "#E3E3E3",
+    },
+    markerColor: {
+      required: false,
+      type: String,
+      default: "gray",
     },
     drawMarkers: {
       required: false,
@@ -77,6 +91,13 @@ export default defineComponent({
     this.startRendering(this.draw);
   },
   methods: {
+    getMeterHeight(db: number) {
+      return (
+        this.height *
+        ((DB_RANGE + db) / DB_RANGE) *
+        (DB_RANGE / (DB_RANGE + 10)) // add a little padding up to the top and bottom
+      );
+    },
     draw(): void {
       if (this.canvasCxt) {
         const dataArray = this.getFloatTimeDomainData();
@@ -90,23 +111,16 @@ export default defineComponent({
         }
 
         db = db < -DB_RANGE ? -DB_RANGE : db;
-        const mult = (DB_RANGE + db) / DB_RANGE;
-
-        const meterHeight = this.height * mult;
+        const meterHeight = this.getMeterHeight(db);
 
         this.canvasCxt.clearRect(0, 0, this.canvasWidth, this.height);
 
-        this.canvasCxt.fillStyle = "#E3E3E3";
+        this.canvasCxt.fillStyle = this.backgroundColor;
         this.canvasCxt.beginPath();
-        this.canvasCxt.fillRect(
-          0,
-          0,
-          this.width,
-          this.height
-        );
+        this.canvasCxt.fillRect(0, 0, this.width, this.height);
         this.canvasCxt.stroke();
 
-        this.canvasCxt.fillStyle = "black";
+        this.canvasCxt.fillStyle = this.barColor;
         this.canvasCxt.beginPath();
         this.canvasCxt.fillRect(
           0,
@@ -122,6 +136,7 @@ export default defineComponent({
       }
     },
     drawDbMarkers(): void {
+      this.drawDbMarker(6);
       this.drawDbMarker(0);
       this.drawDbMarker(-10);
       this.drawDbMarker(-20);
@@ -130,24 +145,22 @@ export default defineComponent({
       this.drawDbMarker(-50);
       this.drawDbMarker(-60);
       this.drawDbMarker(-70);
-      this.drawDbMarker(-80);
     },
     drawDbMarker(db: number): void {
-      const y = this.height - ((DB_RANGE + db) / DB_RANGE) * this.height;
+      const y = this.height - this.getMeterHeight(db);
       const x = this.width + 4;
 
       this.canvasCxt!.lineWidth = 1;
-      this.canvasCxt!.strokeStyle = "gray";
+      this.canvasCxt!.strokeStyle = this.markerColor;
+
+      this.canvasCxt?.beginPath();
+      this.canvasCxt?.moveTo(x, y);
+      this.canvasCxt?.lineTo(x + 4, y);
+      this.canvasCxt?.stroke();
 
       this.canvasCxt!.font = "10px Arial";
-      this.canvasCxt!.fillStyle = "gray";
-      this.canvasCxt!.fillText(`${db}db`, x, y);
-
-
-      // this.canvasCxt?.beginPath();
-      // this.canvasCxt?.moveTo(x, y);
-      // this.canvasCxt?.lineTo(x + MARKER_WIDTH, y);
-      // this.canvasCxt?.stroke();
+      this.canvasCxt!.fillStyle = this.markerColor;
+      this.canvasCxt!.fillText(`${Math.abs(db)}`, x + 8, y + 3);
     },
   },
 });
