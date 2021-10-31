@@ -1913,12 +1913,6 @@ export default defineComponent({
 
     return reactive(state);
   },
-  mounted() {
-    // todo: need to handle when page resizes
-    this.svgRootPageY = (
-      this.$refs.svgRoot as HTMLElement
-    ).getBoundingClientRect().y;
-  },
   props: {
     modelValue: {
       required: true,
@@ -1949,7 +1943,7 @@ export default defineComponent({
     showShadow: {
       required: false,
       type: Boolean,
-      default: false
+      default: false,
     },
   },
   computed: {
@@ -1974,6 +1968,11 @@ export default defineComponent({
   methods: {
     onKnobMouseDown(e: MouseEvent) {
       e.preventDefault();
+
+      this.svgRootPageY = (
+        this.$refs.svgRoot as HTMLElement
+      ).getBoundingClientRect().y;
+
       document.addEventListener("mousemove", this.onKnobMouseDrag);
       document.addEventListener("touchmove", this.onKnobTouchDrag);
       document.addEventListener("mouseup", this.onDocumentMouseUp);
@@ -2008,10 +2007,10 @@ export default defineComponent({
       );
     },
     onKnobTouchDrag(e: TouchEvent) {
-      this.onKnobDrag(e.touches[0].pageY);
+      this.onKnobDrag(e.touches[0].clientY);
     },
     onKnobMouseDrag(e: MouseEvent) {
-      this.onKnobDrag(e.pageY);
+      this.onKnobDrag(e.clientY);
     },
   },
   watch: {

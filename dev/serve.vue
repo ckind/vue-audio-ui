@@ -31,7 +31,7 @@
 
     <v-a-knob v-model="analyzerWidth" :minValue="200" :maxValue="1200" />
 
-    <v-a-spectrum-analyzer
+    <!-- <v-a-spectrum-analyzer
       :input="monoGain"
       :audioContext="audioCtx"
       :fftSize="2048"
@@ -40,7 +40,7 @@
       gridColor="gray"
       lineColor="black"
       backgroundColor="white"
-    />
+    /> -->
 
     <v-a-analog-meter-stereo
       :width="200"
@@ -56,6 +56,7 @@
     <ChannelStrip :input="monoGain" />
     <ChannelStrip :input="monoGain" />
     <ChannelStrip :input="monoGain" />
+    <v-a-fader v-model="gainValue" :minValue="0" :maxValue="1" :showShadow="true" />
   </div>
 </template>
 
