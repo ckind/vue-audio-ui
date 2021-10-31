@@ -35,7 +35,7 @@ export default defineComponent({
     barColor: {
       required: false,
       type: String,
-      default: "black",
+      default: "#454545",
     },
     backgroundColor: {
       required: false,
@@ -70,7 +70,7 @@ export default defineComponent({
   },
   computed: {
     canvasWidth(): number {
-      return this.width + (this.drawMarkers ? 40 : 0);
+      return this.width + (this.drawMarkers ? 30 : 0);
     },
   },
   setup(props) {

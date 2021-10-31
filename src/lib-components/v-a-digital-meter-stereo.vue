@@ -57,7 +57,7 @@ export default defineComponent({
     barColor: {
       required: false,
       type: String,
-      default: "black",
+      default: "#454545",
     },
     backgroundColor: {
       required: false,

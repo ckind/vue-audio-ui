@@ -56,6 +56,6 @@ export default defineComponent({
   margin: 2px;
 }
 .stereo-meter-container {
-  display: inline-block;
+  display: block;
 }
 </style>

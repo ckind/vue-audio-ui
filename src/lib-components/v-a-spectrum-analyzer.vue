@@ -1,7 +1,5 @@
 <template>
-  <div ref="analyserCanvasContainer" class="canvas-container" :style="cssVars">
-    <canvas ref="analyserCanvas" class="analyser-canvas"></canvas>
-  </div>
+  <canvas :width="graphWidth" :height="graphHeight" ref="analyserCanvas" class="analyser-canvas"></canvas>
 </template>
 
 <script lang="ts">
@@ -11,14 +9,13 @@ import useRendering from "@/composables/rendering";
 
 const HIGH_PASS_CUTOFF = 20;
 const NOISE_FLOOR = -120;
+const DEFAULT_ASPECT_RATIO = 3;
 
 export default defineComponent({
   name: "VASpectrumAnalyzer",
   data() {
     return {
       continueDrawing: false,
-      height: 0,
-      width: 0,
       canvas: null as HTMLCanvasElement | null,
       canvasContext: null as CanvasRenderingContext2D | null,
       resizeObserver: null as ResizeObserver | null,
@@ -54,15 +51,15 @@ export default defineComponent({
       required: false,
       default: "gray",
     },
-    graphHeight: {
-      type: String,
+    height: {
+      type: Number,
       required: false,
-      default: "30%",
+      default: -1,
     },
-    graphWidth: {
-      type: String,
+    width: {
+      type: Number,
       required: false,
-      default: "100%",
+      default: 1200,
     },
     font: {
       required: false,
@@ -79,38 +76,25 @@ export default defineComponent({
     };
   },
   computed: {
-    cssVars() {
-      return {
-        "--graph-height": this.graphHeight,
-        "--graph-width": this.graphWidth,
-      };
+    graphWidth(): number {
+      return this.width;
     },
+    graphHeight(): number {
+      return this.height < 0
+        ? (this.width / DEFAULT_ASPECT_RATIO)
+        : this.height;
+    }
   },
   created() {
     this.input.connect(this.analyzer);
     this.startRendering(this.drawFrequencyDomain);
   },
   mounted() {
-    this.resizeObserver = new ResizeObserver(this.recomputeDimensions);
-    this.resizeObserver.observe(
-      this.$refs.analyserCanvasContainer as HTMLElement
-    );
     this.canvasContext = (
       this.$refs.analyserCanvas as HTMLCanvasElement
     ).getContext("2d");
   },
   methods: {
-    recomputeDimensions() {
-      if (this.$refs.analyserCanvasContainer) {
-        const rect = (
-          this.$refs.analyserCanvasContainer as HTMLElement
-        ).getBoundingClientRect();
-        (this.$refs.analyserCanvas as HTMLCanvasElement).width = rect.width;
-        (this.$refs.analyserCanvas as HTMLCanvasElement).height = rect.height;
-        this.width = rect.width;
-        this.height = rect.height;
-      }
-    },
     scaleX(
       f: number,
       rangeMinHz: number,
@@ -152,8 +136,12 @@ export default defineComponent({
 
         const dataArray = this.getFloatFrequencyData();
 
+        this.canvasContext.clearRect(0, 0, this.graphWidth, this.graphHeight);
+
         this.canvasContext.fillStyle = this.backgroundColor;
-        this.canvasContext.fillRect(0, 0, this.width, this.height);
+        this.canvasContext.fillRect(0, 0, this.graphWidth, this.graphHeight);
+
+        this.canvasContext.beginPath();
 
         this.canvasContext.lineWidth = 1;
         this.canvasContext.strokeStyle = this.lineColor;
@@ -161,14 +149,12 @@ export default defineComponent({
 
         let x = 0;
         let y =
-          this.height - ((dataArray[0] - NOISE_FLOOR) / yRange) * this.height;
-
-        this.canvasContext.beginPath();
+          this.graphHeight - ((dataArray[0] - NOISE_FLOOR) / yRange) * this.graphHeight;
 
         for (let i = 0; i < dataArray.length; i++) {
           const barWidth = 1;
           const barHeight =
-            ((dataArray[i] - NOISE_FLOOR) / yRange) * this.height;
+            ((dataArray[i] - NOISE_FLOOR) / yRange) * this.graphHeight;
 
           const f = i * (nyquist / dataArray.length);
 
@@ -176,9 +162,9 @@ export default defineComponent({
 
           // only stretch the graph over the 20hz to nyquist range
           if (f >= HIGH_PASS_CUTOFF) {
-            x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.width);
+            x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.graphWidth);
 
-            y = this.height - barHeight;
+            y = this.graphHeight - barHeight;
 
             if (this.drawLines) {
               this.canvasContext.fillRect(x, y, barWidth, barHeight);
@@ -204,12 +190,12 @@ export default defineComponent({
     drawDbMarker(db: number) {
       if (this.canvasContext) {
         const y =
-          this.height - ((NOISE_FLOOR - db) / NOISE_FLOOR) * this.height;
+          this.graphHeight - ((NOISE_FLOOR - db) / NOISE_FLOOR) * this.graphHeight;
 
         this.canvasContext.strokeStyle = this.gridColor;
         this.canvasContext.beginPath();
         this.canvasContext.moveTo(0, y);
-        this.canvasContext.lineTo(this.width, y);
+        this.canvasContext.lineTo(this.graphWidth, y);
         this.canvasContext.stroke();
 
         this.canvasContext.font = `12px ${this.font}`;
@@ -218,21 +204,21 @@ export default defineComponent({
       }
     },
     drawFrequencyMarkers(nyquist: number) {
-      this.drawFrequencyMarker(HIGH_PASS_CUTOFF, nyquist, true);
+      this.drawFrequencyMarker(HIGH_PASS_CUTOFF, nyquist, this.graphWidth > 300);
       this.drawFrequencyMarker(25, nyquist);
       this.drawFrequencyMarker(50, nyquist, true);
       this.drawFrequencyMarker(100, nyquist);
-      this.drawFrequencyMarker(200, nyquist, true);
-      this.drawFrequencyMarker(500, nyquist, true);
-      this.drawFrequencyMarker(1000, nyquist, true);
+      this.drawFrequencyMarker(200, nyquist, this.graphWidth > 600);
+      this.drawFrequencyMarker(500, nyquist, this.graphWidth > 300);
+      this.drawFrequencyMarker(1000, nyquist, this.graphWidth > 600);
       this.drawFrequencyMarker(1500, nyquist);
       this.drawFrequencyMarker(2000, nyquist, true);
-      this.drawFrequencyMarker(3000, nyquist, true);
-      this.drawFrequencyMarker(5000, nyquist, true);
-      this.drawFrequencyMarker(7000, nyquist, true);
+      this.drawFrequencyMarker(3000, nyquist, this.graphWidth > 600);
+      this.drawFrequencyMarker(5000, nyquist, this.graphWidth > 300);
+      this.drawFrequencyMarker(7000, nyquist, this.graphWidth > 600);
       this.drawFrequencyMarker(10000, nyquist, true);
-      this.drawFrequencyMarker(15000, nyquist, true);
-      this.drawFrequencyMarker(20000, nyquist, true);
+      this.drawFrequencyMarker(15000, nyquist, this.graphWidth > 600);
+      this.drawFrequencyMarker(20000, nyquist, this.graphWidth > 800);
     },
     drawFrequencyMarker(
       f: number,
@@ -240,12 +226,12 @@ export default defineComponent({
       drawLabel: boolean = false
     ) {
       if (this.canvasContext && f >= HIGH_PASS_CUTOFF) {
-        const x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.width);
+        const x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.graphWidth);
 
         this.canvasContext.strokeStyle = this.gridColor;
         this.canvasContext.beginPath();
         this.canvasContext.moveTo(x, 0);
-        this.canvasContext.lineTo(x, this.height);
+        this.canvasContext.lineTo(x, this.graphWidth);
         this.canvasContext.stroke();
 
         if (drawLabel) {
@@ -265,15 +251,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.canvas-container {
-  width: var(--graph-width);
-  padding-top: var(--graph-height);
-  position: relative;
-  z-index: 1;
-}
 .analyser-canvas {
-  z-index: 2;
-  position: absolute;
-  top: 0;
+  /* width: var(--graph-width);
+  height: var(--graph-height); */
+  display: block;
 }
 </style>

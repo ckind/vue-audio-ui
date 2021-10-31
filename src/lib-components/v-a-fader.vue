@@ -960,17 +960,11 @@
         clip-path="url(#clipPath1362)"
       >
         <path
+          v-if="showShadow"
           transform="matrix(.53231 0 0 .99811 356.28 162.03)"
           d="m649.84 478.85v126.27l31.315-18.94s-35.355-47.982 0-83.338c-27.779-21.466-31.315-23.991-31.315-23.991z"
           fill="#a1a1a1"
           filter="url(#filter4165)"
-        />
-        <path
-          d="m685.78 646.43h34.461"
-          fill="#e6e6e6"
-          stroke="#b4b4b4"
-          stroke-linecap="round"
-          stroke-width="3.5"
         />
         <rect
           x="642.36"
@@ -1920,6 +1914,7 @@ export default defineComponent({
     return reactive(state);
   },
   mounted() {
+    // todo: need to handle when page resizes
     this.svgRootPageY = (
       this.$refs.svgRoot as HTMLElement
     ).getBoundingClientRect().y;
@@ -1950,6 +1945,11 @@ export default defineComponent({
     default: {
       required: false,
       type: Number,
+    },
+    showShadow: {
+      required: false,
+      type: Boolean,
+      default: false
     },
   },
   computed: {

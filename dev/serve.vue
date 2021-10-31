@@ -2,8 +2,6 @@
   <div id="app">
     <audio controls :src="trackSrc" />
 
-    <v-a-knob v-model="gainValue" :minValue="0" :maxValue="1" />
-
     Peak
     <v-a-digital-meter-stereo
       class="ui-component"
@@ -21,12 +19,27 @@
       :drawMarkers="true"
     />
     RMS (Mono)
-    <v-a-fader v-model="gainValue" :minValue="0" :maxValue="1" />
+    <v-a-fader v-model="gainValue" :minValue="0" :maxValue="1" :showShadow="true" />
     <v-a-digital-meter
       class="ui-component"
       type="rms"
       :input="monoGain"
       :drawMarkers="true"
+    />
+
+    <br />
+
+    <v-a-knob v-model="analyzerWidth" :minValue="200" :maxValue="1200" />
+
+    <v-a-spectrum-analyzer
+      :input="monoGain"
+      :audioContext="audioCtx"
+      :fftSize="2048"
+      :drawLines="true"
+      :width="analyzerWidth"
+      gridColor="gray"
+      lineColor="black"
+      backgroundColor="white"
     />
 
     <v-a-analog-meter-stereo
@@ -37,28 +50,25 @@
       :rightInput="rightGain"
     />
 
-    <br />
-
-    <div class="ui-component spectrum">
-      <v-a-spectrum-analyzer
-        :input="monoGain"
-        :audioContext="audioCtx"
-        :fftSize="2048"
-        :drawLines="true"
-        gridColor="gray"
-        lineColor="black"
-        backgroundColor="white"
-      />
-    </div>
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
 import WebAudioHelpers from "@/util/web-audio-helpers";
+import ChannelStrip from "./channel-strip.vue";
 
 export default defineComponent({
   name: "ServeDev",
+  components: {
+    ChannelStrip
+  },
   setup() {
     const ctx = WebAudioHelpers.setupAudioContext();
     const osc = ctx.createOscillator();
@@ -78,6 +88,7 @@ export default defineComponent({
       osc: osc,
       gainValue: gainValue,
       trackGain: trackGain,
+      analyzerWidth: 700
     });
 
     return state;
@@ -152,8 +163,5 @@ export default defineComponent({
 }
 .stereo-meter-container {
   display: inline-block;
-}
-.spectrum {
-  border: 1px solid black;
 }
 </style>
