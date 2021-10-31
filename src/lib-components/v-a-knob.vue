@@ -198,10 +198,6 @@ export default defineComponent({
 						? this.unsteppedValue
 						: this.roundToStep(this.unsteppedValue);
 				this.$emit("update:modelValue", this.valueCurve.getCurvedValue(steppedValue));
-
-				console.log(this.linearValue);
-
-				console.log("test");
 			}
 		},
 		onKnobTouchDrag(e: TouchEvent) {
@@ -221,7 +217,7 @@ export default defineComponent({
 				this.step === 0
 					? this.unsteppedValue
 					: this.roundToStep(this.unsteppedValue);
-			}
+		}
 	}
 });
 </script>

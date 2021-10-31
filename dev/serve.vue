@@ -21,6 +21,7 @@
       :drawMarkers="true"
     />
     RMS (Mono)
+    <v-a-fader v-model="gainValue" :minValue="0" :maxValue="1" />
     <v-a-digital-meter
       class="ui-component"
       type="rms"
@@ -65,7 +66,7 @@ export default defineComponent({
     const leftGain = ctx.createGain();
     const rightGain = ctx.createGain();
 
-    const gainValue = 1;
+    const gainValue = 0.5;
     const trackGain = ctx.createGain();
     trackGain.gain.setValueAtTime(gainValue, ctx.currentTime);
 
@@ -76,22 +77,22 @@ export default defineComponent({
       audioCtx: ctx,
       osc: osc,
       gainValue: gainValue,
-      trackGain: trackGain
+      trackGain: trackGain,
     });
 
     return state;
   },
   computed: {
     trackSrc() {
-      // return require("./lost-in-the-fog.wav");
-      return require("./maenads.wav");
+      return require("./lost-in-the-fog.wav");
+      // return require("./maenads.wav");
       // return require("./baccata.wav");
     },
   },
   watch: {
     gainValue(value: number) {
       this.trackGain.gain.setValueAtTime(value, this.audioCtx.currentTime);
-    }
+    },
   },
   mounted(): void {
     // const f = 200;
