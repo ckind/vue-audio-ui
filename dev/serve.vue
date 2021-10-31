@@ -2,6 +2,8 @@
   <div id="app">
     <audio controls :src="trackSrc" />
 
+    <v-a-knob v-model="gainValue" :minValue="0" :maxValue="1" />
+
     Peak
     <v-a-digital-meter-stereo
       class="ui-component"
@@ -63,12 +65,18 @@ export default defineComponent({
     const leftGain = ctx.createGain();
     const rightGain = ctx.createGain();
 
+    const gainValue = 1;
+    const trackGain = ctx.createGain();
+    trackGain.gain.setValueAtTime(gainValue, ctx.currentTime);
+
     const state = reactive({
       leftGain: leftGain,
       rightGain: rightGain,
       monoGain: monoGain,
       audioCtx: ctx,
       osc: osc,
+      gainValue: gainValue,
+      trackGain: trackGain
     });
 
     return state;
@@ -79,6 +87,11 @@ export default defineComponent({
       return require("./maenads.wav");
       // return require("./baccata.wav");
     },
+  },
+  watch: {
+    gainValue(value: number) {
+      this.trackGain.gain.setValueAtTime(value, this.audioCtx.currentTime);
+    }
   },
   mounted(): void {
     // const f = 200;
@@ -104,12 +117,14 @@ export default defineComponent({
     const track = this.audioCtx.createMediaElementSource(audioElement);
     const splitter = this.audioCtx.createChannelSplitter(2);
 
-    track.connect(this.monoGain);
-    track.connect(splitter);
+    track.connect(this.trackGain);
+
+    this.trackGain.connect(this.monoGain);
+    this.trackGain.connect(splitter);
     splitter.connect(this.leftGain, 0);
     splitter.connect(this.rightGain, 1);
 
-    track.connect(this.audioCtx.destination);
+    this.trackGain.connect(this.audioCtx.destination);
   },
   methods: {
     requestMicrophoneAccess() {
