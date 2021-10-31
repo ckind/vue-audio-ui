@@ -1,35 +1,18 @@
 <template>
   <div id="app">
     <audio controls :src="trackSrc" />
-
-    Peak
-    <v-a-digital-meter-stereo
-      class="ui-component"
-      type="peak"
-      :leftInput="leftGain"
-      :rightInput="rightGain"
-      :drawMarkers="true"
-    />
-    RMS
-    <v-a-digital-meter-stereo
+    
+    <!-- <v-a-analog-meter-stereo
+      :width="200"
       class="ui-component"
       type="rms"
       :leftInput="leftGain"
       :rightInput="rightGain"
-      :drawMarkers="true"
-    />
-    RMS (Mono)
-    <v-a-fader v-model="gainValue" :minValue="0" :maxValue="1" :showShadow="true" />
-    <v-a-digital-meter
-      class="ui-component"
-      type="rms"
-      :input="monoGain"
-      :drawMarkers="true"
-    />
+    /> -->
 
     <br />
 
-    <v-a-knob v-model="analyzerWidth" :minValue="200" :maxValue="1200" />
+    <!-- <v-a-knob v-model="analyzerWidth" :minValue="200" :maxValue="1200" /> -->
 
     <!-- <v-a-spectrum-analyzer
       :input="monoGain"
@@ -42,21 +25,21 @@
       backgroundColor="white"
     /> -->
 
-    <v-a-analog-meter-stereo
-      :width="200"
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="monoGain" />
+
+    <v-a-fader v-model="gainValue" :minValue="0" :maxValue="1" :showShadow="true" />
+    <v-a-digital-meter-stereo
       class="ui-component"
       type="rms"
       :leftInput="leftGain"
       :rightInput="rightGain"
+      :drawMarkers="true"
     />
-
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
-    <v-a-fader v-model="gainValue" :minValue="0" :maxValue="1" :showShadow="true" />
   </div>
 </template>
 

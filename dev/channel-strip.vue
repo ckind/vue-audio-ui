@@ -33,6 +33,9 @@
       />
     </div>
 
+    <v-a-toggle-button :label="'mute'" :color="'red'" />
+    <v-a-toggle-button :label="'solo'" :color="'blue'" />
+
   </div>
 </template>
 
@@ -45,7 +48,7 @@ export default defineComponent({
     input: {
       required: true,
       type: AudioNode,
-    },
+    }
   },
   data() {
     return {
