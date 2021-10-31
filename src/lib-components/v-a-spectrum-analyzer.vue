@@ -64,6 +64,11 @@ export default defineComponent({
       required: false,
       default: "100%",
     },
+    font: {
+      required: false,
+      type: String,
+      default: "Helvetica, sans-serif",
+    },
   },
   setup(props) {
     const input = props.input as AudioNode;
@@ -207,7 +212,7 @@ export default defineComponent({
         this.canvasContext.lineTo(this.width, y);
         this.canvasContext.stroke();
 
-        this.canvasContext.font = "12px Arial";
+        this.canvasContext.font = `12px ${this.font}`;
         this.canvasContext.fillStyle = this.gridColor;
         this.canvasContext.fillText(`${db}db`, 10, y);
       }
@@ -244,7 +249,7 @@ export default defineComponent({
         this.canvasContext.stroke();
 
         if (drawLabel) {
-          this.canvasContext.font = "14px Arial";
+          this.canvasContext.font = `14px ${this.font}`;
 
           this.canvasContext.fillStyle = this.lineColor;
           if (f < 1000) {

@@ -10,6 +10,7 @@
       :barColor="barColor"
       :backgroundColor="backgroundColor"
       :markerColor="markerColor"
+      :font="font"
       :drawMarkers="false"
     />
     <v-a-digital-meter
@@ -22,6 +23,7 @@
       :barColor="barColor"
       :backgroundColor="backgroundColor"
       :markerColor="markerColor"
+      :font="font"
       :drawMarkers="drawMarkers"
     />
   </div>
@@ -81,6 +83,11 @@ export default defineComponent({
       required: false,
       type: Number,
       default: 20,
+    },
+    font: {
+      required: false,
+      type: String,
+      default: "Helvetica, sans-serif",
     },
   },
 });

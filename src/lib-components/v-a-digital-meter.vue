@@ -62,6 +62,11 @@ export default defineComponent({
       type: Number,
       default: 20,
     },
+    font: {
+      required: false,
+      type: String,
+      default: "Helvetica, sans-serif",
+    },
   },
   computed: {
     canvasWidth(): number {
@@ -158,7 +163,7 @@ export default defineComponent({
       this.canvasCxt?.lineTo(x + 4, y);
       this.canvasCxt?.stroke();
 
-      this.canvasCxt!.font = "10px Arial";
+      this.canvasCxt!.font = `10px ${this.font}`;
       this.canvasCxt!.fillStyle = this.markerColor;
       this.canvasCxt!.fillText(`${Math.abs(db)}`, x + 8, y + 3);
     },
