@@ -14,16 +14,15 @@
 
     <!-- <v-a-knob v-model="analyzerWidth" :minValue="200" :maxValue="1200" /> -->
 
-    <!-- <v-a-spectrum-analyzer
-      :input="monoGain"
-      :audioContext="audioCtx"
+    <v-a-spectrum-analyzer
+      :input="channelOutput"
       :fftSize="2048"
       :drawLines="true"
       :width="analyzerWidth"
       gridColor="gray"
       lineColor="black"
       backgroundColor="white"
-    /> -->
+    />
 
     <ChannelStrip :input="channelInput" :output="channelOutput" />
     <ChannelStrip :input="channelInput" :output="dummyGain" />

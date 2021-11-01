@@ -4,7 +4,6 @@ const useMetering = (audioCtx: BaseAudioContext, fftSize: number) => {
 
 	const analyzer = ref(audioCtx.createAnalyser());
 	analyzer.value.fftSize = fftSize;
-	analyzer.value.smoothingTimeConstant = 1.0;
 
 	const dataArray = new Float32Array(analyzer.value.frequencyBinCount);
 

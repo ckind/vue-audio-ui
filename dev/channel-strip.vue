@@ -88,7 +88,6 @@ export default defineComponent({
   },
   mounted() {
     (this.$refs.container as HTMLElement).style.backgroundImage = `url(${this.backgroundImg})`;
-    console.log(this.backgroundImg);
   },
   watch: {
     // todo: rampTo? sounds clicking when making sudden changes
