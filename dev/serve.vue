@@ -25,14 +25,13 @@
       backgroundColor="white"
     /> -->
 
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
-    <ChannelStrip :input="monoGain" />
+    <ChannelStrip :input="channelInput" :output="channelOutput" />
+    <ChannelStrip :input="channelInput" :output="dummyGain" />
+    <ChannelStrip :input="channelInput" :output="dummyGain" />
+    <ChannelStrip :input="channelInput" :output="dummyGain" />
+    <ChannelStrip :input="channelInput" :output="dummyGain" />
+    <ChannelStrip :input="channelInput" :output="dummyGain" />
 
-    <v-a-fader v-model="gainValue" :minValue="0" :maxValue="1" :showShadow="true" />
     <v-a-digital-meter-stereo
       class="ui-component"
       type="rms"
@@ -56,23 +55,24 @@ export default defineComponent({
   setup() {
     const ctx = WebAudioHelpers.setupAudioContext();
     const osc = ctx.createOscillator();
-    const monoGain = ctx.createGain();
     const leftGain = ctx.createGain();
     const rightGain = ctx.createGain();
+    const channelInput = ctx.createGain();
+    const channelOutput = ctx.createGain();
 
-    const gainValue = 0.5;
-    const trackGain = ctx.createGain();
-    trackGain.gain.setValueAtTime(gainValue, ctx.currentTime);
+    const dummyGain = ctx.createGain();
+
+    channelOutput.connect(ctx.destination);
 
     const state = reactive({
       leftGain: leftGain,
       rightGain: rightGain,
-      monoGain: monoGain,
+      channelInput: channelInput,
+      channelOutput: channelOutput,
       audioCtx: ctx,
       osc: osc,
-      gainValue: gainValue,
-      trackGain: trackGain,
-      analyzerWidth: 700
+      analyzerWidth: 700,
+      dummyGain: dummyGain
     });
 
     return state;
@@ -82,11 +82,6 @@ export default defineComponent({
       return require("./lost-in-the-fog.wav");
       // return require("./maenads.wav");
       // return require("./baccata.wav");
-    },
-  },
-  watch: {
-    gainValue(value: number) {
-      this.trackGain.gain.setValueAtTime(value, this.audioCtx.currentTime);
     },
   },
   mounted(): void {
@@ -113,14 +108,10 @@ export default defineComponent({
     const track = this.audioCtx.createMediaElementSource(audioElement);
     const splitter = this.audioCtx.createChannelSplitter(2);
 
-    track.connect(this.trackGain);
-
-    this.trackGain.connect(this.monoGain);
-    this.trackGain.connect(splitter);
+    track.connect(this.channelInput);
+    this.channelOutput.connect(splitter);
     splitter.connect(this.leftGain, 0);
     splitter.connect(this.rightGain, 1);
-
-    this.trackGain.connect(this.audioCtx.destination);
   },
   methods: {
     requestMicrophoneAccess() {
@@ -128,9 +119,7 @@ export default defineComponent({
         .getUserMedia({ video: false, audio: true })
         .then((stream) => {
           const source = this.audioCtx.createMediaStreamSource(stream);
-          source.connect(this.monoGain);
-          source.connect(this.leftGain);
-          source.connect(this.rightGain);
+          source.connect(this.channelInput);
         })
         .catch((err) => {
           console.log("error requesting microphone access:" + err);

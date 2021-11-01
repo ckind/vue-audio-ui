@@ -11,6 +11,7 @@
       :backgroundColor="backgroundColor"
       :markerColor="markerColor"
       :font="font"
+      :clippingColor="clippingColor"
       :drawMarkers="false"
     />
     <v-a-digital-meter
@@ -24,6 +25,7 @@
       :backgroundColor="backgroundColor"
       :markerColor="markerColor"
       :font="font"
+      :clippingColor="clippingColor"
       :drawMarkers="drawMarkers"
     />
   </div>
@@ -54,15 +56,20 @@ export default defineComponent({
       type: Number,
       default: 2048,
     },
+    clippingColor: {
+      required: false,
+      type: String,
+      default: "#e64a19",
+    },
     barColor: {
       required: false,
       type: String,
-      default: "#454545",
+      default: "#4caf50",
     },
     backgroundColor: {
       required: false,
       type: String,
-      default: "#E3E3E3",
+      default: "#e0e0e0",
     },
     markerColor: {
       required: false,

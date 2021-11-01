@@ -7,7 +7,6 @@
         @touchstart="onKnobMouseDown"
         @dblclick="onKnobDblClick"
         class="knob-container"
-        :class="[shadow ? 'knob-shadow' : '']"
         :style="`transform: rotate(${knobRotation}rad);`"
         :width="size"
         :height="size"
@@ -109,25 +108,30 @@ export default defineComponent({
     },
     default: {
       required: false,
-      type: Number,
+      type: Number
     },
-    shadow: {
-      required: false,
-      type: Boolean,
-      default: false,
-    },
-    shadowColor: {
+    topColor: {
       required: false,
       type: String,
-      default: "black",
+      default: "#939598",
     },
+    baseColor: {
+      required: false,
+      type: String,
+      default: "#4d4d4d",
+    },
+    markColor: {
+      required: false,
+      type: String,
+      default: "#ffffff",
+    },
+    // gripColor: {
+    //   required: false,
+    //   type: String,
+    //   default: "black",
+    // },
   },
   computed: {
-    cssVars(): Object {
-      return {
-        "--shadowColor": this.shadowColor,
-      };
-    },
     knobRotation(): number {
       const offset = this.linearValue - this.midValue;
       return (offset / (this.valueRange / 2)) * this.rotationMax;
@@ -138,6 +142,13 @@ export default defineComponent({
     valueRange(): number {
       return this.maxValue - this.minValue;
     },
+    cssVars() {
+      return {
+        "--top-color": this.topColor,
+        "--base-color": this.baseColor,
+        "--mark-color": this.markColor,
+      }
+    }
   },
   methods: {
     onKnobMouseDown(e: MouseEvent) {
@@ -222,8 +233,8 @@ export default defineComponent({
   display: flex;
 }
 .knob-shadow {
-  -webkit-box-shadow: 0 0 10px var(--shadowColor);
-  box-shadow: 0 0 10px var(--shadowColor);
+  -webkit-box-shadow: 0px 0px 8px var(--shadowColor);
+  box-shadow: 0px 0px 8px var(--shadowColor);
 }
 .knob-container {
   border-radius: 50%;
@@ -232,13 +243,16 @@ export default defineComponent({
 
 /* default knob styling */
 .st0 {
-  fill: #acacac;
+  fill: var(--base-color);
+  /* baseColor */
 }
 .st1 {
-  fill: #939598;
+  fill: var(--top-color);
+  /* topColor */
 }
 .st2 {
-  fill: #ffffff;
+  fill: var(--mark-color);
+  /* markColor */
 }
 .st3 {
   fill: none;

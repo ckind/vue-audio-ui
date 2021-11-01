@@ -4,6 +4,7 @@ const useMetering = (audioCtx: BaseAudioContext, fftSize: number) => {
 
 	const analyzer = ref(audioCtx.createAnalyser());
 	analyzer.value.fftSize = fftSize;
+	analyzer.value.smoothingTimeConstant = 1.0;
 
 	const dataArray = new Float32Array(analyzer.value.frequencyBinCount);
 
@@ -29,6 +30,10 @@ const useMetering = (audioCtx: BaseAudioContext, fftSize: number) => {
 				peak = value;
 			}
 		}
+
+		// if (peak > 0) {
+		// 	console.log(peak);
+		// }
 
 		return 20 * Math.log10(peak);
 	}

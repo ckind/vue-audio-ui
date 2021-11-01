@@ -12,8 +12,11 @@ import { defineComponent, PropType } from "vue";
 import useMetering from "@/composables/metering";
 import useRendering from "@/composables/rendering";
 import { DigitalMeterType } from "@/types/v-audio-ui-types";
+import { QuadBezierCurvedRange } from "@/util/curved-range"
+import { fitToBounds } from "@/util/math-helpers";
 
-const DB_RANGE = 80;
+const DB_RANGE = 90;
+const curve = new QuadBezierCurvedRange(0, DB_RANGE);
 
 export default defineComponent({
   name: "VADigitalMeter",
@@ -32,15 +35,20 @@ export default defineComponent({
       type: Number,
       default: 2048,
     },
+    clippingColor: {
+      required: false,
+      type: String,
+      default: "#e64a19",
+    },
     barColor: {
       required: false,
       type: String,
-      default: "#454545",
+      default: "#4caf50",
     },
     backgroundColor: {
       required: false,
       type: String,
-      default: "#E3E3E3",
+      default: "#e0e0e0",
     },
     markerColor: {
       required: false,
@@ -100,8 +108,11 @@ export default defineComponent({
       return (
         this.height *
         ((DB_RANGE + db) / DB_RANGE) *
-        (DB_RANGE / (DB_RANGE + 10)) // add a little padding up to the top and bottom
+        (DB_RANGE / (DB_RANGE + 10)) // add a little padding up to the top
       );
+    },
+    scaleY(db: number): number {
+      return curve.getCurvedValue(db + DB_RANGE) - DB_RANGE;
     },
     draw(): void {
       if (this.canvasCxt) {
@@ -115,8 +126,12 @@ export default defineComponent({
           db = this.getRmsDb(dataArray);
         }
 
-        db = db < -DB_RANGE ? -DB_RANGE : db;
-        const meterHeight = this.getMeterHeight(db);
+        // todo: discarding everything above 0 for now
+        // find a way way to display clipping
+        const clipping = db > 0;
+        db = fitToBounds(db, -DB_RANGE, 0);
+
+        const meterHeight = this.getMeterHeight(this.scaleY(db));
 
         this.canvasCxt.clearRect(0, 0, this.canvasWidth, this.height);
 
@@ -125,7 +140,7 @@ export default defineComponent({
         this.canvasCxt.fillRect(0, 0, this.width, this.height);
         this.canvasCxt.stroke();
 
-        this.canvasCxt.fillStyle = this.barColor;
+        this.canvasCxt.fillStyle = clipping ? this.clippingColor : this.barColor;
         this.canvasCxt.beginPath();
         this.canvasCxt.fillRect(
           0,
@@ -141,18 +156,16 @@ export default defineComponent({
       }
     },
     drawDbMarkers(): void {
-      this.drawDbMarker(6);
+      // this.drawDbMarker(6);
       this.drawDbMarker(0);
       this.drawDbMarker(-10);
       this.drawDbMarker(-20);
       this.drawDbMarker(-30);
       this.drawDbMarker(-40);
-      this.drawDbMarker(-50);
       this.drawDbMarker(-60);
-      this.drawDbMarker(-70);
     },
     drawDbMarker(db: number): void {
-      const y = this.height - this.getMeterHeight(db);
+      const y = this.height - this.getMeterHeight(this.scaleY(db));
       const x = this.width + 4;
 
       this.canvasCxt!.lineWidth = 1;
