@@ -113,6 +113,7 @@ export default defineComponent({
   display: inline-block;
   border: solid 1px gray;
   padding: 10px 5px;
+  height: 400px;
 }
 .eq-band-container {
   display: flex;

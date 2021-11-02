@@ -169,7 +169,7 @@ export default defineComponent({
       const value =
         typeof this.default === "undefined" ? this.midValue : this.default;
       this.unsteppedValue = value;
-      this.$emit("input", this.valueCurve.getCurvedValue(value));
+      this.$emit("update:modelValue", this.valueCurve.getCurvedValue(value));
     },
     roundToStep(x: number) {
       if (this.step === 0) {

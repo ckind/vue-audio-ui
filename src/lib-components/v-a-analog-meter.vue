@@ -115,5 +115,8 @@ export default defineComponent({
 .meter-container {
   /* background: white; */
   display: inline-block;
+  background-color: white;
+  padding: 8px;
+  border: 1px solid gray;
 }
 </style>

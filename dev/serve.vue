@@ -14,15 +14,14 @@
 
     <!-- <v-a-knob v-model="analyzerWidth" :minValue="200" :maxValue="1200" /> -->
 
-    <v-a-spectrum-analyzer
+    <!-- <v-a-spectrum-analyzer
       :input="channelOutput"
-      :fftSize="2048"
-      :drawLines="true"
       :width="analyzerWidth"
       gridColor="gray"
-      lineColor="black"
-      backgroundColor="white"
-    />
+      lineColor="white"
+      backgroundColor="black"
+      borderColor="black"
+    /> -->
 
     <ChannelStrip :input="channelInput" :output="channelOutput" />
     <ChannelStrip :input="channelInput" :output="dummyGain" />
@@ -30,14 +29,7 @@
     <ChannelStrip :input="channelInput" :output="dummyGain" />
     <ChannelStrip :input="channelInput" :output="dummyGain" />
     <ChannelStrip :input="channelInput" :output="dummyGain" />
-
-    <v-a-digital-meter-stereo
-      class="ui-component"
-      type="rms"
-      :leftInput="leftGain"
-      :rightInput="rightGain"
-      :drawMarkers="true"
-    />
+    <MasterChannel :input="channelOutput" :output="audioCtx.destination" />
   </div>
 </template>
 
@@ -45,11 +37,13 @@
 import { defineComponent, reactive } from "vue";
 import WebAudioHelpers from "@/util/web-audio-helpers";
 import ChannelStrip from "./channel-strip.vue";
+import MasterChannel from "./master-channel.vue";
 
 export default defineComponent({
   name: "ServeDev",
   components: {
-    ChannelStrip
+    ChannelStrip,
+    MasterChannel
   },
   setup() {
     const ctx = WebAudioHelpers.setupAudioContext();
@@ -60,8 +54,6 @@ export default defineComponent({
     const channelOutput = ctx.createGain();
 
     const dummyGain = ctx.createGain();
-
-    channelOutput.connect(ctx.destination);
 
     const state = reactive({
       leftGain: leftGain,
@@ -78,25 +70,15 @@ export default defineComponent({
   },
   computed: {
     trackSrc() {
-      return require("./lost-in-the-fog.wav");
-      // return require("./maenads.wav");
+      // return require("./lost-in-the-fog.wav");
+      return require("./maenads.wav");
       // return require("./baccata.wav");
-    },
+    }
   },
   mounted(): void {
     // const f = 200;
-
-    // this.osc.frequency.setValueAtTime(f, this.audioCtx.currentTime );
-    // this.osc.connect(this.audioCtx.destination);
+    // this.osc.frequency.setValueAtTime(f, this.audioCtx.currentTime);
     // this.osc.start();
-
-    // this.osc.connect(this.monoGain);
-    // this.osc.connect(this.leftGain);
-    // this.osc.connect(this.rightGain);
-
-    // window.setTimeout(() => this.osc.frequency.setValueAtTime(f + 20, this.audioCtx.currentTime), 2000);
-
-    // window.setTimeout(() => this.osc.stop(), 2000);
 
     // this.requestMicrophoneAccess();
 
@@ -123,7 +105,7 @@ export default defineComponent({
         .catch((err) => {
           console.log("error requesting microphone access:" + err);
         });
-    },
+    }
   },
 });
 </script>
