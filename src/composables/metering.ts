@@ -29,11 +29,7 @@ const useMetering = (audioCtx: BaseAudioContext, fftSize: number) => {
 				peak = value;
 			}
 		}
-
-		// if (peak > 0) {
-		// 	console.log(peak);
-		// }
-
+		
 		return 20 * Math.log10(peak);
 	}
 

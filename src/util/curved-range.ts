@@ -61,7 +61,6 @@ Equations for getting curved value
   curved value = y(t) = (1 - t)^2*y0 + 2t*(1 - t)*y1 + t^2*y2
 
 */
-
 interface Point {
   x: number;
   y: number;

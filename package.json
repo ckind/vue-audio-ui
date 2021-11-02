@@ -1,6 +1,6 @@
 {
   "name": "v-audio-ui",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "dist/v-audio-ui.ssr.js",
   "browser": "dist/v-audio-ui.esm.js",

@@ -80,7 +80,9 @@ export default defineComponent({
     // this.osc.frequency.setValueAtTime(f, this.audioCtx.currentTime);
     // this.osc.start();
 
-    // this.requestMicrophoneAccess();
+    // WebAudioHelpers.requestMicrophoneAccess(this.audioCtx, (source: MediaStreamAudioSourceNode) => {
+    //   source.connect(this.channelInput);
+    // });
 
     // get the audio element
     const audioElement = document.querySelector("audio")!;
@@ -93,20 +95,7 @@ export default defineComponent({
     this.channelOutput.connect(splitter);
     splitter.connect(this.leftGain, 0);
     splitter.connect(this.rightGain, 1);
-  },
-  methods: {
-    requestMicrophoneAccess() {
-      navigator.mediaDevices
-        .getUserMedia({ video: false, audio: true })
-        .then((stream) => {
-          const source = this.audioCtx.createMediaStreamSource(stream);
-          source.connect(this.channelInput);
-        })
-        .catch((err) => {
-          console.log("error requesting microphone access:" + err);
-        });
-    }
-  },
+  }
 });
 </script>
 

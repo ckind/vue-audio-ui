@@ -1931,6 +1931,7 @@ export default defineComponent({
       type: Number,
       default: 200,
     },
+    // not currently being used - 
     // curveType: {
     // 	required: false,
     // 	type: PropType<CurveType>,
@@ -1987,7 +1988,7 @@ export default defineComponent({
     onKnobDblClick() {
       const value =
         typeof this.default === "undefined" ? this.midValue : this.default;
-      this.$emit("input", this.valueCurve.getCurvedValue(value));
+      this.$emit("update:modelValue", this.valueCurve.getCurvedValue(value));
     },
     onKnobDrag(currPageY: number) {
       let currSvgY = currPageY - this.svgRootPageY;

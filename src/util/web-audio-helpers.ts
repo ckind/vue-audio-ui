@@ -16,7 +16,7 @@ const helpers = {
 				globalAudioContext = new window.AudioContext();
 				setupAutoResume(globalAudioContext);
 			}
-			
+
 			return globalAudioContext;
 		}
 		else {
@@ -27,6 +27,18 @@ const helpers = {
 			return ctx;
 		}
 	},
+
+	requestMicrophoneAccess(audioCtx: AudioContext, callback: (a: MediaStreamAudioSourceNode) => void) {
+		navigator.mediaDevices
+			.getUserMedia({ video: false, audio: true })
+			.then((stream) => {
+				const source = audioCtx.createMediaStreamSource(stream);
+				callback(source);
+			})
+			.catch((err) => {
+				console.log("error requesting microphone access:" + err);
+			});
+	}
 
 };
 
