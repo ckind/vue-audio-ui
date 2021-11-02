@@ -35,7 +35,7 @@
 
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
-import WebAudioHelpers from "@/util/web-audio-helpers";
+import WebAudioHelpers from "./util/web-audio-helpers";
 import ChannelStrip from "./channel-strip.vue";
 import MasterChannel from "./master-channel.vue";
 

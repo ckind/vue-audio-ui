@@ -83,7 +83,7 @@ export default defineComponent({
   },
   computed: {
     backgroundImg() {
-      return require("@/assets/metal-2.png");
+      return require("./assets/metal-2.png");
     }
   },
   mounted() {
