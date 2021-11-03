@@ -7,3 +7,4 @@ export { default as VASpectrumAnalyzer } from './v-a-spectrum-analyzer.vue';
 export { default as VAKnob } from './v-a-knob.vue';
 export { default as VAFader } from './v-a-fader.vue';
 export { default as VAToggleButton } from './v-a-toggle-button.vue';
+export { default as VAAudioFileVisualizer } from './v-a-audio-file-visualizer.vue';

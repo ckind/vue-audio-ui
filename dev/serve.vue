@@ -1,7 +1,17 @@
 <template>
   <div id="app">
     <audio controls :src="trackSrc" />
-    
+
+    <v-a-audio-file-visualizer
+      ref="audioFileViz"
+      :zoom="zoom"
+      :selectionStart="selectionStart"
+      :selectionEnd="selectionEnd"
+    />
+    <v-a-knob v-model="selectionStart" :minValue="0" :maxValue="1" />
+    <v-a-knob v-model="selectionEnd" :minValue="0" :maxValue="1" />
+    <v-a-fader v-model="zoom" :minValue="0" :maxValue="1" />
+
     <!-- <v-a-analog-meter-stereo
       :width="200"
       class="ui-component"
@@ -24,11 +34,11 @@
     /> -->
 
     <ChannelStrip :input="channelInput" :output="channelOutput" />
+    <!-- <ChannelStrip :input="channelInput" :output="dummyGain" />
     <ChannelStrip :input="channelInput" :output="dummyGain" />
     <ChannelStrip :input="channelInput" :output="dummyGain" />
     <ChannelStrip :input="channelInput" :output="dummyGain" />
-    <ChannelStrip :input="channelInput" :output="dummyGain" />
-    <ChannelStrip :input="channelInput" :output="dummyGain" />
+    <ChannelStrip :input="channelInput" :output="dummyGain" /> -->
     <MasterChannel :input="channelOutput" :output="audioCtx.destination" />
   </div>
 </template>
@@ -38,12 +48,13 @@ import { defineComponent, reactive } from "vue";
 import WebAudioHelpers from "./util/web-audio-helpers";
 import ChannelStrip from "./channel-strip.vue";
 import MasterChannel from "./master-channel.vue";
+import VAAudioFileVisualizer from "../src/lib-components/v-a-audio-file-visualizer.vue";
 
 export default defineComponent({
   name: "ServeDev",
   components: {
     ChannelStrip,
-    MasterChannel
+    MasterChannel,
   },
   setup() {
     const ctx = WebAudioHelpers.setupAudioContext();
@@ -52,6 +63,9 @@ export default defineComponent({
     const rightGain = ctx.createGain();
     const channelInput = ctx.createGain();
     const channelOutput = ctx.createGain();
+    const zoom = 1;
+    const selectionStart = 0;
+    const selectionEnd = 1;
 
     const dummyGain = ctx.createGain();
 
@@ -63,7 +77,10 @@ export default defineComponent({
       audioCtx: ctx,
       osc: osc,
       analyzerWidth: 700,
-      dummyGain: dummyGain
+      dummyGain: dummyGain,
+      zoom: zoom,
+      selectionStart: selectionStart,
+      selectionEnd: selectionEnd,
     });
 
     return state;
@@ -71,9 +88,16 @@ export default defineComponent({
   computed: {
     trackSrc() {
       // return require("./lost-in-the-fog.wav");
-      return require("./maenads.wav");
+      // return require("./maenads.wav");
       // return require("./baccata.wav");
-    }
+      // return require("./dinky-break.wav");
+      return require("./kick-1.wav");
+    },
+    sampleSrc() {
+      // return require("./dinky-break.wav");
+      // return require("./lost-in-the-fog.wav");
+      return require("./kick-1.wav");
+    },
   },
   mounted(): void {
     // const f = 200;
@@ -83,6 +107,16 @@ export default defineComponent({
     // WebAudioHelpers.requestMicrophoneAccess(this.audioCtx, (source: MediaStreamAudioSourceNode) => {
     //   source.connect(this.channelInput);
     // });
+
+    fetch(this.trackSrc)
+      .then((response) => response.arrayBuffer())
+      .then((buffer) => this.audioCtx.decodeAudioData(buffer))
+      .then((buffer) => {
+        // todo: sum channels to mono?
+        (
+          this.$refs.audioFileViz as typeof VAAudioFileVisualizer
+        ).loadAudioFromAmplitudeData(buffer.getChannelData(0));
+      });
 
     // get the audio element
     const audioElement = document.querySelector("audio")!;
@@ -95,7 +129,7 @@ export default defineComponent({
     this.channelOutput.connect(splitter);
     splitter.connect(this.leftGain, 0);
     splitter.connect(this.rightGain, 1);
-  }
+  },
 });
 </script>
 
