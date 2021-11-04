@@ -52,9 +52,10 @@
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
 import { LinearCurvedRange } from "@/util/curved-range";
-// import { PropType } from "vue";
+import { PropType } from "vue";
 
 // type CurveType = "linear" | "exp";
+type KnobModelValueType = number | AudioParam;
 
 export default defineComponent({
   setup(props) {
@@ -66,17 +67,35 @@ export default defineComponent({
       dragRange: 70,
       prevY: -1,
       valueCurve: new LinearCurvedRange(props.minValue, props.maxValue),
+      audioParamValue: null as AudioParam | null
     };
-    state.linearValue = props.modelValue;
-    state.curvedValue = state.valueCurve.getCurvedValue(props.modelValue);
-    state.unsteppedValue = state.curvedValue;
+
+    if (props.modelValue instanceof Number) {
+      state.linearValue = props.modelValue as number;
+      state.curvedValue = state.valueCurve.getCurvedValue(props.modelValue as number);
+      state.unsteppedValue = state.curvedValue;
+    }
+    else if (props.modelValue instanceof AudioParam) {
+      // todo: should we do two way data binding with this? additive patching?
+
+      // const audioParam = props.modelValue as AudioParam;
+
+      // state.linearValue = props.default
+      //   ? props.default
+      //   : (props.maxValue - props.minValue)/2;
+      // state.curvedValue = state.valueCurve.getCurvedValue(audioParam.value);
+      // state.unsteppedValue = state.curvedValue;
+
+      // state.audioParamValue = new AudioParam();
+      // state.audioParamValue.connect(audioParam);
+    }
 
     return reactive(state);
   },
   props: {
     modelValue: {
       required: true,
-      type: Number,
+      type: Number as PropType<KnobModelValueType>,
     },
     minValue: {
       required: true,

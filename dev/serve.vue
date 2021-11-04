@@ -2,14 +2,14 @@
   <div id="app">
     <audio controls :src="trackSrc" />
 
+    <br />
+
     <v-a-audio-file-visualizer
       ref="audioFileViz"
-      :zoom="zoom"
       :selectionStart="selectionStart"
       :selectionEnd="selectionEnd"
     />
-    <v-a-knob v-model="selectionStart" :minValue="0" :maxValue="1" />
-    <v-a-knob v-model="selectionEnd" :minValue="0" :maxValue="1" />
+
     <v-a-fader v-model="zoom" :minValue="0" :maxValue="1" />
 
     <!-- <v-a-analog-meter-stereo
@@ -90,8 +90,8 @@ export default defineComponent({
       // return require("./lost-in-the-fog.wav");
       // return require("./maenads.wav");
       // return require("./baccata.wav");
-      // return require("./dinky-break.wav");
-      return require("./kick-1.wav");
+      return require("./dinky-break.wav");
+      // return require("./kick-1.wav");
     },
     sampleSrc() {
       // return require("./dinky-break.wav");
