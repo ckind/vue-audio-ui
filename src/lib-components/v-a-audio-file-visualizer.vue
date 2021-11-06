@@ -83,6 +83,11 @@ export default defineComponent({
     graphHeight() {
       return this.width / DEFAULT_ASPECT_RATIO;
     },
+    zoomMult() {
+      // todo: find a better curve?
+      // const scaledZoom = this.curedRange.getCurvedValue(this.zoom);scaledZoom;
+      return Math.max(this.zoom, 128 / this.amplitudeData.length); // don't allow zooming in past 1 sample
+    }
   },
   mounted() {
     this.canvas = this.$refs.visualizer as HTMLCanvasElement;
@@ -91,38 +96,39 @@ export default defineComponent({
   methods: {
     loadAudioFromAmplitudeData(data: Float32Array) {
       this.amplitudeData = data;
-      window.requestAnimationFrame(this.drawAmplitude);
+      // this.markerPosition = this.graphWidth/2;
+      // this.markerIndex = Math.floor(this.amplitudeData.length/2);
+      window.requestAnimationFrame(this.drawZoom);
+    },
+    drawZoom() {
+      const midIndex = Math.floor(this.amplitudeData.length / 2);midIndex;
+
+      // zoom in on markerIndex as if it were the center
+      this.zoomWindowStartIndex = Math.floor(this.markerIndex - (this.amplitudeData.length * this.zoomMult)/2);
+      this.zoomWindowEndIndex = Math.floor(this.markerIndex + (this.amplitudeData.length * this.zoomMult)/2);
+
+      // shift the window so that the center of the zoom lines back up with the marker index
+      const zoomWindowLength = this.zoomWindowEndIndex - this.zoomWindowStartIndex;
+      const markerPositionCenterOffset = this.graphWidth/2 - this.markerPosition;
+      const markerPositionCenterOffsetMult = markerPositionCenterOffset/this.graphWidth;
+      const zoomWindowShift = Math.floor(markerPositionCenterOffsetMult * zoomWindowLength);
+
+      this.zoomWindowStartIndex += zoomWindowShift;
+      this.zoomWindowEndIndex += zoomWindowShift;
+
+      this.drawAmplitude();
     },
     drawAmplitude() {
-      // todo: find a better curve?
-      const scaledZoom = this.curedRange.getCurvedValue(this.zoom);scaledZoom;
-      let zoomMult = Math.max(scaledZoom, 1 / this.amplitudeData.length); // don't allow zooming in past 1 sample
-
-      // todo: caculate midIndex relative to the marker position?
-      const midIndex = this.amplitudeData.length / 2;midIndex;
-      const shiftAmount = -1000000;
-
-      console.log(shiftAmount);
-
-      this.zoomWindowStartIndex = Math.floor(this.markerIndex - (this.amplitudeData.length * zoomMult)/2);
-      this.zoomWindowEndIndex = Math.floor(this.markerIndex + (this.amplitudeData.length * zoomMult)/2);
-
-      // console.log(this.amplitudeData.length, midIndex, this.zoomWindowStartIndex, this.zoomWindowEndIndex);
-
-      const zoomWindowLength = this.zoomWindowEndIndex - this.zoomWindowStartIndex;
-      this.markerPosition = ((this.markerIndex - this.zoomWindowStartIndex) / zoomWindowLength) * this.graphWidth;
-
-
       // todo: low pass filter to prevent aliasing when down-sampling?
       const zoomResolution = Math.max(
         Math.round(
-          (this.amplitudeData.length * zoomMult) /
+          (this.amplitudeData.length * this.zoomMult) /
             this.graphWidth /
             RESOLUTION_SCALER
         ),
         1
       );
-      const pointDistance = this.graphWidth / zoomWindowLength;
+      const pointDistance = this.graphWidth / (this.zoomWindowEndIndex - this.zoomWindowStartIndex);
 
       this.canvasContext?.clearRect(0, 0, this.graphWidth, this.graphHeight);
       this.canvasContext!.fillStyle = this.backgroundColor;
@@ -130,6 +136,7 @@ export default defineComponent({
       this.canvasContext!.strokeStyle = this.lineColor;
       this.canvasContext?.beginPath();
 
+      // todo: apply some sort of sinusoidal interpolation
       let x = 0;
       let y = 0;
       for (
@@ -138,8 +145,7 @@ export default defineComponent({
         i += zoomResolution
       ) {
         x = (i - this.zoomWindowStartIndex) * pointDistance;
-        y =
-          this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
+        y = this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
         this.canvasContext?.lineTo(x, y);
       }
       this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
@@ -174,7 +180,7 @@ export default defineComponent({
         this.zoom = fitToBounds(this.zoom - diffY/DRAG_RANGE * 1, 0, 1);
       }
 
-      window.requestAnimationFrame(this.drawAmplitude);
+      window.requestAnimationFrame(this.drawZoom);
 
       this.prevY = currY;
     }
