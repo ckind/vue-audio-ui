@@ -33,9 +33,11 @@ export default defineComponent({
       markerIndex: 0,
       zoomWindowStartIndex: 0,
       zoomWindowEndIndex: 0,
+      xShiftMult: 0,
       zoom: 1,
       prevY: -1,
-      curedRange: new Pow2CurvedRange(0.0001, 1) // todo: adjust min value based on sample length?
+      prevX: -1,
+      curedRange: new Pow2CurvedRange(0.0001, 1), // todo: adjust min value based on sample length?
     };
   },
   props: {
@@ -86,8 +88,11 @@ export default defineComponent({
     zoomMult() {
       // todo: find a better curve?
       // const scaledZoom = this.curedRange.getCurvedValue(this.zoom);scaledZoom;
-      return Math.max(this.zoom, 128 / this.amplitudeData.length); // don't allow zooming in past 1 sample
-    }
+      return Math.max(this.zoom, 128 / this.amplitudeData.length); // don't allow zooming in past X samples
+    },
+    zoomWindowLength() {
+      return this.zoomWindowEndIndex - this.zoomWindowStartIndex;
+    },
   },
   mounted() {
     this.canvas = this.$refs.visualizer as HTMLCanvasElement;
@@ -96,26 +101,34 @@ export default defineComponent({
   methods: {
     loadAudioFromAmplitudeData(data: Float32Array) {
       this.amplitudeData = data;
-      // this.markerPosition = this.graphWidth/2;
-      // this.markerIndex = Math.floor(this.amplitudeData.length/2);
       window.requestAnimationFrame(this.drawZoom);
     },
-    drawZoom() {
-      const midIndex = Math.floor(this.amplitudeData.length / 2);midIndex;
-
+    shiftZoomWindow(numSamples: number) {
+      this.zoomWindowStartIndex += numSamples;
+      this.zoomWindowEndIndex += numSamples;
+    },
+    setZoomWindow() {
       // zoom in on markerIndex as if it were the center
-      this.zoomWindowStartIndex = Math.floor(this.markerIndex - (this.amplitudeData.length * this.zoomMult)/2);
-      this.zoomWindowEndIndex = Math.floor(this.markerIndex + (this.amplitudeData.length * this.zoomMult)/2);
+      this.zoomWindowStartIndex = Math.floor(
+        this.markerIndex - (this.amplitudeData.length * this.zoomMult) / 2
+      );
+      this.zoomWindowEndIndex = Math.floor(
+        this.markerIndex + (this.amplitudeData.length * this.zoomMult) / 2
+      );
 
       // shift the window so that the center of the zoom lines back up with the marker index
-      const zoomWindowLength = this.zoomWindowEndIndex - this.zoomWindowStartIndex;
-      const markerPositionCenterOffset = this.graphWidth/2 - this.markerPosition;
-      const markerPositionCenterOffsetMult = markerPositionCenterOffset/this.graphWidth;
-      const zoomWindowShift = Math.floor(markerPositionCenterOffsetMult * zoomWindowLength);
+      const markerPositionCenterOffset =
+        this.graphWidth / 2 - this.markerPosition;
+      const markerPositionCenterOffsetMult =
+        markerPositionCenterOffset / this.graphWidth;
+      const zoomWindowShift = Math.floor(
+        markerPositionCenterOffsetMult * this.zoomWindowLength
+      );
 
-      this.zoomWindowStartIndex += zoomWindowShift;
-      this.zoomWindowEndIndex += zoomWindowShift;
-
+      this.shiftZoomWindow(zoomWindowShift);
+    },
+    drawZoom() {
+      this.setZoomWindow();
       this.drawAmplitude();
     },
     drawAmplitude() {
@@ -128,7 +141,8 @@ export default defineComponent({
         ),
         1
       );
-      const pointDistance = this.graphWidth / (this.zoomWindowEndIndex - this.zoomWindowStartIndex);
+      const pointDistance =
+        this.graphWidth / (this.zoomWindowEndIndex - this.zoomWindowStartIndex);
 
       this.canvasContext?.clearRect(0, 0, this.graphWidth, this.graphHeight);
       this.canvasContext!.fillStyle = this.backgroundColor;
@@ -145,7 +159,8 @@ export default defineComponent({
         i += zoomResolution
       ) {
         x = (i - this.zoomWindowStartIndex) * pointDistance;
-        y = this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
+        y =
+          this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
         this.canvasContext?.lineTo(x, y);
       }
       this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
@@ -158,33 +173,56 @@ export default defineComponent({
       this.canvasContext?.stroke();
     },
     onCanvasMouseDown(e: MouseEvent) {
+      document.getElementsByTagName("body")[0].classList.add("--no-text-select");
+
       const canvasX = this.canvas?.getBoundingClientRect()?.x as number;
       const xpos = e.clientX - canvasX;
 
-      this.markerIndex = Math.floor(this.amplitudeData.length * xpos/this.graphWidth);
+      this.xShiftMult = 0;
+
+      this.markerIndex = Math.floor(
+        (this.amplitudeData.length * xpos) / this.graphWidth
+      );
       this.markerPosition = xpos;
       window.requestAnimationFrame(this.drawAmplitude);
 
       window.addEventListener("mousemove", this.onClickDrag);
       window.addEventListener("mouseup", this.endDrag);
+
+      console.log(this.zoomWindowStartIndex, this.zoomWindowEndIndex);
     },
     endDrag() {
       window.removeEventListener("mousemove", this.onClickDrag);
       this.prevY = -1;
+      this.prevX = -1;
+
+      document.getElementsByTagName("body")[0].classList.remove("--no-text-select");
     },
     onClickDrag(e: MouseEvent) {
       const currY = e.pageY;
+      const currX = e.pageX;
 
       if (this.prevY >= 0) {
         const diffY = currY - this.prevY;
-        this.zoom = fitToBounds(this.zoom - diffY/DRAG_RANGE * 1, 0, 1);
+        this.zoom = fitToBounds(this.zoom - (diffY / DRAG_RANGE) * 1, 0, 1);
+        this.setZoomWindow();
       }
 
-      window.requestAnimationFrame(this.drawZoom);
+      // todo: still need to figure out x shifting
+      // if (this.prevX >= 0) {
+      //   const diffX = currX - this.prevX;
+      //   this.xShiftMult += diffX / this.graphWidth;
+      //   this.shiftZoomWindow(
+      //     Math.floor(this.xShiftMult * this.zoomWindowLength)
+      //   );
+      // }
+
+      window.requestAnimationFrame(this.drawAmplitude);
 
       this.prevY = currY;
-    }
-  }
+      this.prevX = currX;
+    },
+  },
 });
 </script>
 
@@ -194,5 +232,16 @@ export default defineComponent({
   border: 1px solid;
   border-color: var(--border-color);
   cursor: move;
+}
+</style>
+
+<style>
+.--no-text-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 </style>
