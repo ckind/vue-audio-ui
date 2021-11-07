@@ -1931,7 +1931,7 @@ export default defineComponent({
       type: Number,
       default: 200,
     },
-    // not currently being used - 
+    // not currently being used -
     // curveType: {
     // 	required: false,
     // 	type: PropType<CurveType>,
@@ -1959,7 +1959,10 @@ export default defineComponent({
     },
     svgFaderPosition(): number {
       const offset =
-        (this.linearValue / this.valueRange) * this.svgFaderPositionRange;
+        ((this.linearValue - this.minValue) / this.valueRange) * this.svgFaderPositionRange;
+
+      if (isNaN(offset)) return 0;
+
       return SVG_FADER_POS_MIN - offset;
     },
     width() {
@@ -2000,7 +2003,7 @@ export default defineComponent({
       }
 
       const mult = (this.height - currSvgY) / this.height;
-      const knobValue = mult * this.valueRange;
+      const knobValue = mult * this.valueRange + this.minValue;
 
       this.$emit(
         "update:modelValue",
@@ -2018,6 +2021,12 @@ export default defineComponent({
     modelValue(newValue: number): void {
       this.curvedValue = newValue;
       this.linearValue = this.valueCurve.getLinearValue(this.curvedValue);
+    },
+    minValue(newValue: number) {
+      this.valueCurve = new LinearCurvedRange(newValue, this.maxValue);
+    },
+    maxValue(newValue: number) {
+      this.valueCurve = new LinearCurvedRange(this.minValue, newValue);
     },
   },
 });

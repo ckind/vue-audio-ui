@@ -6,11 +6,7 @@
 
     <v-a-audio-file-visualizer
       ref="audioFileViz"
-      :selectionStart="selectionStart"
-      :selectionEnd="selectionEnd"
     />
-
-    <v-a-fader v-model="zoom" :minValue="0" :maxValue="1" />
 
     <!-- <v-a-analog-meter-stereo
       :width="200"
@@ -63,10 +59,6 @@ export default defineComponent({
     const rightGain = ctx.createGain();
     const channelInput = ctx.createGain();
     const channelOutput = ctx.createGain();
-    const zoom = 1;
-    const selectionStart = 0;
-    const selectionEnd = 1;
-
     const dummyGain = ctx.createGain();
 
     const state = reactive({
@@ -77,10 +69,7 @@ export default defineComponent({
       audioCtx: ctx,
       osc: osc,
       analyzerWidth: 700,
-      dummyGain: dummyGain,
-      zoom: zoom,
-      selectionStart: selectionStart,
-      selectionEnd: selectionEnd,
+      dummyGain: dummyGain
     });
 
     return state;

@@ -6,7 +6,18 @@
     class="visualizer-canvas"
     :style="cssVars"
     @mousedown="onCanvasMouseDown"
+    @dblclick="onCanvasDoubleClick"
   ></canvas>
+  <v-a-fader :minValue="-40000" :maxValue="40000" v-model="xShift" />
+  <p>zoom: {{ zoom }}</p>
+  <p>zoomWindowStartIndex: {{ zoomWindowStartIndex }}</p>
+  <p>zoomWindowEndIndex: {{ zoomWindowEndIndex }}</p>
+  <p>zoomWindowLength: {{ zoomWindowLength }}</p>
+  <p>totalSamples: {{ amplitudeData.length }}</p>
+  <p>xShift: {{ xShift }}</p>
+  <p>markerIndex: {{ markerIndex }}</p>
+  <p>markerPosition: {{ markerPosition }}</p>
+  <p>graphWidth: {{ graphWidth }}</p>
 </template>
 
 <script lang="ts">
@@ -19,7 +30,7 @@ const DEFAULT_ASPECT_RATIO = 3;
 // greater number = greater drawing resolution
 // lower number = better performance when drawing
 // must be >= 1
-const RESOLUTION_SCALER = 4;
+const RESOLUTION_SCALER = 12;
 const DRAG_RANGE = 70;
 
 export default defineComponent({
@@ -33,11 +44,12 @@ export default defineComponent({
       markerIndex: 0,
       zoomWindowStartIndex: 0,
       zoomWindowEndIndex: 0,
-      xShiftMult: 0,
       zoom: 1,
       prevY: -1,
       prevX: -1,
-      curedRange: new Pow2CurvedRange(0.0001, 1), // todo: adjust min value based on sample length?
+      curedRange: new Pow2CurvedRange(0.0001, 1), // todo: adjust min value based on sample length?,
+
+      xShift: 0,
     };
   },
   props: {
@@ -61,16 +73,6 @@ export default defineComponent({
       type: Number,
       default: -1,
     },
-    selectionStart: {
-      required: false,
-      type: Number,
-      default: 0,
-    },
-    selectionEnd: {
-      required: false,
-      type: Number,
-      default: 0,
-    },
   },
   computed: {
     cssVars() {
@@ -88,7 +90,7 @@ export default defineComponent({
     zoomMult() {
       // todo: find a better curve?
       // const scaledZoom = this.curedRange.getCurvedValue(this.zoom);scaledZoom;
-      return Math.max(this.zoom, 128 / this.amplitudeData.length); // don't allow zooming in past X samples
+      return Math.max(this.zoom, 16 / this.amplitudeData.length); // don't allow zooming in past X samples
     },
     zoomWindowLength() {
       return this.zoomWindowEndIndex - this.zoomWindowStartIndex;
@@ -124,8 +126,21 @@ export default defineComponent({
       const zoomWindowShift = Math.floor(
         markerPositionCenterOffsetMult * this.zoomWindowLength
       );
-
       this.shiftZoomWindow(zoomWindowShift);
+
+      // keep the window within bounds of the sample data
+      let shiftCorrection = 0;
+
+      shiftCorrection +=
+        this.zoomWindowStartIndex < 0 ? -this.zoomWindowStartIndex : 0;
+      shiftCorrection +=
+        this.zoomWindowEndIndex > this.amplitudeData.length
+          ? this.amplitudeData.length - this.zoomWindowEndIndex
+          : 0;
+
+      console.log(shiftCorrection);
+
+      this.shiftZoomWindow(shiftCorrection);
     },
     drawZoom() {
       this.setZoomWindow();
@@ -158,7 +173,7 @@ export default defineComponent({
         i < this.zoomWindowEndIndex;
         i += zoomResolution
       ) {
-        x = (i - this.zoomWindowStartIndex) * pointDistance;
+        x = (i - this.zoomWindowStartIndex + this.xShift) * pointDistance;
         y =
           this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
         this.canvasContext?.lineTo(x, y);
@@ -172,31 +187,41 @@ export default defineComponent({
       this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
       this.canvasContext?.stroke();
     },
+    onCanvasDoubleClick() {
+      this.markerIndex = 0;
+      this.markerPosition = 0;
+      this.zoom = 1;
+      this.xShift = 0;
+      this.zoomWindowStartIndex = 0;
+      this.zoomWindowEndIndex = this.amplitudeData.length;
+    },
     onCanvasMouseDown(e: MouseEvent) {
-      document.getElementsByTagName("body")[0].classList.add("--no-text-select");
+      document
+        .getElementsByTagName("body")[0]
+        .classList.add("--no-text-select");
 
       const canvasX = this.canvas?.getBoundingClientRect()?.x as number;
       const xpos = e.clientX - canvasX;
 
-      this.xShiftMult = 0;
-
       this.markerIndex = Math.floor(
-        (this.amplitudeData.length * xpos) / this.graphWidth
+        this.zoomWindowStartIndex +
+          (xpos / this.graphWidth) * this.zoomWindowLength
       );
       this.markerPosition = xpos;
+
       window.requestAnimationFrame(this.drawAmplitude);
 
       window.addEventListener("mousemove", this.onClickDrag);
       window.addEventListener("mouseup", this.endDrag);
-
-      console.log(this.zoomWindowStartIndex, this.zoomWindowEndIndex);
     },
     endDrag() {
       window.removeEventListener("mousemove", this.onClickDrag);
       this.prevY = -1;
       this.prevX = -1;
 
-      document.getElementsByTagName("body")[0].classList.remove("--no-text-select");
+      document
+        .getElementsByTagName("body")[0]
+        .classList.remove("--no-text-select");
     },
     onClickDrag(e: MouseEvent) {
       const currY = e.pageY;
@@ -209,18 +234,20 @@ export default defineComponent({
       }
 
       // todo: still need to figure out x shifting
-      // if (this.prevX >= 0) {
-      //   const diffX = currX - this.prevX;
-      //   this.xShiftMult += diffX / this.graphWidth;
-      //   this.shiftZoomWindow(
-      //     Math.floor(this.xShiftMult * this.zoomWindowLength)
-      //   );
-      // }
+      // prevent from shift before beginning for past end of sample
+      if (this.prevX >= 0) {
+        // const diffX = currX - this.prevX;
+      }
 
       window.requestAnimationFrame(this.drawAmplitude);
 
       this.prevY = currY;
       this.prevX = currX;
+    },
+  },
+  watch: {
+    xShift() {
+      this.drawAmplitude();
     },
   },
 });
