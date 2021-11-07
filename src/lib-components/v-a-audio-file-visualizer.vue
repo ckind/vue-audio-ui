@@ -138,8 +138,6 @@ export default defineComponent({
           ? this.amplitudeData.length - this.zoomWindowEndIndex
           : 0;
 
-      console.log(shiftCorrection);
-
       this.shiftZoomWindow(shiftCorrection);
     },
     drawZoom() {
@@ -166,8 +164,23 @@ export default defineComponent({
       this.canvasContext?.beginPath();
 
       // todo: apply some sort of sinusoidal interpolation
+      // could also refactoring the drawing
       let x = 0;
       let y = 0;
+
+      // draw samples left of shift
+      for (
+        let i = this.zoomWindowStartIndex - this.xShift;
+        i < this.zoomWindowStartIndex;
+        i += zoomResolution
+      ) {
+        x = (i - (this.zoomWindowStartIndex - this.xShift)) * pointDistance;
+        y =
+          this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
+        this.canvasContext?.lineTo(x, y);
+      }
+
+      // draw samples within the zoomWindow
       for (
         let i = this.zoomWindowStartIndex;
         i < this.zoomWindowEndIndex;
@@ -178,6 +191,24 @@ export default defineComponent({
           this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
         this.canvasContext?.lineTo(x, y);
       }
+
+      // draw samples right of shift
+      for (
+        let i = this.zoomWindowEndIndex;
+        i < this.zoomWindowEndIndex - this.xShift;
+        i += zoomResolution
+      ) {
+        x =
+          (2 * i -
+            this.zoomWindowEndIndex -
+            this.zoomWindowStartIndex +
+            this.xShift) *
+          pointDistance;
+        y =
+          this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
+        this.canvasContext?.lineTo(x, y);
+      }
+
       this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
       this.canvasContext?.stroke();
 
