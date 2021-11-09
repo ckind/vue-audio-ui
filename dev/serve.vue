@@ -4,6 +4,8 @@
 
     <br />
 
+    <CurveGraph />
+
     <v-a-audio-file-visualizer
       ref="audioFileViz"
     />
@@ -45,12 +47,14 @@ import WebAudioHelpers from "./util/web-audio-helpers";
 import ChannelStrip from "./channel-strip.vue";
 import MasterChannel from "./master-channel.vue";
 import VAAudioFileVisualizer from "../src/lib-components/v-a-audio-file-visualizer.vue";
+import CurveGraph from "./curve-graph.vue";
 
 export default defineComponent({
   name: "ServeDev",
   components: {
     ChannelStrip,
     MasterChannel,
+    CurveGraph
   },
   setup() {
     const ctx = WebAudioHelpers.setupAudioContext();

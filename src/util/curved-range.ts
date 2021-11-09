@@ -1,46 +1,153 @@
 import { solveQuadratic } from "./math-helpers";
 
-class BaseCurvedRange {
-	readonly min: number;
-	readonly max: number;
+interface CurvedRange {
+  getCurvedValue(_linearValue: number): number;
 
-	constructor(min: number, max: number) {
-		this.min = min;
-		this.max = max;
-	}
-
-	getCurvedValue(_linearValue: number): number {
-		throw "getCurvedValue must be overriden in child class";
-	}
-
-	getLinearValue(_curvedValue: number): number {
-		throw "getLinearValue must be overriden in child class";
-	}
-
-	protected validateInput(value: number) {
-		if (value < this.min) {
-			throw `given value ${value} is less than min value ${this.min}`;
-		} else if (value > this.max) {
-			throw `given value ${value} is greater than max value ${this.max}`;
-		}
-	}
+  getLinearValue(_curvedValue: number): number;
 }
+
+class BaseCurvedRange {
+  readonly min: number;
+  readonly max: number;
+
+  constructor(min: number, max: number) {
+    this.min = min;
+    this.max = max;
+  }
+
+  getCurvedValue(_linearValue: number): number {
+    throw "getCurvedValue must be overriden in child class";
+  }
+
+  getLinearValue(_curvedValue: number): number {
+    throw "getLinearValue must be overriden in child class";
+  }
+
+  protected validateInput(value: number) {
+    if (value < this.min) {
+      throw `given value ${value} is less than min value ${this.min}`;
+    } else if (value > this.max) {
+      throw `given value ${value} is greater than max value ${this.max}`;
+    }
+  }
+}
+
+
+
+/** 
+ * 
+
+------ ll.og formula ------
+
+$f1 = input_value
+$f2 = min_input_value
+$f3 = max_input_value
+$f4 = min_output_value
+$f5 = max_output_value
+$f6 = log_base
+
+(exp((($f1 - $f2) / ($f3-$f2) - 1) * $f6) - 1)
+  /
+(exp(-$f6) - 1)
+  *
+($f4 - $f5)
+  +
+$f5
+
+*/
+
+
+
+function exp(x: number): number {
+  return Math.pow(Math.E, x);
+}
+
+function getLogCurve(
+  x: number,
+  minInput: number,
+  maxInput: number,
+  minOutput: number,
+  maxOutput: number,
+  curveAmt: number
+) {
+  return (exp(((x - minInput) / (maxInput - minInput) - 1) * curveAmt) - 1)
+    / (exp(-curveAmt) - 1)
+    * (minOutput - maxOutput)
+    + maxOutput;
+}
+
+function getInverseLogCurve(
+  x: number,
+  minInput: number,
+  maxInput: number,
+  minOutput: number,
+  maxOutput: number,
+  curveAmt: number
+) {
+  return (((Math.log((x - maxOutput) * (exp(-curveAmt) - 1) / (minOutput - maxOutput) + 1)) / curveAmt) + 1)
+    * (maxInput - minInput)
+    + minInput;
+}
+
+class InverseLogCurvedRange extends BaseCurvedRange {
+  private curveAmount: number;
+
+  constructor(min: number, max: number, curveAmount: number) {
+    super(min, max);
+    this.curveAmount = curveAmount;
+  }
+
+  getCurvedValue(value: number): number {
+    this.validateInput(value);
+
+    return getInverseLogCurve(value, this.min, this.max, this.min, this.max, this.curveAmount);
+  }
+
+  getLinearValue(value: number): number {
+    this.validateInput(value);
+
+    return getLogCurve(value, this.min, this.max, this.min, this.max, this.curveAmount);
+  }
+}
+
+class LogCurvedRange extends BaseCurvedRange {
+  private curveAmount: number;
+
+  constructor(min: number, max: number, curveAmount: number) {
+    super(min, max);
+    this.curveAmount = curveAmount;
+  }
+
+  getCurvedValue(value: number): number {
+    this.validateInput(value);
+
+    return getLogCurve(value, this.min, this.max, this.min, this.max, this.curveAmount);
+  }
+
+  getLinearValue(value: number): number {
+    this.validateInput(value);
+
+    return getInverseLogCurve(value, this.min, this.max, this.min, this.max, this.curveAmount);
+  }
+}
+
+
 
 class LinearCurvedRange extends BaseCurvedRange {
 
-	constructor(min: number, max: number) {
-		super(min, max);
-	}
+  constructor(min: number, max: number) {
+    super(min, max);
+  }
 
-	getCurvedValue(value: number): number {
-		this.validateInput(value);
-		return value;
-	}
+  getCurvedValue(value: number): number {
+    this.validateInput(value);
+    return value;
+  }
 
-	getLinearValue(value: number): number {
-		this.validateInput(value);
-		return value;
-	}
+  getLinearValue(value: number): number {
+    this.validateInput(value);
+    return value;
+  }
 }
 
 /*
@@ -85,9 +192,9 @@ class QuadBezierCurvedRange extends BaseCurvedRange {
     const t = (linearValue - this.min) / (this.max - this.min);
     // get value along bezier interpolation using t
     // y(t) = (y0 - 2y1 + y2)t^2 + 2(y1 + y0)t + y0
-    let y = 
-      (this.p[0].y - 2*this.p[1].y + this.p[2].y) * Math.pow(t, 2) + 
-      2 * (this.p[1].y + this.p[0].y ) * t + 
+    let y =
+      (this.p[0].y - 2 * this.p[1].y + this.p[2].y) * Math.pow(t, 2) +
+      2 * (this.p[1].y + this.p[0].y) * t +
       this.p[0].y;
     y += this.min;
     return y;
@@ -100,7 +207,7 @@ class QuadBezierCurvedRange extends BaseCurvedRange {
     // 0    = (y0 - 2y1 + y2)t^2 + 2(y1 + y0)t + (y0 - y(t));
     // solve for t
     const yt = curvedValue - this.min;
-    const a = this.p[0].y - 2*(this.p[1].y) + this.p[2].y;
+    const a = this.p[0].y - 2 * (this.p[1].y) + this.p[2].y;
     const b = 2 * (this.p[1].y + this.p[0].y);
     const c = this.p[0].y - yt;
     const solution = solveQuadratic(a, b, c);
@@ -143,7 +250,7 @@ class Pow2CurvedRange extends BaseCurvedRange {
   getCurvedValue(value: number): number {
     this.validateInput(value);
     const t = (value - this.min) / this.range;
-    const val = this.exp2(t * this.logRange + this.logMin);
+    const val = this.exp2(t * this.logRange + this.logMin); // todo: fix this
     return val;
   }
 
@@ -155,5 +262,4 @@ class Pow2CurvedRange extends BaseCurvedRange {
   }
 }
 
-
-export { BaseCurvedRange, LinearCurvedRange, Pow2CurvedRange, QuadBezierCurvedRange };
+export { CurvedRange, LinearCurvedRange, Pow2CurvedRange, QuadBezierCurvedRange, LogCurvedRange, InverseLogCurvedRange };

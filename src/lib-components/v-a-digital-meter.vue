@@ -12,11 +12,13 @@ import { defineComponent, PropType } from "vue";
 import useMetering from "@/composables/metering";
 import useRendering from "@/composables/rendering";
 import { DigitalMeterType } from "@/types/v-audio-ui-types";
-import { QuadBezierCurvedRange } from "@/util/curved-range"
+// import { QuadBezierCurvedRange } from "@/util/curved-range"
+import { LogCurvedRange } from "@/util/curved-range"
 import { fitToBounds } from "@/util/math-helpers";
 
 const DB_RANGE = 90;
-const curve = new QuadBezierCurvedRange(0, DB_RANGE);
+// const curve = new QuadBezierCurvedRange(0, DB_RANGE);
+const curve = new LogCurvedRange(0, DB_RANGE, 2);
 
 export default defineComponent({
   name: "VADigitalMeter",

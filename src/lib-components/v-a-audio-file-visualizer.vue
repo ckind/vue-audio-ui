@@ -8,13 +8,11 @@
     @mousedown="onCanvasMouseDown"
     @dblclick="onCanvasDoubleClick"
   ></canvas>
-  <v-a-fader :minValue="-40000" :maxValue="40000" v-model="xShift" />
   <p>zoom: {{ zoom }}</p>
   <p>zoomWindowStartIndex: {{ zoomWindowStartIndex }}</p>
   <p>zoomWindowEndIndex: {{ zoomWindowEndIndex }}</p>
   <p>zoomWindowLength: {{ zoomWindowLength }}</p>
   <p>totalSamples: {{ amplitudeData.length }}</p>
-  <p>xShift: {{ xShift }}</p>
   <p>markerIndex: {{ markerIndex }}</p>
   <p>markerPosition: {{ markerPosition }}</p>
   <p>graphWidth: {{ graphWidth }}</p>
@@ -48,8 +46,6 @@ export default defineComponent({
       prevY: -1,
       prevX: -1,
       curedRange: new Pow2CurvedRange(0.0001, 1), // todo: adjust min value based on sample length?,
-
-      xShift: 0,
     };
   },
   props: {
@@ -111,19 +107,19 @@ export default defineComponent({
     },
     setZoomWindow() {
       // zoom in on markerIndex as if it were the center
-      this.zoomWindowStartIndex = Math.floor(
-        this.markerIndex - (this.amplitudeData.length * this.zoomMult) / 2
-      );
-      this.zoomWindowEndIndex = Math.floor(
-        this.markerIndex + (this.amplitudeData.length * this.zoomMult) / 2
-      );
+      this.zoomWindowStartIndex =
+        this.markerIndex -
+        Math.round((this.amplitudeData.length * this.zoomMult) / 2);
+      this.zoomWindowEndIndex =
+        this.markerIndex +
+        Math.round((this.amplitudeData.length * this.zoomMult) / 2);
 
       // shift the window so that the center of the zoom lines back up with the marker index
       const markerPositionCenterOffset =
         this.graphWidth / 2 - this.markerPosition;
       const markerPositionCenterOffsetMult =
         markerPositionCenterOffset / this.graphWidth;
-      const zoomWindowShift = Math.floor(
+      const zoomWindowShift = Math.round(
         markerPositionCenterOffsetMult * this.zoomWindowLength
       );
       this.shiftZoomWindow(zoomWindowShift);
@@ -164,21 +160,8 @@ export default defineComponent({
       this.canvasContext?.beginPath();
 
       // todo: apply some sort of sinusoidal interpolation
-      // could also refactoring the drawing
       let x = 0;
       let y = 0;
-
-      // draw samples left of shift
-      for (
-        let i = this.zoomWindowStartIndex - this.xShift;
-        i < this.zoomWindowStartIndex;
-        i += zoomResolution
-      ) {
-        x = (i - (this.zoomWindowStartIndex - this.xShift)) * pointDistance;
-        y =
-          this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
-        this.canvasContext?.lineTo(x, y);
-      }
 
       // draw samples within the zoomWindow
       for (
@@ -186,24 +169,7 @@ export default defineComponent({
         i < this.zoomWindowEndIndex;
         i += zoomResolution
       ) {
-        x = (i - this.zoomWindowStartIndex + this.xShift) * pointDistance;
-        y =
-          this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
-        this.canvasContext?.lineTo(x, y);
-      }
-
-      // draw samples right of shift
-      for (
-        let i = this.zoomWindowEndIndex;
-        i < this.zoomWindowEndIndex - this.xShift;
-        i += zoomResolution
-      ) {
-        x =
-          (2 * i -
-            this.zoomWindowEndIndex -
-            this.zoomWindowStartIndex +
-            this.xShift) *
-          pointDistance;
+        x = (i - this.zoomWindowStartIndex) * pointDistance;
         y =
           this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
         this.canvasContext?.lineTo(x, y);
@@ -222,7 +188,6 @@ export default defineComponent({
       this.markerIndex = 0;
       this.markerPosition = 0;
       this.zoom = 1;
-      this.xShift = 0;
       this.zoomWindowStartIndex = 0;
       this.zoomWindowEndIndex = this.amplitudeData.length;
     },
@@ -234,10 +199,10 @@ export default defineComponent({
       const canvasX = this.canvas?.getBoundingClientRect()?.x as number;
       const xpos = e.clientX - canvasX;
 
-      this.markerIndex = Math.floor(
-        this.zoomWindowStartIndex +
-          (xpos / this.graphWidth) * this.zoomWindowLength
-      );
+      this.markerIndex =
+        Math.round((xpos / this.graphWidth) * this.zoomWindowLength) +
+        this.zoomWindowStartIndex;
+
       this.markerPosition = xpos;
 
       window.requestAnimationFrame(this.drawAmplitude);
@@ -257,6 +222,22 @@ export default defineComponent({
     onClickDrag(e: MouseEvent) {
       const currY = e.pageY;
       const currX = e.pageX;
+      let shiftXNumSamples = 0;
+
+      if (this.prevX >= 0) {
+        const diffX = currX - this.prevX;
+        shiftXNumSamples = Math.round(
+          (diffX / this.graphWidth) * this.zoomWindowLength
+        );
+        // don't allow shifting before audio start or after audio end
+        // shiftXNumSamples = fitToBounds(
+        //   shiftXNumSamples,
+        //   this.zoomWindowStartIndex,
+        //   this.zoomWindowLength - this.zoomWindowEndIndex
+        // );
+        this.shiftZoomWindow(-shiftXNumSamples);
+        this.markerIndex -= shiftXNumSamples;
+      }
 
       if (this.prevY >= 0) {
         const diffY = currY - this.prevY;
@@ -264,21 +245,16 @@ export default defineComponent({
         this.setZoomWindow();
       }
 
-      // todo: still need to figure out x shifting
-      // prevent from shift before beginning for past end of sample
-      if (this.prevX >= 0) {
-        // const diffX = currX - this.prevX;
-      }
+      this.markerPosition = Math.round(
+        ((this.markerIndex - this.zoomWindowStartIndex) /
+          this.zoomWindowLength) *
+          this.graphWidth
+      );
 
       window.requestAnimationFrame(this.drawAmplitude);
 
       this.prevY = currY;
       this.prevX = currX;
-    },
-  },
-  watch: {
-    xShift() {
-      this.drawAmplitude();
     },
   },
 });
