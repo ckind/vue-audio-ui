@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Pow2CurvedRange } from "@/util/curved-range";
+import { CurvedRange, LogCurvedRange } from "@/util/curved-range";
 import { fitToBounds } from "@/util/math-helpers";
 
 const DEFAULT_ASPECT_RATIO = 3;
@@ -28,8 +28,8 @@ const DEFAULT_ASPECT_RATIO = 3;
 // greater number = greater drawing resolution
 // lower number = better performance when drawing
 // must be >= 1
-const RESOLUTION_SCALER = 12;
-const DRAG_RANGE = 70;
+const RESOLUTION_SCALER = 4;
+const DRAG_RANGE = 300;
 
 export default defineComponent({
   name: "VAAudioFileVisualizer",
@@ -45,7 +45,7 @@ export default defineComponent({
       zoom: 1,
       prevY: -1,
       prevX: -1,
-      curedRange: new Pow2CurvedRange(0.0001, 1), // todo: adjust min value based on sample length?,
+      curedRange: new LogCurvedRange(0, 1, 8) as CurvedRange, // todo: adjust curve based on sample length?,
     };
   },
   props: {
@@ -85,8 +85,8 @@ export default defineComponent({
     },
     zoomMult() {
       // todo: find a better curve?
-      // const scaledZoom = this.curedRange.getCurvedValue(this.zoom);scaledZoom;
-      return Math.max(this.zoom, 16 / this.amplitudeData.length); // don't allow zooming in past X samples
+      const scaledZoom = this.curedRange.getCurvedValue(this.zoom);
+      return Math.max(scaledZoom, 16 / this.amplitudeData.length); // don't allow zooming in past X samples
     },
     zoomWindowLength() {
       return this.zoomWindowEndIndex - this.zoomWindowStartIndex;
@@ -140,9 +140,31 @@ export default defineComponent({
       this.setZoomWindow();
       this.drawAmplitude();
     },
+    getMaxSampleValue(
+      sampleData: Float32Array,
+      startIndex: number,
+      endIndex: number
+    ): number {
+      let max = Number.MIN_VALUE;
+      for (let i = startIndex; i < endIndex; i++) {
+        max = Math.max(max, sampleData[i]);
+      }
+      return max;
+    },
+    getMinSampleValue(
+      sampleData: Float32Array,
+      startIndex: number,
+      endIndex: number
+    ): number {
+      let min = Number.MIN_VALUE;
+      for (let i = startIndex; i < endIndex; i++) {
+        min = Math.min(min, sampleData[i]);
+      }
+      return min;
+    },
     drawAmplitude() {
       // todo: low pass filter to prevent aliasing when down-sampling?
-      const zoomResolution = Math.max(
+      const binSize = Math.max(
         Math.round(
           (this.amplitudeData.length * this.zoomMult) /
             this.graphWidth /
@@ -159,20 +181,28 @@ export default defineComponent({
       this.canvasContext!.strokeStyle = this.lineColor;
       this.canvasContext?.beginPath();
 
-      // todo: apply some sort of sinusoidal interpolation
+      // todo: apply some sort of sinusoidal interpolation?
       let x = 0;
       let y = 0;
+      let amplitude = 0;
 
       // draw samples within the zoomWindow
+
+      // todo: instead of drawing of nth pixel, take the max or average of each bin?
+      // draw line at each x with min and max sample value?
       for (
         let i = this.zoomWindowStartIndex;
         i < this.zoomWindowEndIndex;
-        i += zoomResolution
+        i += binSize
       ) {
+        // amplitude = this.getMaxSampleValue(this.amplitudeData, i, i + binSize);
+        amplitude = this.amplitudeData[i];
+
         x = (i - this.zoomWindowStartIndex) * pointDistance;
         y =
-          this.graphHeight / 2 + (this.amplitudeData[i] * this.graphHeight) / 2;
-        this.canvasContext?.lineTo(x, y);
+          this.graphHeight -
+          (this.graphHeight / 2 + (amplitude * this.graphHeight) / 2);
+        this.canvasContext?.lineTo(x, y); // todo: do we need to draw line if distance between samples is less than 1 px;
       }
 
       this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
@@ -224,17 +254,22 @@ export default defineComponent({
       const currX = e.pageX;
       let shiftXNumSamples = 0;
 
+      // todo: these movements are a bit jerky. find a way to smoothe them out?
+      // find whether the diffX or diffY is greater and commit to moving only in that
+      // direction until that changes
+
       if (this.prevX >= 0) {
         const diffX = currX - this.prevX;
+
         shiftXNumSamples = Math.round(
           (diffX / this.graphWidth) * this.zoomWindowLength
         );
-        // don't allow shifting before audio start or after audio end
-        // shiftXNumSamples = fitToBounds(
-        //   shiftXNumSamples,
-        //   this.zoomWindowStartIndex,
-        //   this.zoomWindowLength - this.zoomWindowEndIndex
-        // );
+
+        const minShift = -this.zoomWindowStartIndex; // don't allowing shifting past zero
+        const maxShift = this.amplitudeData.length - this.zoomWindowEndIndex; // don't allowing shifting after end
+
+        shiftXNumSamples = fitToBounds(shiftXNumSamples, minShift, maxShift);
+
         this.shiftZoomWindow(-shiftXNumSamples);
         this.markerIndex -= shiftXNumSamples;
       }
