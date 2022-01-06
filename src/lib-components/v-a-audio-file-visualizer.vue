@@ -16,6 +16,14 @@
   <p>markerIndex: {{ markerIndex }}</p>
   <p>markerPosition: {{ markerPosition }}</p>
   <p>graphWidth: {{ graphWidth }}</p>
+  <p>
+    binSize:
+    {{ Math.max(Math.floor(zoomWindowLength / graphWidth), 1) }}
+  </p>
+  <p>
+    binSize (raw):
+    {{ Math.max(zoomWindowLength / graphWidth, 1) }}
+  </p>
 </template>
 
 <script lang="ts">
@@ -29,6 +37,7 @@ const DEFAULT_ASPECT_RATIO = 3;
 // lower number = better performance when drawing
 // must be >= 1
 const RESOLUTION_SCALER = 4;
+RESOLUTION_SCALER;
 const DRAG_RANGE = 300;
 
 export default defineComponent({
@@ -156,20 +165,27 @@ export default defineComponent({
       startIndex: number,
       endIndex: number
     ): number {
-      let min = Number.MIN_VALUE;
+      let min = Number.MAX_VALUE;
       for (let i = startIndex; i < endIndex; i++) {
         min = Math.min(min, sampleData[i]);
       }
       return min;
     },
-    drawAmplitude() {
+    getAvgSampleValue(
+      sampleData: Float32Array,
+      startIndex: number,
+      endIndex: number
+    ): number {
+      let sum = 0;
+      for (let i = startIndex; i < endIndex; i++) {
+        sum += Math.abs(sampleData[i]);
+      }
+      return sum/(endIndex - startIndex);
+    },
+    drawAmplitudeSamples() {
       // todo: low pass filter to prevent aliasing when down-sampling?
       const binSize = Math.max(
-        Math.round(
-          (this.amplitudeData.length * this.zoomMult) /
-            this.graphWidth /
-            RESOLUTION_SCALER
-        ),
+        Math.ceil(this.zoomWindowLength / this.graphWidth),
         1
       );
       const pointDistance =
@@ -214,6 +230,117 @@ export default defineComponent({
       this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
       this.canvasContext?.stroke();
     },
+    drawAmplitudeAvg() {
+      const binSize = Math.max(
+        Math.floor(this.zoomWindowLength / this.graphWidth),
+        1
+      );
+
+      this.canvasContext?.clearRect(0, 0, this.graphWidth, this.graphHeight);
+      this.canvasContext!.fillStyle = this.backgroundColor;
+      this.canvasContext?.fillRect(0, 0, this.graphWidth, this.graphHeight);
+      this.canvasContext!.strokeStyle = this.lineColor;
+      this.canvasContext?.beginPath();
+
+      let x = 0;
+      let y = 0;
+      let avg = 0;
+
+      // draw samples within the zoomWindow
+      for (let i = 0; i < this.graphWidth; i++) {
+        x = i;
+
+        avg = this.getAvgSampleValue(
+          this.amplitudeData,
+          this.zoomWindowStartIndex + i * binSize,
+          this.zoomWindowStartIndex + (i + 1) * binSize
+        );
+
+        y =
+          this.graphHeight -
+          (this.graphHeight / 2 + (avg * this.graphHeight) / 2);
+
+        this.canvasContext?.moveTo(x, y);
+
+        y =
+          this.graphHeight -
+          (this.graphHeight / 2 + (-avg * this.graphHeight) / 2);
+
+        this.canvasContext?.lineTo(x, y);
+      }
+
+      this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
+      this.canvasContext?.stroke();
+
+      this.canvasContext?.beginPath();
+      this.canvasContext!.strokeStyle = "red";
+      this.canvasContext?.moveTo(this.markerPosition, 0);
+      this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
+      this.canvasContext?.stroke();
+    },
+    drawAmplitudeMinMax() {
+      const binSize = Math.max(
+        Math.floor(this.zoomWindowLength / this.graphWidth),
+        1
+      );
+
+      this.canvasContext?.clearRect(0, 0, this.graphWidth, this.graphHeight);
+      this.canvasContext!.fillStyle = this.backgroundColor;
+      this.canvasContext?.fillRect(0, 0, this.graphWidth, this.graphHeight);
+      this.canvasContext!.strokeStyle = this.lineColor;
+      this.canvasContext?.beginPath();
+
+      let x = 0;
+      let y = 0;
+      let min = 0;
+      let max = 0;
+
+      // draw samples within the zoomWindow
+      for (let i = 0; i < this.graphWidth; i++) {
+        x = i;
+
+        min = this.getMinSampleValue(
+          this.amplitudeData,
+          this.zoomWindowStartIndex + i * binSize,
+          this.zoomWindowStartIndex + (i + 1) * binSize
+        );
+        max = this.getMaxSampleValue(
+          this.amplitudeData,
+          this.zoomWindowStartIndex + i * binSize,
+          this.zoomWindowStartIndex + (i + 1) * binSize
+        );
+
+        y =
+          this.graphHeight -
+          (this.graphHeight / 2 + (min * this.graphHeight) / 2);
+
+        this.canvasContext?.moveTo(x, y);
+
+        y =
+          this.graphHeight -
+          (this.graphHeight / 2 + (max * this.graphHeight) / 2);
+
+        this.canvasContext?.lineTo(x, y);
+      }
+
+      this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
+      this.canvasContext?.stroke();
+
+      this.canvasContext?.beginPath();
+      this.canvasContext!.strokeStyle = "red";
+      this.canvasContext?.moveTo(this.markerPosition, 0);
+      this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
+      this.canvasContext?.stroke();
+    },
+    drawAmplitude() {
+      if (this.zoomWindowLength > this.graphWidth) {
+        // this.drawAmplitudeMinMax();
+        // this.drawAmplitudeSamples();
+        this.drawAmplitudeAvg();
+      } else {
+        this.drawAmplitudeSamples();
+      }
+    },
     onCanvasDoubleClick() {
       this.markerIndex = 0;
       this.markerPosition = 0;
@@ -252,32 +379,29 @@ export default defineComponent({
     onClickDrag(e: MouseEvent) {
       const currY = e.pageY;
       const currX = e.pageX;
-      let shiftXNumSamples = 0;
 
-      // todo: these movements are a bit jerky. find a way to smoothe them out?
-      // find whether the diffX or diffY is greater and commit to moving only in that
-      // direction until that changes
+      const diffX = currX - this.prevX;
+      const diffY = currY - this.prevY;
 
-      if (this.prevX >= 0) {
-        const diffX = currX - this.prevX;
+      if (Math.abs(diffX) >= Math.abs(diffY)) {
+        if (this.prevX >= 0) {
+          let shiftXNumSamples = Math.round(
+            (diffX / this.graphWidth) * this.zoomWindowLength
+          );
 
-        shiftXNumSamples = Math.round(
-          (diffX / this.graphWidth) * this.zoomWindowLength
-        );
+          const minShift = -this.zoomWindowStartIndex; // don't allowing shifting past zero
+          const maxShift = this.amplitudeData.length - this.zoomWindowEndIndex; // don't allowing shifting after end
 
-        const minShift = -this.zoomWindowStartIndex; // don't allowing shifting past zero
-        const maxShift = this.amplitudeData.length - this.zoomWindowEndIndex; // don't allowing shifting after end
+          shiftXNumSamples = fitToBounds(shiftXNumSamples, minShift, maxShift);
 
-        shiftXNumSamples = fitToBounds(shiftXNumSamples, minShift, maxShift);
-
-        this.shiftZoomWindow(-shiftXNumSamples);
-        this.markerIndex -= shiftXNumSamples;
-      }
-
-      if (this.prevY >= 0) {
-        const diffY = currY - this.prevY;
-        this.zoom = fitToBounds(this.zoom - (diffY / DRAG_RANGE) * 1, 0, 1);
-        this.setZoomWindow();
+          this.shiftZoomWindow(-shiftXNumSamples);
+          this.markerIndex -= shiftXNumSamples;
+        }
+      } else {
+        if (this.prevY >= 0) {
+          this.zoom = fitToBounds(this.zoom - (diffY / DRAG_RANGE) * 1, 0, 1);
+          this.setZoomWindow();
+        }
       }
 
       this.markerPosition = Math.round(
