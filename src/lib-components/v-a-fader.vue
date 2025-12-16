@@ -959,13 +959,6 @@
         :transform="`translate(0,${svgFaderPosition})`"
         clip-path="url(#clipPath1362)"
       >
-        <path
-          v-if="showShadow"
-          transform="matrix(.53231 0 0 .99811 356.28 162.03)"
-          d="m649.84 478.85v126.27l31.315-18.94s-35.355-47.982 0-83.338c-27.779-21.466-31.315-23.991-31.315-23.991z"
-          fill="#a1a1a1"
-          filter="url(#filter4165)"
-        />
         <rect
           x="642.36"
           y="637.36"
@@ -1940,11 +1933,6 @@ export default defineComponent({
     default: {
       required: false,
       type: Number,
-    },
-    showShadow: {
-      required: false,
-      type: Boolean,
-      default: false,
     },
   },
   computed: {
