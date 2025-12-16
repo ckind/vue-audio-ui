@@ -1,9 +1,9 @@
 import { ref } from "vue";
 
-const useRendering = () => {
+export function useRendering() {
 	const continueRendering = ref(false);
 
-	const renderLoop = (callback: Function): void => {
+	function renderLoop(callback: Function): void {
 		try {
 			callback();
 		} catch (error) {
@@ -16,17 +16,15 @@ const useRendering = () => {
 		}
 	};
 
-	const startRendering = (callback: Function): void => {
+	function startRendering(callback: Function): void {
 		continueRendering.value = true;
 
 		renderLoop(callback);
 	};
 
-	const stopRendering = (): void => {
+	function stopRendering(): void {
 		continueRendering.value = false;
 	};
 
 	return { startRendering, stopRendering };
 }
-
-export default useRendering;

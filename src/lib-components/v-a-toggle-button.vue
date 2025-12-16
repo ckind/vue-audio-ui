@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, computed } from "vue";
 
 export default defineComponent({
   Name: "VAToggleButton",
@@ -25,23 +25,20 @@ export default defineComponent({
       default: "",
     },
   },
-  data() {
-    return {
-      on: false,
-    };
-  },
-  computed: {
-    cssVars() {
+  setup(props) {
+    const on = ref(false);
+    const cssVars = computed(() => {
       return {
-        '--on-color': `${this.color}`
+        '--on-color': `${props.color}`
       }
+    });
+
+    function onButtonClick() {
+      on.value = !on.value;
     }
-  },
-  methods: {
-    onButtonClick() {
-      this.on = !this.on;
-    },
-  },
+
+    return { on, cssVars, onButtonClick };
+  }
 });
 </script>
 

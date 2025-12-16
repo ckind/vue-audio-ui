@@ -9,8 +9,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import useMetering from "@/composables/metering";
-import useRendering from "@/composables/rendering";
+import { useMetering } from "@/composables/useMetering";
+import { useRendering } from "@/composables/useRendering";
 import { DigitalMeterType } from "@/types/v-audio-ui-types";
 // import { QuadBezierCurvedRange } from "@/util/curved-range"
 import { LogCurvedRange } from "@/util/curved-range"

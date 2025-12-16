@@ -10,39 +10,17 @@
       ref="audioFileViz"
     />
 
-    <!-- <v-a-analog-meter-stereo
-      :width="200"
-      class="ui-component"
-      type="rms"
-      :leftInput="leftGain"
-      :rightInput="rightGain"
-    /> -->
+    <v-a-toggle-button label="mute" />
 
     <br />
 
-    <!-- <v-a-knob v-model="analyzerWidth" :minValue="200" :maxValue="1200" /> -->
-
-    <!-- <v-a-spectrum-analyzer
-      :input="channelOutput"
-      :width="analyzerWidth"
-      gridColor="gray"
-      lineColor="white"
-      backgroundColor="black"
-      borderColor="black"
-    /> -->
-
     <ChannelStrip :input="channelInput" :output="channelOutput" />
-    <!-- <ChannelStrip :input="channelInput" :output="dummyGain" />
-    <ChannelStrip :input="channelInput" :output="dummyGain" />
-    <ChannelStrip :input="channelInput" :output="dummyGain" />
-    <ChannelStrip :input="channelInput" :output="dummyGain" />
-    <ChannelStrip :input="channelInput" :output="dummyGain" /> -->
     <MasterChannel :input="channelOutput" :output="audioCtx.destination" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from "vue";
+import { defineComponent, computed } from "vue";
 import WebAudioHelpers from "./util/web-audio-helpers";
 import ChannelStrip from "./channel-strip.vue";
 import MasterChannel from "./master-channel.vue";
@@ -54,43 +32,43 @@ export default defineComponent({
   components: {
     ChannelStrip,
     MasterChannel,
-    CurveGraph
+    CurveGraph,
   },
   setup() {
-    const ctx = WebAudioHelpers.setupAudioContext();
-    const osc = ctx.createOscillator();
-    const leftGain = ctx.createGain();
-    const rightGain = ctx.createGain();
-    const channelInput = ctx.createGain();
-    const channelOutput = ctx.createGain();
-    const dummyGain = ctx.createGain();
+    const audioCtx = WebAudioHelpers.setupAudioContext();
+    const osc = audioCtx.createOscillator();
+    const leftGain = audioCtx.createGain();
+    const rightGain = audioCtx.createGain();
+    const channelInput = audioCtx.createGain();
+    const channelOutput = audioCtx.createGain();
+    const dummyGain = audioCtx.createGain();
+    const analyzerWidth = 700;
 
-    const state = reactive({
-      leftGain: leftGain,
-      rightGain: rightGain,
-      channelInput: channelInput,
-      channelOutput: channelOutput,
-      audioCtx: ctx,
-      osc: osc,
-      analyzerWidth: 700,
-      dummyGain: dummyGain
+    const trackSrc = computed(() => {
+      // return require("./assets/lost-in-the-fog.wav");
+      return require("./assets/maenads.wav");
+      // return require("./assets/baccata.wav");
+      // return require("./assets/dinky-break.wav");
+      // return require("./assets/kick-1.wav");
     });
 
-    return state;
-  },
-  computed: {
-    trackSrc() {
-      // return require("./lost-in-the-fog.wav");
-      // return require("./maenads.wav");
-      return require("./baccata.wav");
-      // return require("./dinky-break.wav");
-      // return require("./kick-1.wav");
-    },
-    sampleSrc() {
-      // return require("./dinky-break.wav");
-      // return require("./lost-in-the-fog.wav");
-      return require("./kick-1.wav");
-    },
+    const sampleSrc = computed(() => {
+      // return require("./assets/dinky-break.wav");
+      return require("./assets/kick-1.wav");
+    });
+
+    return {
+      leftGain,
+      rightGain,
+      channelInput,
+      channelOutput,
+      audioCtx,
+      osc,
+      analyzerWidth,
+      dummyGain,
+      trackSrc,
+      sampleSrc
+    };
   },
   mounted(): void {
     // const f = 200;
@@ -106,9 +84,8 @@ export default defineComponent({
       .then((buffer) => this.audioCtx.decodeAudioData(buffer))
       .then((buffer) => {
         // todo: sum channels to mono?
-        (
-          this.$refs.audioFileViz as typeof VAAudioFileVisualizer
-        ).loadAudioFromAmplitudeData(buffer.getChannelData(0));
+        (this.$refs.audioFileViz as typeof VAAudioFileVisualizer)
+        .loadAudioFromAmplitudeData(buffer.getChannelData(0));
       });
 
     // get the audio element

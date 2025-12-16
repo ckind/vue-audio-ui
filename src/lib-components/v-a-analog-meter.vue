@@ -32,9 +32,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import useMetering from "@/composables/metering";
-import useRendering from "@/composables/rendering";
+import { defineComponent, PropType, computed, ref, onMounted, onUnmounted } from "vue";
+import { useMetering } from "@/composables/useMetering";
+import { useRendering } from "@/composables/useRendering";
 import { AnalogMeterType } from "@/types/v-audio-ui-types";
 
 export default defineComponent({
@@ -63,51 +63,56 @@ export default defineComponent({
   setup(props) {
     const input = props.input as AudioNode;
 
-    return {
-      ...useMetering(input.context, props.fftSize),
-      ...useRendering(),
-    };
-  },
-  computed: {
-    rotation() {
-      return isNaN(this.value)
+    const {
+      getPeakDb,
+      getRmsDb,
+      getFloatTimeDomainData,
+      analyzer
+    } = useMetering(input.context, props.fftSize);
+
+    const { startRendering, stopRendering } = useRendering();
+
+    const value = ref(-1);
+    const color = ref("black");
+
+    const rotation = computed(() => {
+      return isNaN(value.value)
         ? "rotate(0 100.64 163)"
-        : `rotate(${50 * this.value} 100.64 163)`;
-    },
-  },
-  data() {
+        : `rotate(${50 * value.value} 100.64 163)`;
+    });
+
+    onMounted(() => {
+      startRendering(() => {
+        const dataArray = getFloatTimeDomainData();
+
+        let db = 0;
+
+        if (props.type === "peak") {
+          db = getPeakDb(dataArray);
+        } else if (props.type === "rms") {
+          db = getRmsDb(dataArray);
+        }
+
+        const dbRange = 80;
+        db = db < -dbRange ? -dbRange : db;
+        const mult = (dbRange + db) / dbRange;
+
+        value.value = mult * 2 - 1;
+      });
+    });
+
+    onUnmounted(() => {
+      stopRendering();
+    });
+
+    input.connect(analyzer);
+
     return {
-      value: -1,
-      continueDrawing: false,
-      color: "black",
+      color,
+      rotation,
+      value
     };
-  },
-  created() {
-    this.input.connect(this.analyzer);
-  },
-  mounted() {
-    this.startRendering(this.draw);
-  },
-  methods: {
-    
-    draw(): void {
-      const dataArray = this.getFloatTimeDomainData();
-
-      let db = 0;
-
-      if (this.type === "peak") {
-        db = this.getPeakDb(dataArray);
-      } else if (this.type === "rms") {
-        db = this.getRmsDb(dataArray);
-      }
-
-      const dbRange = 80;
-      db = db < -dbRange ? -dbRange : db;
-      const mult = (dbRange + db) / dbRange;
-
-      this.value = mult * 2 - 1;
-    },
-  },
+  }
 });
 </script>
 

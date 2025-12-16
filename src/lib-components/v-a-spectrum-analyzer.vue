@@ -10,8 +10,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import useMetering from "@/composables/metering";
-import useRendering from "@/composables/rendering";
+import { useMetering } from "@/composables/useMetering";
+import { useRendering } from "@/composables/useRendering";
 
 const HIGH_PASS_CUTOFF = 20;
 const NOISE_FLOOR = -120;

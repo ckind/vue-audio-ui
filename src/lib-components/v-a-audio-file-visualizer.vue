@@ -61,7 +61,7 @@ export default defineComponent({
     lineColor: {
       required: false,
       type: String,
-      default: "pink",
+      default: "white",
     },
     backgroundColor: {
       required: false,
