@@ -12,6 +12,8 @@ const buildPresets = [
   ],
   '@babel/preset-typescript',
 ];
-module.exports = {
-  presets: (process.env.NODE_ENV === 'development' ? devPresets : buildPresets),
+
+export default {
+  presets: process.env.NODE_ENV === 'development' ? devPresets : buildPresets
 };
+
