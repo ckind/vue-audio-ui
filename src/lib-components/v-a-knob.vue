@@ -67,7 +67,7 @@ export default defineComponent({
       dragRange: 70,
       prevY: -1,
       valueCurve: new LinearCurvedRange(props.minValue, props.maxValue),
-      audioParamValue: null as AudioParam | null
+      // audioParamValue: null as AudioParam | null
     };
 
     if (props.modelValue instanceof Number) {
@@ -75,20 +75,20 @@ export default defineComponent({
       state.curvedValue = state.valueCurve.getCurvedValue(props.modelValue as number);
       state.unsteppedValue = state.curvedValue;
     }
-    else if (props.modelValue instanceof AudioParam) {
-      // todo: should we do two way data binding with this? additive patching?
+    // else if (props.modelValue instanceof AudioParam) {
+    //   // todo: should we do two way data binding with this? additive patching?
 
-      // const audioParam = props.modelValue as AudioParam;
+    //   const audioParam = props.modelValue as AudioParam;
 
-      // state.linearValue = props.default
-      //   ? props.default
-      //   : (props.maxValue - props.minValue)/2;
-      // state.curvedValue = state.valueCurve.getCurvedValue(audioParam.value);
-      // state.unsteppedValue = state.curvedValue;
+    //   state.linearValue = props.default
+    //     ? props.default
+    //     : (props.maxValue - props.minValue)/2;
+    //   state.curvedValue = state.valueCurve.getCurvedValue(audioParam.value);
+    //   state.unsteppedValue = state.curvedValue;
 
-      // state.audioParamValue = new AudioParam();
-      // state.audioParamValue.connect(audioParam);
-    }
+    //   state.audioParamValue = new AudioParam();
+    //   state.audioParamValue.connect(audioParam);
+    // }
 
     return reactive(state);
   },
