@@ -115,11 +115,6 @@ export default defineComponent({
       type: Number,
       default: 0,
     },
-    units: {
-      required: false,
-      type: String,
-      default: "",
-    },
     size: {
       required: false,
       type: Number,
