@@ -171,7 +171,7 @@ export default defineComponent({
   props: {
     input: {
       required: true,
-      type: AudioNode,
+      type: Object,
     },
     type: {
       required: false,

@@ -40,11 +40,11 @@ export default defineComponent({
   props: {
     leftInput: {
       required: true,
-      type: AudioNode,
+      type: Object,
     },
     rightInput: {
       required: true,
-      type: AudioNode,
+      type: Object,
     },
     type: {
       required: false,

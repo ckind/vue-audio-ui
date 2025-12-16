@@ -120,7 +120,7 @@ if (!argv.format || argv.format === 'es') {
   buildFormats.push(esConfig);
 }
 
-if (!argv.format || argv.format === 'cjs') {
+if (!argv.format || argv.format === 'ssr') {
   const umdConfig = {
     ...baseConfig,
     external,
