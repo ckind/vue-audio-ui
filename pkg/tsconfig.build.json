@@ -1,0 +1,36 @@
+{
+  // had to create this new tsconfig and tweak it to get vite-plugin-dts to work
+  // see https://github.com/qmhc/unplugin-dts/issues/343#issuecomment-2198111439
+
+  // from the vite-plugin-dts npm README:
+  // Due to some limitations, the plugin relies on the top-level tsconfig.json to
+  // resolve the files to include. Therefore, you need to specify the correct include
+  // property in the top-level tsconfig.json, or you can specify a configuration file
+  // path with the correct include property using the tsconfigPath option of the
+  // plugin. For example, in the Vite initial template, it is tsconfig.app.json.
+  
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": [
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.vue",
+    "index.ts",
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    // for some reason vite-plugin-dts fails if I include this reference
+    // {
+    //   "path": "./tsconfig.app.json"
+    // }
+  ]
+}
