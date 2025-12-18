@@ -87,11 +87,13 @@ export default defineComponent({
     },
     faderDragRange(): number {
       return Math.abs(this.height - this.faderHeadHeight);
+      
     },
     faderHeadTop(): number {
       // set top position prop of fader head based on value of control
       // need to invert so highest value is top: 0
-      return this.faderDragRange - ((this.linearValue * this.maxValue) * this.faderDragRange);
+      const valueRatio = (this.linearValue - this.minValue) / (this.maxValue - this.minValue);
+      return this.faderDragRange - (valueRatio * this.faderDragRange);
     },
     cssVars() {
       return {
@@ -113,13 +115,7 @@ export default defineComponent({
 
       return undefined;
     },
-    onHeadMouseDown(e: MouseEvent | TouchEvent) {
-      e.preventDefault();
-
-      // todo: should access this via comp api instead of using $refs
-      this.faderContainerY = (
-        this.$refs.faderContainer as HTMLElement
-      ).getBoundingClientRect().y;
+    getFaderHeadHeight() {
       const faderHead = this.$refs.faderHead as HTMLElement;
 
       // look for underlying img or svg to get exact height
@@ -127,8 +123,18 @@ export default defineComponent({
       // to match the img or svg height exactly with proper css
       const headImg = this.getContainedImgOrSvg(faderHead);
 
-      this.faderHeadHeight = headImg ? headImg.getBoundingClientRect().height :
+      return headImg ? headImg.getBoundingClientRect().height :
         faderHead.getBoundingClientRect().height;
+    },
+    onHeadMouseDown(e: MouseEvent | TouchEvent) {
+      e.preventDefault();
+
+      // todo: should access this via comp api instead of using $refs
+      this.faderContainerY = (
+        this.$refs.faderContainer as HTMLElement
+      ).getBoundingClientRect().y;
+
+      this.faderHeadHeight = this.getFaderHeadHeight();
 
       document.addEventListener("mousemove", this.onHeadMouseDrag);
       document.addEventListener("touchmove", this.onHeadTouchDrag);
