@@ -4,32 +4,29 @@
     <div class="eq-container">
       <div class="eq-band-container">
         high
-        <v-a-knob class="eq-knob" v-model="highEqGain" :size="50" :minValue="-10" :maxValue="10" />
+        <v-a-knob class="eq-knob" v-model="highEqGain" :size="50" :minValue="-10" :maxValue="10">
+          <img src="@/assets/svg/knob1.svg" alt="My SVG image">
+        </v-a-knob>
       </div>
       <div class="eq-band-container">
         mid
-        <v-a-knob class="eq-knob" v-model="midEqGain" :size="50" :minValue="-20" :maxValue="20" />
+        <v-a-knob class="eq-knob" v-model="midEqGain" :size="50" :minValue="-20" :maxValue="20">
+          <img src="@/assets/svg/knob2.svg" alt="My SVG image" width="50" height="50">
+        </v-a-knob>
       </div>
       <div class="eq-band-container">
         low
-        <v-a-knob class="eq-knob" v-model="lowEqGain" :size="50" :minValue="-20" :maxValue="20" />
+        <v-a-knob class="eq-knob" v-model="lowEqGain" :size="50" :minValue="-20" :maxValue="20">
+          <img src="@/assets/svg/knob3.svg" alt="My SVG image" width="50" height="50">
+        </v-a-knob>
       </div>
     </div>
 
     <br />
 
     <div class="volume-container">
-      <v-a-fader
-        v-model="faderGain"
-        :minValue="0"
-        :maxValue="1"
-      />
-      <v-a-digital-meter
-        class="ui-component"
-        type="peak"
-        :input="postGain"
-        :drawMarkers="true"
-      />
+      <v-a-fader v-model="faderGain" :minValue="0" :maxValue="1" class="fader"></v-a-fader>
+      <v-a-digital-meter class="ui-component" type="peak" :input="postGain" :drawMarkers="true" />
     </div>
 
     <!-- <v-a-toggle-button :label="'mute'" :color="'red'" />
@@ -115,6 +112,11 @@ export default defineComponent({
   border: solid 1px gray;
   padding: 10px 5px;
 }
+
+.fader {
+  display: inline-block;
+}
+
 .eq-band-container {
   display: flex;
   margin: 5px;

@@ -13,7 +13,7 @@ import VASpectrumAnalyzer from './src/lib/v-a-spectrum-analyzer.vue'
 import VAToggleButton from './src/lib/v-a-toggle-button.vue'
 
 const components = {
-  test,
+  // test,
   VAAnalogMeterStereo,
   VAAnalogMeter,
   VAAudioFileVisualizer,
@@ -38,7 +38,7 @@ export default install;
 // To allow individual component use, export components
 // each can be registered via Vue.component()
 export {
-  test,
+  // test,
   VAAnalogMeterStereo,
   VAAnalogMeter,
   VAAudioFileVisualizer,

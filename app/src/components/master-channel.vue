@@ -12,7 +12,7 @@
 
       <br />
 
-      <v-a-fader v-model="faderGainValue" :minValue="0" :maxValue="1" />
+      <v-a-fader v-model="faderGainValue" :minValue="0" :maxValue="1" class="fader"/>
       <v-a-digital-meter-stereo
         class="ui-component"
         type="rms"
@@ -99,5 +99,8 @@ export default defineComponent({
   display: flex;
   margin: 5px;
   justify-content: space-around;
+}
+.fader {
+  display: inline-block;
 }
 </style>
