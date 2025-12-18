@@ -1,9 +1,9 @@
 <template>
-  <div class="control-container" :style="cssVars">
+  <div class="control-container">
     <div class="knob-row">
       <!-- default knob -->
       <span @mousedown="onKnobMouseDown" @touchstart="onKnobMouseDown" @dblclick="onKnobDblClick" class="knob-container"
-        :style="`transform: rotate(${knobRotation}rad);`" :width="size" :height="size">
+        :style="`transform: rotate(${knobRotation}rad); width: ${size}px; height: ${size}px;`">
         <slot>
           <svg :width="size" :height="size" viewBox="0 0 100 100">
             <g>
@@ -106,21 +106,6 @@ export default defineComponent({
       required: false,
       type: Number
     },
-    topColor: {
-      required: false,
-      type: String,
-      default: "#939598",
-    },
-    baseColor: {
-      required: false,
-      type: String,
-      default: "#4d4d4d",
-    },
-    markColor: {
-      required: false,
-      type: String,
-      default: "#ffffff",
-    },
     // gripColor: {
     //   required: false,
     //   type: String,
@@ -137,13 +122,6 @@ export default defineComponent({
     },
     valueRange(): number {
       return this.maxValue - this.minValue;
-    },
-    cssVars() {
-      return {
-        "--top-color": this.topColor,
-        "--base-color": this.baseColor,
-        "--mark-color": this.markColor,
-      }
     }
   },
   methods: {
@@ -240,21 +218,34 @@ export default defineComponent({
 .knob-container {
   border-radius: 50%;
   line-height: 0px !important;
+  cursor: move;
+}
+.knob-container ::v-deep svg {
+  /* This makes the SVG fill the container */
+  width: 100% !important;
+  height: auto !important; /* Ensures the aspect ratio is preserved */
+  display: block; /* Removes default inline spacing issues */
+}
+.knob-container ::v-deep img {
+  /* This makes the SVG fill the container */
+  width: 100% !important;
+  height: auto !important; /* Ensures the aspect ratio is preserved */
+  display: block; /* Removes default inline spacing issues */
 }
 
 /* default knob styling */
 .st0 {
-  fill: var(--base-color);
+  fill: #4d4d4d;
   /* baseColor */
 }
 
 .st1 {
-  fill: var(--top-color);
+  fill: #939598;
   /* topColor */
 }
 
 .st2 {
-  fill: var(--mark-color);
+  fill: #ffffff;
   /* markColor */
 }
 
