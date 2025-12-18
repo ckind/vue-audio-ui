@@ -1,14 +1,20 @@
 <template>
   <div>
     <div class="example">
-      <div class="fader">
-        <v-a-fader
-          v-model="modelValue"
-          :minValue="minValue"
-          :maxValue="maxValue"
-          :height="height"
-          :default="defaultValue"
-        />
+      <div class="fader-container">
+        <v-a-fader v-model="modelValue" :minValue="minValue" :maxValue="maxValue" :default="defaultValue" class="fader">
+          <template #faderHead>
+            <img src="../public/assets/faderHead_variant.svg" alt="My SVG image">
+          </template>
+        </v-a-fader>
+        <v-a-fader v-model="modelValue" :minValue="minValue" :maxValue="maxValue" :default="defaultValue" class="fader">
+          <template #faderBackground>
+            <img src="../public/assets/faderBackground_variant.svg" alt="My SVG image">
+          </template>
+          <template #faderHead>
+            <img src="../public/assets/faderHead_variant.svg" alt="My SVG image">
+          </template>
+        </v-a-fader>
       </div>
 
       <div class="props">
@@ -33,6 +39,11 @@
         </div>
 
         <div>
+          <label for="height">width: </label>
+          <span id="height" name="height"> {{ width }}</span>
+        </div>
+
+        <div>
           <label for="default">default: </label>
           <span id="default" name="default"> {{ defaultValue }}</span>
         </div>
@@ -50,11 +61,14 @@ import { ref } from "vue";
 import { VAFader } from "@pkg/v-audio-ui";
 
 import PropsTable from "./PropsTable.vue";
+import faderHeadVariant from "@public/assets/faderHead_variant.svg";
+import faderBackgroundVariant from "@public/assets/faderBackground_variant.svg";
 
 const minValue = ref(0);
 const maxValue = ref(100);
 const modelValue = ref(50);
 const height = ref(200);
+const width = ref(46);
 const defaultValue = ref(50);
 const propsToDisplay = ref(VAFader.props);
 
@@ -66,14 +80,22 @@ const propsToDisplay = ref(VAFader.props);
   align-items: center;
   gap: 2em;
 }
-.fader {
+
+.fader-container {
   flex: 0 0 auto;
 }
+
+.fader {
+  display: inline-block;
+  margin: 0.25em;
+}
+
 .props {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
+
 .props input {
   width: 9rem;
 }

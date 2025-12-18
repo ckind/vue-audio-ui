@@ -28,6 +28,7 @@ export default defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props) {
+    // todo: should refactor all these and stop using a combination of composition and options api
     const valueCurve = ref(new LinearCurvedRange(props.minValue, props.maxValue));
     const faderContainerY = ref(0);
     const linearValue = ref(props.modelValue);
@@ -37,6 +38,7 @@ export default defineComponent({
     // const faderBackground = useTemplateRef("fader-background");
     // const faderHead = useTemplateRef("fader-head");
     const faderHeadHeight = ref(0);
+    const resizeObserver = ref<ResizeObserver | undefined>(undefined);
 
     return {
       valueCurve,
@@ -47,7 +49,8 @@ export default defineComponent({
       // faderContainer,
       // faderBackground,
       // faderHead,
-      faderHeadHeight
+      faderHeadHeight,
+      resizeObserver
     };
   },
   props: {
@@ -87,7 +90,6 @@ export default defineComponent({
     },
     faderDragRange(): number {
       return Math.abs(this.height - this.faderHeadHeight);
-      
     },
     faderHeadTop(): number {
       // set top position prop of fader head based on value of control
@@ -102,6 +104,16 @@ export default defineComponent({
         "--fader-head-top": `${this.faderHeadTop}px`
       }
     }
+  },
+  mounted() {
+    this.resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[], observer: ResizeObserver) => {
+      this.faderHeadHeight = this.getFaderHeadHeight();
+    });
+
+    this.resizeObserver.observe(this.$refs.faderHead as HTMLElement);
+  },
+  unmounted() {
+    this.resizeObserver?.disconnect();
   },
   methods: {
     getContainedImgOrSvg(el: HTMLElement) {

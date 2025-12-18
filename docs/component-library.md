@@ -11,7 +11,7 @@ This page documents and demonstrates the available components in v-audio-ui.
 
 ## v-a-fader
 
-Hardware-style fader with customizable assets. Click and drag to adjust value. Double-click to return to default value.
+Hardware-style fader with customizable assets. Click and drag to adjust value. Double-click to return to default value. Use the faderHead and fackBackground slots for custom assets (svg and img tags currently supported). Slot content will automatically be resized to fit the <strong>height</strong> and <strong>width</strong> props. Consider setting <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/preserveAspectRatio" target="blank">preserveAspectRatio</a> to "none" for svg assets.
 
 <VAFaderExample />
 

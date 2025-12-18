@@ -1,0 +1,49 @@
+<svg
+  width="40"
+  height="120"
+  viewBox="0 0 40 120"
+  xmlns="http://www.w3.org/2000/svg"
+  preserveAspectRatio="none"
+>
+  <defs>
+    <!-- Main body gradient -->
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6b0f14" />
+      <stop offset="50%" stop-color="#4d0b0f" />
+      <stop offset="100%" stop-color="#33070a" />
+    </linearGradient>
+
+    <!-- Center highlight -->
+    <linearGradient id="highlightGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8c1b22" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#5a0e13" stop-opacity="0.9" />
+    </linearGradient>
+  </defs>
+
+  <!-- Main fader body -->
+  <rect
+    x="2"
+    y="2"
+    width="36"
+    height="116"
+    rx="6"
+    fill="url(#bodyGrad)"
+    stroke="#1f0406"
+    stroke-width="1"
+  />
+
+  <!-- Subtle side grooves -->
+  <rect x="7" y="6" width="1" height="108" fill="#240507" opacity="0.4" />
+  <rect x="32" y="6" width="1" height="108" fill="#240507" opacity="0.4" />
+
+  <!-- Center highlight bar -->
+  <rect
+    x="18"
+    y="6"
+    width="4"
+    height="108"
+    rx="2"
+    fill="url(#highlightGrad)"
+    opacity="0.85"
+  />
+</svg>
