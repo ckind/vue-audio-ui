@@ -5,26 +5,7 @@
       <span @mousedown="onKnobMouseDown" @touchstart="onKnobMouseDown" @dblclick="onKnobDblClick" class="knob-container"
         :style="`transform: rotate(${knobRotation}rad); width: ${size}px; height: ${size}px;`">
         <slot>
-          <svg :width="size" :height="size" viewBox="0 0 100 100">
-            <g>
-              <g>
-                <circle class="st0" cx="50%" cy="50%" r="50%" />
-                <g transform="translate(-20 -20)">
-                  <g transform="translate(0 -6)">
-                    <path d="M109.4,78.2c-2.3-2.5-4-5.6-4.6-9c-0.7-3.5-0.5-6.9,0.6-10.2c-2.2-4.6-5.3-8.6-9.2-11.9c-3.3,0.2-6.8-0.4-10-2
-                      s-5.8-4-7.7-6.7c-5.1-1-10.2-1.1-15-0.2c-1.9,2.8-4.6,5.1-7.8,6.6s-6.7,2.1-10.1,1.7c-3.8,3.1-7.1,7.1-9.5,11.6
-                      c0.9,3.2,1.1,6.7,0.4,10.2c-0.9,3.5-2.6,6.5-5,8.9c0.1,5.1,1.1,10.1,3.1,14.6c3.1,1.2,5.9,3.2,8.2,6.2c2.2,2.8,3.5,6.2,4,9.4
-                      c4,3,8.4,5.3,13.5,6.7c2.9-1.6,6.3-2.6,9.9-2.6s6.9,1,9.9,2.8c4.8-1.1,9.5-3.3,13.6-6.4c0.6-3.3,1.9-6.5,4.2-9.3
-                      c2.3-2.8,5.2-4.7,8.4-5.9c1-2.2,1.9-4.6,2.5-7.1C109.1,83.4,109.3,80.7,109.4,78.2z" />
-                  </g>
-                  <ellipse class="st1" cx="70.4" cy="70.4" rx="26.7" ry="26.7" />
-                  <g transform="translate(0 -8)">
-                    <path class="st2" d="M71.5,28.5c-0.4,0-0.9,0-1.1,0c-0.3,0-0.9,0-1.1,0v31h2.5v-31H71.5z" />
-                  </g>
-                </g>
-              </g>
-            </g>
-          </svg>
+          <default-knob />
         </slot>
       </span>
     </div>
@@ -34,12 +15,16 @@
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
 import { LinearCurvedRange } from "@/util/curved-range";
+import defaultKnob from "@/lib/components/default-knob.vue";
 import { type PropType } from "vue";
 
 // type CurveType = "linear" | "exp";
 type KnobModelValueType = number | AudioParam;
 
 export default defineComponent({
+  components: {
+    defaultKnob
+  },
   setup(props) {
     const state = {
       curvedValue: 0,
@@ -87,11 +72,6 @@ export default defineComponent({
       required: true,
       type: Number,
     },
-    // curveType: {
-    // 	required: false,
-    // 	type: PropType<CurveType>,
-    // 	default: "linear"
-    // },
     step: {
       required: false,
       type: Number,
@@ -106,11 +86,6 @@ export default defineComponent({
       required: false,
       type: Number
     },
-    // gripColor: {
-    //   required: false,
-    //   type: String,
-    //   default: "black",
-    // },
   },
   computed: {
     knobRotation(): number {
@@ -220,41 +195,23 @@ export default defineComponent({
   line-height: 0px !important;
   cursor: move;
 }
+
 .knob-container ::v-deep svg {
   /* This makes the SVG fill the container */
   width: 100% !important;
-  height: auto !important; /* Ensures the aspect ratio is preserved */
-  display: block; /* Removes default inline spacing issues */
+  height: auto !important;
+  /* Ensures the aspect ratio is preserved */
+  display: block;
+  /* Removes default inline spacing issues */
 }
+
 .knob-container ::v-deep img {
   /* This makes the SVG fill the container */
   width: 100% !important;
-  height: auto !important; /* Ensures the aspect ratio is preserved */
-  display: block; /* Removes default inline spacing issues */
-}
-
-/* default knob styling */
-.st0 {
-  fill: #4d4d4d;
-  /* baseColor */
-}
-
-.st1 {
-  fill: #939598;
-  /* topColor */
-}
-
-.st2 {
-  fill: #ffffff;
-  /* markColor */
-}
-
-.st3 {
-  fill: none;
-  stroke: #ffffff;
-  stroke-width: 1.7417;
-  stroke-linecap: round;
-  stroke-miterlimit: 10;
+  height: auto !important;
+  /* Ensures the aspect ratio is preserved */
+  display: block;
+  /* Removes default inline spacing issues */
 }
 
 .control-container {
