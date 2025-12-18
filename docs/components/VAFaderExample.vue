@@ -3,9 +3,6 @@
     <div class="example">
       <div class="fader-container">
         <v-a-fader v-model="modelValue" :minValue="minValue" :maxValue="maxValue" :default="defaultValue" class="fader">
-          <template #faderHead>
-            <img src="../public/assets/faderHead_variant.svg" alt="My SVG image">
-          </template>
         </v-a-fader>
         <v-a-fader v-model="modelValue" :minValue="minValue" :maxValue="maxValue" :default="defaultValue" class="fader">
           <template #faderBackground>
