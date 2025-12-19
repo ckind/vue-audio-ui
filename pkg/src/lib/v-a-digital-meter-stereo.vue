@@ -101,10 +101,23 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.stereo-meter-container {
+  display: flex;
+  flex-direction: row; /* default, but explicit */
+  align-items: flex-end; /* or center, depending on look */
+  gap: 4px; /* space between meters */
+}
+
 .meter-channel {
+  margin: 0; /* optional, since gap handles spacing */
+}
+
+
+
+/* .meter-channel {
   margin: 2px;
 }
 .stereo-meter-container {
   display: inline-block;
-}
+} */
 </style>
