@@ -41,7 +41,7 @@ Also see discussion on <a href="/web-audio-api-and-ssr">server-side rendering</a
 
 ## v-a-digital-meter-stereo
 
-Stereo version of <a href="/component-library#v-a-digital-meter">v-a-digital-meter</a>.
+Stereo version of <a href="#v-a-digital-meter">v-a-digital-meter</a>.
 
 <VADigitalMeterStereoExample />
 
@@ -57,7 +57,7 @@ VU-style meter. Set the input prop to an <a target="blank" href="https://develop
 
 ## v-a-analog-meter-stereo
 
-Stereo version of <a href="/component-library#v-a-analog-meter">v-a-analog-meter</a>.
+Stereo version of <a href="#v-a-analog-meter">v-a-analog-meter</a>.
 
 <VAAnalogMeterStereoExample />
 
