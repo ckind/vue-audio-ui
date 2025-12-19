@@ -6,10 +6,10 @@
         </v-a-fader>
         <v-a-fader v-model="modelValue" :minValue="minValue" :maxValue="maxValue" :default="defaultValue" class="fader">
           <template #faderBackground>
-            <img src="../public/assets/faderBackground_variant.svg" alt="My SVG image">
+            <img src="/assets/faderBackground_variant.svg" alt="My SVG image">
           </template>
           <template #faderHead>
-            <img src="../public/assets/faderHead_variant.svg" alt="My SVG image">
+            <img src="/assets/faderHead_variant.svg" alt="My SVG image">
           </template>
         </v-a-fader>
       </div>
@@ -58,8 +58,6 @@ import { ref } from "vue";
 import { VAFader } from "@pkg/v-audio-ui";
 
 import PropsTable from "./PropsTable.vue";
-import faderHeadVariant from "@public/assets/faderHead_variant.svg";
-import faderBackgroundVariant from "@public/assets/faderBackground_variant.svg";
 
 const minValue = ref(0);
 const maxValue = ref(100);

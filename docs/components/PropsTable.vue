@@ -6,11 +6,6 @@
         <th>type</th>
         <th>required</th>
         <th>default</th>
-
-            <!-- type?: PropType<T> | true | null;
-    required?: boolean;
-    default?: D | DefaultFactory<D> | null | undefined | object;
-    validator?(value: unknown, props: Data): boolean; -->
       </tr>
     </thead>
     <tbody>
@@ -31,13 +26,8 @@ const props = defineProps({
   propsToDisplay: {
     type: Object,
     required: true
-  }});
-
-onMounted(() => {
-  console.log("PropsTable mounted with props:", props.propsToDisplay);
+  }
 });
-
 </script>
 
 # My Dynamic Table
-
