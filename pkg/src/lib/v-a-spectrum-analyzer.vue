@@ -5,12 +5,12 @@
     ref="analyserCanvas"
     class="analyser-canvas"
     :style="cssVars"
-  ></canvas>
+    ></canvas>
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from "vue";
-import { useMetering } from "@/composables/useMetering";
+import { defineComponent, type PropType, watch } from "vue";
+import { useMetering } from "@/composables/useMeteringSSR";
 import { useRendering } from "@/composables/useRendering";
 
 const HIGH_PASS_CUTOFF = 20;
@@ -30,8 +30,8 @@ export default defineComponent({
   },
   props: {
     input: {
-      required: true,
-      type: Object,
+      required: false,
+      type: AudioNode,
     },
     fftSize: {
       type: Number,
@@ -41,7 +41,7 @@ export default defineComponent({
     fillStyle: {
       type: String as PropType<FillStyleType>,
       required: false,
-      default: "solid"
+      default: "none"
     },
     lineColor: {
       type: String,
@@ -80,10 +80,12 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const input = props.input as AudioNode;
+    const metering = useMetering(props.fftSize, props.input);
+
+    watch(() => props.input, metering.onInputChanged);
 
     return {
-      ...useMetering(input.context, props.fftSize),
+      ...metering,
       ...useRendering(),
     };
   },
@@ -100,14 +102,11 @@ export default defineComponent({
       }
     },
   },
-  created() {
-    this.input.connect(this.analyzer);
-    this.startRendering(this.drawFrequencyDomain);
-  },
   mounted() {
     this.canvasContext = (
       this.$refs.analyserCanvas as HTMLCanvasElement
     ).getContext("2d");
+    this.startRendering(this.drawFrequencyDomain);
   },
   methods: {
     scaleX(
@@ -147,7 +146,13 @@ export default defineComponent({
     drawFrequencyDomain() {
       if (this.canvasContext) {
         const yRange = 0 - NOISE_FLOOR;
-        const nyquist = this.input.context.sampleRate / 2;
+
+        // todo: input won't get assigned until callback in SSR 
+        // assume 48000 sample rate for now until set for now
+        // will snap to actual sample rate as soon as input is set though
+        const nyquist = this.input
+          ? this.input.context.sampleRate / 2
+          : 24000;
 
         const dataArray = this.getFloatFrequencyData();
 
@@ -156,46 +161,48 @@ export default defineComponent({
         this.canvasContext.fillStyle = this.backgroundColor;
         this.canvasContext.fillRect(0, 0, this.graphWidth, this.graphHeight);
 
-        this.canvasContext.beginPath();
+        if (dataArray) {
+          this.canvasContext.beginPath();
 
-        this.canvasContext.lineWidth = 1;
-        this.canvasContext.strokeStyle = this.lineColor;
-        this.canvasContext.fillStyle = this.lineColor;
+          this.canvasContext.lineWidth = 1;
+          this.canvasContext.strokeStyle = this.lineColor;
+          this.canvasContext.fillStyle = this.lineColor;
 
-        this.canvasContext.moveTo(0, this.graphHeight);
+          this.canvasContext.moveTo(0, this.graphHeight);
 
-        let x = 0;
-        let y =
-          this.graphHeight -
-          ((dataArray[0]! - NOISE_FLOOR) / yRange) * this.graphHeight;
+          let x = 0;
+          let y =
+            this.graphHeight -
+            ((dataArray[0]! - NOISE_FLOOR) / yRange) * this.graphHeight;
 
-        for (let i = 0; i < dataArray.length; i++) {
-          const barHeight =
-            ((dataArray[i]! - NOISE_FLOOR) / yRange) * this.graphHeight;
+          for (let i = 0; i < dataArray.length; i++) {
+            const barHeight =
+              ((dataArray[i]! - NOISE_FLOOR) / yRange) * this.graphHeight;
 
-          const f = i * (nyquist / dataArray.length);
+            const f = i * (nyquist / dataArray.length);
 
-          this.canvasContext.lineTo(x, y);
+            this.canvasContext.lineTo(x, y);
 
-          // only stretch the graph over the 20hz to nyquist range
-          if (f >= HIGH_PASS_CUTOFF) {
-            x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.graphWidth);
-            y = this.graphHeight - barHeight;
+            // only stretch the graph over the 20hz to nyquist range
+            if (f >= HIGH_PASS_CUTOFF) {
+              x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.graphWidth);
+              y = this.graphHeight - barHeight;
 
-            if (this.fillStyle === "lines") {
-              const barWidth = 1;
-              this.canvasContext.fillRect(x, y, barWidth, barHeight);
+              if (this.fillStyle === "lines") {
+                const barWidth = 1;
+                this.canvasContext.fillRect(x, y, barWidth, barHeight);
+              }
             }
+
+            this.canvasContext.lineTo(x, y);
           }
 
-          this.canvasContext.lineTo(x, y);
+          this.canvasContext.lineTo(this.graphWidth, this.graphHeight);
+          this.canvasContext.closePath();
+          this.canvasContext.stroke();
+
+          if (this.fillStyle === "solid") this.canvasContext.fill();
         }
-
-        this.canvasContext.lineTo(this.graphWidth, this.graphHeight);
-        this.canvasContext.closePath();
-        this.canvasContext.stroke();
-
-        if (this.fillStyle === "solid") this.canvasContext.fill();
 
         this.drawDbMarkers();
         this.drawFrequencyMarkers(nyquist);

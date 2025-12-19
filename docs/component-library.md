@@ -6,6 +6,7 @@ import VADigitalMeterExample from './components/VADigitalMeterExample.vue';
 import VADigitalMeterStereoExample from './components/VADigitalMeterStereoExample.vue';
 import VAAnalogMeterExample from './components/VAAnalogMeterExample.vue';
 import VAAnalogMeterStereoExample from './components/VAAnalogMeterStereoExample.vue';
+import VASpectrumAnalyzerExample from './components/VASpectrumAnalyzerExample.vue';
 </script>
 
 # Available Components
@@ -287,4 +288,16 @@ onMounted(() => {
 });
 
 </script>
+```
+
+## v-a-spectrum-analyzer
+
+A spectrum analyzer for visualizing real time frequency-domain data.
+
+<VASpectrumAnalyzerExample />
+
+**Usage**
+
+```vue
+todo
 ```
