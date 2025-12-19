@@ -68,7 +68,7 @@
 
 <script setup>
 import { ref, defineProps } from "vue";
-import { VAKnob } from "@pkg/vue-audio-ui";
+import { VAKnob } from "vue-audio-ui";
 
 import PropsTable from "./PropsTable.vue";
 

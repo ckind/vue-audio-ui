@@ -3,7 +3,8 @@
   "scripts": {
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "docs:preview": "vitepress preview",
+    "link-package": "npm link ../_publish_local/package"
   },
   "dependencies": {
     "vitepress": "^1.6.4"

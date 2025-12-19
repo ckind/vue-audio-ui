@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, useTemplateRef } from "vue";
-import { VAAnalogMeterStereo } from "@pkg/vue-audio-ui";
+import { VAAnalogMeterStereo } from "vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
 import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
 

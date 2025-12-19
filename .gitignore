@@ -14,6 +14,7 @@ dist-ssr
 coverage
 *.local
 vue-audio-ui-*.tgz
+_publish_local
 
 # Editor directories and files
 .vscode/*

@@ -1,6 +1,6 @@
 import DefaultTheme from 'vitepress/theme'
-import '@pkg/vue-audio-ui.css'
-import VAudioUI from '@pkg/vue-audio-ui'
+import VAudioUI from 'vue-audio-ui'
+import 'vue-audio-ui/style.css'
 
 /** @type {import('vitepress').Theme} */
 export default {

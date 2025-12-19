@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, useTemplateRef } from "vue";
-import { VASpectrumAnalyzer } from "@pkg/vue-audio-ui";
+import { VASpectrumAnalyzer } from "vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
 import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
 

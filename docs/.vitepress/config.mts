@@ -30,11 +30,7 @@ export default defineConfig({
   },
   vite: {
     resolve: {
-      alias: {
-        // Alias '@pkg' to dist path of vue-audio-ui pkg
-        '@pkg': fileURLToPath(new URL('../../pkg/dist', import.meta.url)),
-        '@public': fileURLToPath(new URL('../public', import.meta.url)),
-      }
+      alias: {}
     }
   }
 })
