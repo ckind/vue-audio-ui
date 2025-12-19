@@ -1,4 +1,4 @@
-// const { execSync } = require('child_process');
+// todo: could probably just do this all in node
 import { execSync } from 'child_process';
 
 if (process.platform === 'win32') {

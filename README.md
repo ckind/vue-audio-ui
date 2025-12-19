@@ -88,7 +88,7 @@ npm install
 npm run build
 ```
 
-### Running Docs
+### Running Docs and Demo App
 
 To run the docs:
 
@@ -99,6 +99,17 @@ cd docs
 npm link-package #link docs to local publish, only need to do this once
 npm install
 npm run docs:dev
+```
+
+To run the app:
+
+```bash
+cd app
+npm run publish-local #publishes the package to a local directory for testing
+cd docs
+npm link-package #link docs to local publish, only need to do this once
+npm install
+npm run dev
 ```
 
 ## Contributing
