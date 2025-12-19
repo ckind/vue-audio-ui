@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { defineComponent, type PropType, watch } from "vue";
-import { useMetering } from "@/composables/useMeteringSSR";
+import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
 import { type DigitalMeterType } from "@/types/vue-audio-ui-types";
 import { LogCurvedRange } from "@/util/curved-range"

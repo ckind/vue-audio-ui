@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { defineComponent, type PropType, watch } from "vue";
-import { useMetering } from "@/composables/useMeteringSSR";
+import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
 
 const HIGH_PASS_CUTOFF = 20;

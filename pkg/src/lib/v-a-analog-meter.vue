@@ -134,7 +134,7 @@ import {
   onUnmounted,
   watch
 } from "vue";
-import { useMetering } from "@/composables/useMeteringSSR";
+import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
 import { type AnalogMeterType } from "@/types/vue-audio-ui-types";
 
