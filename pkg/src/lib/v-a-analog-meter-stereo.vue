@@ -25,12 +25,12 @@ export default defineComponent({
   name: "VAAnalogMeterStereo",
   props: {
     leftInput: {
-      required: true,
-      type: Object,
+      required: false,
+      type: AudioNode,
     },
     rightInput: {
-      required: true,
-      type: Object,
+      required: false,
+      type: AudioNode,
     },
     type: {
       required: false,
@@ -52,10 +52,14 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.meter-channel {
-  margin: 2px;
-}
 .stereo-meter-container {
-  display: block;
+  display: flex;
+  flex-direction: row; /* default, but explicit */
+  align-items: flex-end; /* or center, depending on look */
+  gap: 4px; /* space between meters */
+}
+
+.meter-channel {
+  margin: 0; /* optional, since gap handles spacing */
 }
 </style>

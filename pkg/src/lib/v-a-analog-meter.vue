@@ -132,6 +132,7 @@ import {
   ref,
   onMounted,
   onUnmounted,
+  watch
 } from "vue";
 import { useMetering } from "@/composables/useMeteringSSR";
 import { useRendering } from "@/composables/useRendering";
@@ -141,8 +142,9 @@ export default defineComponent({
   name: "VAAnalogMeter",
   props: {
     input: {
-      required: true,
-      type: Object,
+      required: false,
+      type: AudioNode,
+      default: undefined
     },
     type: {
       required: false,
@@ -161,10 +163,10 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const input = props.input as AudioNode;
+    const { getPeakDb, getRmsDb, getFloatTimeDomainData, onInputChanged } =
+      useMetering(props.fftSize, props.input);
 
-    const { getPeakDb, getRmsDb, getFloatTimeDomainData } =
-      useMetering(props.fftSize, input);
+    watch(() => props.input, onInputChanged);
 
     const { startRendering, stopRendering } = useRendering();
 

@@ -4,6 +4,8 @@ import VAFaderExample from './components/VAFaderExample.vue';
 import VAKnobExample from './components/VAKnobExample.vue';
 import VADigitalMeterExample from './components/VADigitalMeterExample.vue';
 import VADigitalMeterStereoExample from './components/VADigitalMeterStereoExample.vue';
+import VAAnalogMeterExample from './components/VAAnalogMeterExample.vue';
+import VAAnalogMeterStereoExample from './components/VAAnalogMeterStereoExample.vue';
 </script>
 
 # Available Components
@@ -129,6 +131,8 @@ onMounted(() => {
 </script>
 ```
 
+Also see discussion on <a href="/web-audio-api-and-ssr">server-side rendering</a>.
+
 ## v-a-digital-meter-stereo
 
 Stereo version of <a href="/component-library#v-a-digital-meter">v-a-digital-meter</a>.
@@ -143,7 +147,7 @@ Stereo version of <a href="/component-library#v-a-digital-meter">v-a-digital-met
     <source src="a-banger.mp3" type="audio/mpeg" />
     Your browser does not support the audio element.
   </audio>
-  <v-a-digital-meter class="ui-component" type="rms" :input="meterInput" :drawMarkers="true" />
+  <v-a-digital-stereo-meter type="rms" :leftInput="leftInput" :rightInput="rightInput" />
 
 </template>
 
@@ -184,4 +188,103 @@ onMounted(() => {
 </script>
 ```
 
-Also see discussion on <a href="/web-audio-api-and-ssr">server-side rendering</a>.
+## v-a-analog-meter
+
+VU-style meter. Set the input prop to an <a target="blank" href="https://developer.mozilla.org/en-US/docs/Web/API/AudioNode">AudioNode</a>.
+
+<VAAnalogMeterExample />
+
+**Usage**
+
+```vue
+<template>
+  <audio controls ref="my-audio">
+    <source src="a-banger.mp3" type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+  <v-a-analog-meter type="rms" :input="meterInput" />
+
+</template>
+
+<script setup>
+import { ref, useTemplateRef, onMounted } from "vue";
+
+const meterInput = ref<AudioNode>();
+const myAudio = useTemplateRef("my-audio");
+let ctx: AudioContext;
+
+onMounted(() => {
+  ctx = new window.AudioContext();
+  document.addEventListener("mousedown", () => {
+    if (ctx.state != "running") {
+      ctx.resume();
+    }
+  });
+
+  // get the audio element
+  const audioElement = myAudio.value as HTMLAudioElement;
+
+  // pass it into the audio context
+  const track = ctx.createMediaElementSource(audioElement);
+  meterInput.value = ctx.createGain();
+  track.connect(meterInput.value);
+  track.connect(ctx.destination);
+});
+
+</script>
+```
+
+## v-a-analog-meter-stereo
+
+Stereo version of <a href="/component-library#v-a-analog-meter">v-a-analog-meter</a>.
+
+<VAAnalogMeterStereoExample />
+
+**Usage**
+
+```vue
+<template>
+  <audio controls ref="my-audio">
+    <source src="a-banger.mp3" type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+  <v-a-analog-meter-stereo type="rms" :leftInput="leftInput" :rightInput="rightInput" />
+
+</template>
+
+<script setup>
+import { ref, useTemplateRef, onMounted } from "vue";
+
+const leftInput = ref<AudioNode>();
+const rightInput = ref<AudioNode>();
+const myAudio = useTemplateRef("my-audio");
+let ctx: AudioContext;
+
+onMounted(() => {
+  ctx = new window.AudioContext();
+  document.addEventListener("mousedown", () => {
+    if (ctx.state != "running") {
+      ctx.resume();
+    }
+  });
+
+  // get the audio element
+  const audioElement = myAudio.value as HTMLAudioElement;
+
+  // pass it into the audio context
+  const track = ctx.createMediaElementSource(audioElement);
+
+  // setup left and right inputs
+  leftInput.value = new GainNode(ctx, { gain: 1 });
+  rightInput.value = new GainNode(ctx, { gain: 1 });
+  const splitter = new ChannelSplitterNode(ctx);
+
+  splitter.connect(leftInput.value, 0);
+  splitter.connect(rightInput.value, 1);
+
+  track.connect(splitter);
+  track.connect(ctx.destination);
+});
+
+</script>
+```
