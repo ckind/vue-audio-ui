@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitepress'
 import { fileURLToPath } from 'node:url'
-import path from 'node:path'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -19,6 +18,7 @@ export default defineConfig({
         items: [
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'Components', link: '/component-library' },
+          { text: 'Web Audio API and SSR', link: '/web-audio-api-and-ssr' },
           { text: 'Contributing', link: '/contributing' }
         ]
       }

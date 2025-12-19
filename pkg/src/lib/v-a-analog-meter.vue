@@ -1,34 +1,5 @@
 <template>
   <div class="meter-container">
-    <!-- <svg
-      :width="`${this.width}px`"
-      version="1.1"
-      viewBox="0 0 88.598 57.562"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <g
-        transform="translate(-56.435 -110.51)"
-        stroke="#000"
-        stroke-linecap="round"
-      >
-        <path
-          d="m100.67 162.95 0.0615-45.323m4.5398 45.537a4.5436 4.5436 0 0 1-4.5525 4.5348 4.5436 4.5436 0 0 1-4.5346-4.5525 4.5436 4.5436 0 0 1 4.5525-4.5347 4.5436 4.5436 0 0 1 4.5347 4.5524z"
-          :fill="color"
-          :stroke="color"
-          stroke-width="1"
-          style="paint-order: fill markers stroke"
-          :transform="rotation"
-        />
-        <path
-          transform="translate(0 0)"
-          d="m56.768 117.96c46.869-16.022 87.933-6e-3 87.933-6e-3"
-          fill="none"
-          :stroke="color"
-          stroke-width="1"
-        />
-      </g>
-    </svg> -->
-
     <svg
       :width="`${width}px`"
       viewBox="0 0 320 220"
@@ -162,7 +133,7 @@ import {
   onMounted,
   onUnmounted,
 } from "vue";
-import { useMetering } from "@/composables/useMetering";
+import { useMetering } from "@/composables/useMeteringSSR";
 import { useRendering } from "@/composables/useRendering";
 import { type AnalogMeterType } from "@/types/v-audio-ui-types";
 
@@ -192,8 +163,8 @@ export default defineComponent({
   setup(props) {
     const input = props.input as AudioNode;
 
-    const { getPeakDb, getRmsDb, getFloatTimeDomainData, analyzer } =
-      useMetering(input.context, props.fftSize);
+    const { getPeakDb, getRmsDb, getFloatTimeDomainData } =
+      useMetering(props.fftSize, input);
 
     const { startRendering, stopRendering } = useRendering();
 
@@ -212,9 +183,9 @@ export default defineComponent({
 
         let db = 0;
 
-        if (props.type === "peak") {
+        if (props.type === "peak" && dataArray) {
           db = getPeakDb(dataArray);
-        } else if (props.type === "rms") {
+        } else if (props.type === "rms" && dataArray) {
           db = getRmsDb(dataArray);
         }
 
@@ -229,8 +200,6 @@ export default defineComponent({
     onUnmounted(() => {
       stopRendering();
     });
-
-    input.connect(analyzer);
 
     return {
       color,

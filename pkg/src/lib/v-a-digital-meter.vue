@@ -8,8 +8,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from "vue";
-import { useMetering } from "@/composables/useMetering";
+import { defineComponent, type PropType, watch } from "vue";
+import { useMetering } from "@/composables/useMeteringSSR";
 import { useRendering } from "@/composables/useRendering";
 import { type DigitalMeterType } from "@/types/v-audio-ui-types";
 import { LogCurvedRange } from "@/util/curved-range"
@@ -22,8 +22,9 @@ export default defineComponent({
   name: "VADigitalMeter",
   props: {
     input: {
-      required: true,
-      type: Object,
+      required: false,
+      type: AudioNode,
+      default: undefined
     },
     type: {
       required: false,
@@ -82,11 +83,13 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const input = props.input as AudioNode;
+    const metering = useMetering(props.fftSize, props.input);
+
+    watch(() => props.input, metering.onInputChanged);
 
     return {
-      ...useMetering(input.context, props.fftSize),
-      ...useRendering(),
+      ...metering,
+      ...useRendering()
     };
   },
   data() {
@@ -94,12 +97,8 @@ export default defineComponent({
       canvasCxt: null as CanvasRenderingContext2D | null,
     };
   },
-  created() {
-    this.input.connect(this.analyzer);
-  },
   mounted() {
     const canvas = this.$refs.meterCanvas as HTMLCanvasElement;
-
     this.canvasCxt = canvas.getContext("2d");
     this.startRendering(this.draw);
   },
@@ -118,11 +117,11 @@ export default defineComponent({
       if (this.canvasCxt) {
         const dataArray = this.getFloatTimeDomainData();
 
-        let db = 0;
+        let db = -DB_RANGE;
 
-        if (this.type === "peak") {
+        if (this.type === "peak" && dataArray) {
           db = this.getPeakDb(dataArray);
-        } else if (this.type === "rms") {
+        } else if (this.type === "rms" && dataArray) {
           db = this.getRmsDb(dataArray);
         }
 
