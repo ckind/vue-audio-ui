@@ -1,23 +1,14 @@
 <template>
   <div>
     <audio controls ref="my-audio">
-      <source src="/audio/brink.mp3" type="audio/mpeg" />
+      <source src="/audio/waterbug.mp3" type="audio/mpeg" />
       Your browser does not support the audio element.
     </audio>
 
     <br />
 
     <div class="example">
-      <v-a-spectrum-analyzer
-        :input="analyzerInput"
-        :width="500"
-        :fftSize="4096"
-        gridColor="gray"
-        backgroundColor="black"
-        borderColor="black"
-        fillStyle="none"
-      />
-
+      <v-a-oscilloscope :input="analyzerInput" :fftSize="2048" />
     </div>
 
     <p><strong>Props</strong></p>
@@ -27,11 +18,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, useTemplateRef } from "vue";
-import { VASpectrumAnalyzer } from "vue-audio-ui";
+import { VAOscilloscope } from "vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
 import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
 
-const propsToDisplay = ref(VASpectrumAnalyzer.props);
+const propsToDisplay = ref(VAOscilloscope.props);
 const analyzerInput = ref<AudioNode>();
 const myAudio = useTemplateRef("my-audio");
 let ctx: AudioContext;

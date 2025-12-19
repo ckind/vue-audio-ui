@@ -1,7 +1,7 @@
 // version of useMetering designed to be SSR compatible
 
 export function useMetering(fftSize: number, input?: AudioNode) {
-  let analyzer: (AnalyserNode | undefined);
+  let analyser: (AnalyserNode | undefined);
   let dataArray: Float32Array<ArrayBuffer>;
 
   // if input is defined and passed in, set up the analyzer right away
@@ -10,11 +10,17 @@ export function useMetering(fftSize: number, input?: AudioNode) {
   }
 
   function setupAnalyzer(node: AudioNode) {
-    analyzer = node.context.createAnalyser();
-    analyzer.fftSize = fftSize;
-    dataArray = new Float32Array(analyzer.frequencyBinCount);
+    analyser = node.context.createAnalyser();
+    analyser.fftSize = fftSize;
+    dataArray = new Float32Array(analyser.frequencyBinCount);
 
-    node.connect(analyzer);
+    node.connect(analyser);
+  }
+
+  function disposeMetering(input?: AudioNode) {
+    if (analyser && input) {
+      input.disconnect(analyser);
+    }
   }
 
   // return this function to used to handle changes in the input -
@@ -28,13 +34,13 @@ export function useMetering(fftSize: number, input?: AudioNode) {
   }
 
   function getFloatTimeDomainData(): Float32Array | undefined {
-    analyzer?.getFloatTimeDomainData(dataArray);
+    analyser?.getFloatTimeDomainData(dataArray);
 
     return dataArray;
   }
 
   function getFloatFrequencyData(): Float32Array | undefined {
-    analyzer?.getFloatFrequencyData(dataArray);
+    analyser?.getFloatFrequencyData(dataArray);
 
     return dataArray;
   }
@@ -70,6 +76,7 @@ export function useMetering(fftSize: number, input?: AudioNode) {
     getRmsDb,
     getFloatTimeDomainData,
     getFloatFrequencyData,
-    onInputChanged
+    onInputChanged,
+    disposeMetering
   };
 }

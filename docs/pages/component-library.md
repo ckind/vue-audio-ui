@@ -7,6 +7,7 @@ import VADigitalMeterStereoExample from '../components/VADigitalMeterStereoExamp
 import VAAnalogMeterExample from '../components/VAAnalogMeterExample.vue';
 import VAAnalogMeterStereoExample from '../components/VAAnalogMeterStereoExample.vue';
 import VASpectrumAnalyzerExample from '../components/VASpectrumAnalyzerExample.vue';
+import VAOscilloscopeExample from '../components/VAOscilloscopeExample.vue';
 </script>
 
 # Available Components
@@ -63,10 +64,18 @@ Stereo version of <a href="#v-a-analog-meter">v-a-analog-meter</a>.
 
 <!--@include: ../code-snippets/VAAnalogMeterStereoUsage.md -->
 
+## v-a-oscilloscope
+
+An oscilloscope for visualizing time-domain data. The <a target="blank" href="https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode/fftSize">fftSize</a> prop must be a power of 2 between 2^5 and 2^15. The resulting length of the buffer drawn each frame will be half of the fftSize.
+
+<VAOscilloscopeExample />
+
+<!--@include: ../code-snippets/VAOscilloscopeUsage.md -->
+
 ## v-a-spectrum-analyzer
 
-A spectrum analyzer for visualizing real time frequency-domain data.
-
+A spectrum analyzer for visualizing frequency-domain data. The <a target="blank" href="https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode/fftSize">fftSize</a> prop must be a power of 2 between 2^5 and 2^15. A larger fftSize will result in higher resolution across the spectrum but a less responsive graph. 
 <VASpectrumAnalyzerExample />
 
 <!--@include: ../code-snippets/VASpectrumAnalyzerUsage.md -->
+

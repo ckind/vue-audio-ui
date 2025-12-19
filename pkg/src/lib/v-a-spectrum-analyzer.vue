@@ -12,6 +12,8 @@
 import { defineComponent, type PropType, watch } from "vue";
 import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
+import { isPowerOfTwo } from '@/util/math-helpers';
+import theme from '@/theme.ts';
 
 const HIGH_PASS_CUTOFF = 20;
 const NOISE_FLOOR = -120;
@@ -37,6 +39,19 @@ export default defineComponent({
       type: Number,
       required: false,
       default: 1024,
+      // todo: this breaks types with options api
+      // validator(n: number) {
+      //   return n >= 32 && n <= 32768 && isPowerOfTwo(n);
+      // }
+    },
+    height: {
+      type: Number,
+      required: false
+    },
+    width: {
+      type: Number,
+      required: false,
+      default: 500,
     },
     fillStyle: {
       type: String as PropType<FillStyleType>,
@@ -45,39 +60,35 @@ export default defineComponent({
     },
     lineColor: {
       type: String,
-      required: false,
-      default: "black",
+      required: false
     },
     backgroundColor: {
       type: String,
       required: false,
-      default: "white",
+      default: "black",
     },
     gridColor: {
       type: String,
       required: false,
       default: "gray",
     },
-    borderColor: {
+    dbColor: {
       type: String,
       required: false,
-      default: "black"
+      default: "gray",
     },
-    height: {
-      type: Number,
+    hzColor: {
+      type: String,
       required: false,
-      default: -1,
+      default: "white",
     },
-    width: {
-      type: Number,
-      required: false,
-      default: 1200,
-    },
+
     font: {
       required: false,
       type: String,
       default: "Helvetica, sans-serif",
     },
+
   },
   setup(props) {
     const metering = useMetering(props.fftSize, props.input);
@@ -94,13 +105,13 @@ export default defineComponent({
       return this.width;
     },
     graphHeight(): number {
-      return this.height < 0 ? this.width / DEFAULT_ASPECT_RATIO : this.height;
+      return this.height ? this.height : this.width / DEFAULT_ASPECT_RATIO;
     },
     cssVars() {
       return {
-        "--border-color": `${this.borderColor}`
+        '--border-color': this.backgroundColor
       }
-    },
+    }
   },
   mounted() {
     this.canvasContext = (
@@ -148,7 +159,7 @@ export default defineComponent({
         const yRange = 0 - NOISE_FLOOR;
 
         // todo: input won't get assigned until callback in SSR 
-        // assume 48000 sample rate for now until set for now
+        // assume 48000 sample rate for now until set for now,
         // will snap to actual sample rate as soon as input is set though
         const nyquist = this.input
           ? this.input.context.sampleRate / 2
@@ -165,8 +176,8 @@ export default defineComponent({
           this.canvasContext.beginPath();
 
           this.canvasContext.lineWidth = 1;
-          this.canvasContext.strokeStyle = this.lineColor;
-          this.canvasContext.fillStyle = this.lineColor;
+          this.canvasContext.strokeStyle = this.lineColor ?? theme.primaryColor;
+          this.canvasContext.fillStyle = this.lineColor ?? theme.primaryColor;
 
           this.canvasContext.moveTo(0, this.graphHeight);
 
@@ -221,7 +232,7 @@ export default defineComponent({
           this.graphHeight -
           ((NOISE_FLOOR - db) / NOISE_FLOOR) * this.graphHeight;
 
-        this.canvasContext.strokeStyle = this.gridColor;
+        this.canvasContext.strokeStyle = this.dbColor;
         this.canvasContext.beginPath();
         this.canvasContext.moveTo(0, y);
         this.canvasContext.lineTo(this.graphWidth, y);
@@ -274,7 +285,7 @@ export default defineComponent({
         if (drawLabel) {
           this.canvasContext.font = `14px ${this.font}`;
 
-          this.canvasContext.fillStyle = this.lineColor;
+          this.canvasContext.fillStyle = this.hzColor ?? theme.primaryColor;
           if (f < 1000) {
             this.canvasContext.fillText(`${f}hz`, x, 50);
           } else {

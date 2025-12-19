@@ -1,5 +1,5 @@
 import { type App, type Plugin } from 'vue';
-
+import vueAudioUITheme from './src/theme.ts';
 import test from './src/lib/test.vue'
 
 import VAAnalogMeterStereo from './src/lib/v-a-analog-meter-stereo.vue'
@@ -10,6 +10,7 @@ import VADigitalMeter from './src/lib/v-a-digital-meter.vue'
 import VAFader from './src/lib/v-a-fader.vue'
 import VAKnob from './src/lib/v-a-knob.vue'
 import VASpectrumAnalyzer from './src/lib/v-a-spectrum-analyzer.vue'
+import VAOscilloscope from './src/lib/v-a-oscilloscope.vue'
 import VAToggleButton from './src/lib/v-a-toggle-button.vue'
 
 const components = {
@@ -22,6 +23,7 @@ const components = {
   VAFader,
   VAKnob,
   VASpectrumAnalyzer,
+  VAOscilloscope,
   VAToggleButton,
 };
 
@@ -47,5 +49,8 @@ export {
   VAFader,
   VAKnob,
   VASpectrumAnalyzer,
+  VAOscilloscope,
   VAToggleButton,
+
+  vueAudioUITheme
 };

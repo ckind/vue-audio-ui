@@ -48,4 +48,8 @@ function solveQuadratic(a: number, b: number, c: number): QuadraticResult {
     return { solution1: root1, solution2: root2 };
 }
 
-export { getBaseLog, solveQuadratic, fitToBounds };
+function isPowerOfTwo(n: number) {
+    return (n & (n - 1)) === 0;
+}
+
+export { getBaseLog, solveQuadratic, fitToBounds, isPowerOfTwo };
