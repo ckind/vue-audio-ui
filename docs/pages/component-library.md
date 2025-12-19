@@ -19,7 +19,7 @@ Hardware-style fader with customizable assets. Click and drag to adjust value. D
 
 <VAFaderExample />
 
-<!--@include: ./code-snippets/VAFaderUsage.md -->
+<!--@include: ../code-snippets/VAFaderUsage.md -->
 
 ## v-a-knob
 
@@ -27,7 +27,7 @@ Hardware-style knob with customizable assets. Click and drag to adjust value. Do
 
 <VAKnobExample />
 
-<!--@include: ./code-snippets/VAKnobUsage.md -->
+<!--@include: ../code-snippets/VAKnobUsage.md -->
 
 ## v-a-digital-meter
 
@@ -35,7 +35,7 @@ Simple db meter with peak and rms modes. Set the input prop to an <a target="bla
 
 <VADigitalMeterExample />
 
-<!--@include: ./code-snippets/VADigitalMeterUsage.md -->
+<!--@include: ../code-snippets/VADigitalMeterUsage.md -->
 
 Also see discussion on <a href="/web-audio-api-and-ssr">server-side rendering</a>.
 
@@ -45,7 +45,7 @@ Stereo version of <a href="#v-a-digital-meter">v-a-digital-meter</a>.
 
 <VADigitalMeterStereoExample />
 
-<!--@include: ./code-snippets/VADigitalMeterStereoUsage.md -->
+<!--@include: ../code-snippets/VADigitalMeterStereoUsage.md -->
 
 ## v-a-analog-meter
 
@@ -53,7 +53,7 @@ VU-style meter. Set the input prop to an <a target="blank" href="https://develop
 
 <VAAnalogMeterExample />
 
-<!--@include: ./code-snippets/VAAnalogMeterUsage.md -->
+<!--@include: ../code-snippets/VAAnalogMeterUsage.md -->
 
 ## v-a-analog-meter-stereo
 
@@ -61,7 +61,7 @@ Stereo version of <a href="#v-a-analog-meter">v-a-analog-meter</a>.
 
 <VAAnalogMeterStereoExample />
 
-<!--@include: ./code-snippets/VAAnalogMeterStereoUsage.md -->
+<!--@include: ../code-snippets/VAAnalogMeterStereoUsage.md -->
 
 ## v-a-spectrum-analyzer
 
@@ -69,4 +69,4 @@ A spectrum analyzer for visualizing real time frequency-domain data.
 
 <VASpectrumAnalyzerExample />
 
-<!--@include: ./code-snippets/VASpectrumAnalyzerUsage.md -->
+<!--@include: ../code-snippets/VASpectrumAnalyzerUsage.md -->
