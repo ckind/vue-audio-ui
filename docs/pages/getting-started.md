@@ -2,10 +2,10 @@
 
 ## Installation
 
-Install the v-audio-ui package via npm.
+Install the vue-audio-ui package via npm.
 
 ```
-npm install v-audio-ui
+npm install vue-audio-ui
 ```
 
 Import and install the plugin on your root Vue application.
@@ -13,8 +13,8 @@ Import and install the plugin on your root Vue application.
 ```js{4}
 import { createApp } from 'vue'
 import App from './App.vue'
-import VAudioUI from 'v-audio-ui'
-import 'v-audio-ui.css'
+import VAudioUI from 'vue-audio-ui'
+import 'vue-audio-ui/style.css'
 
 const app = createApp(App);
 
@@ -25,7 +25,7 @@ app.mount('#app');
 Or import components and register manually (you still need to import the css in your main entry file).
 
 ```js{4}
-import { VAFader } from "v-audio-ui";
+import { VAFader } from "vue-audio-ui";
 
 // etc...
 ```

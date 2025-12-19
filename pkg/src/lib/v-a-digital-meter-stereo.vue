@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
-import { type DigitalMeterType } from "@/types/v-audio-ui-types";
+import { type DigitalMeterType } from "@/types/vue-audio-ui-types";
 
 export default defineComponent({
   name: "VADigitalMeterStereo",

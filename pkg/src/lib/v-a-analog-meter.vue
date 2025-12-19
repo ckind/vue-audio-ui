@@ -136,7 +136,7 @@ import {
 } from "vue";
 import { useMetering } from "@/composables/useMeteringSSR";
 import { useRendering } from "@/composables/useRendering";
-import { type AnalogMeterType } from "@/types/v-audio-ui-types";
+import { type AnalogMeterType } from "@/types/vue-audio-ui-types";
 
 export default defineComponent({
   name: "VAAnalogMeter",

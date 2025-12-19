@@ -42,7 +42,7 @@ Import and install the plugin in your Vue application:
 import { createApp } from 'vue'
 import App from './App.vue'
 import VAudioUI from 'vue-audio-ui'
-import 'v-audio-ui/style.css'
+import 'vue-audio-ui/style.css'
 
 const app = createApp(App)
 app.use(VAudioUI)

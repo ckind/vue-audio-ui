@@ -11,7 +11,7 @@
 import { defineComponent, type PropType, watch } from "vue";
 import { useMetering } from "@/composables/useMeteringSSR";
 import { useRendering } from "@/composables/useRendering";
-import { type DigitalMeterType } from "@/types/v-audio-ui-types";
+import { type DigitalMeterType } from "@/types/vue-audio-ui-types";
 import { LogCurvedRange } from "@/util/curved-range"
 import { fitToBounds } from "@/util/math-helpers";
 

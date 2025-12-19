@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import '../../pkg/dist/v-audio-ui.css'
-import VAudioUI from '../../pkg/dist/v-audio-ui'
+import '../../pkg/dist/vue-audio-ui.css'
+import VAudioUI from '../../pkg/dist/vue-audio-ui'
 
 const app = createApp(App);
 

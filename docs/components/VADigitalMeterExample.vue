@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, useTemplateRef } from "vue";
-import { VADigitalMeter } from "@pkg/v-audio-ui";
+import { VADigitalMeter } from "@pkg/vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
 import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
 

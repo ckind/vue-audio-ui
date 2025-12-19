@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "v-audio-ui"
+  name: "vue-audio-ui"
   text: ""
   tagline: An open-source, customizable Vue component library for building modern web audio applications
   actions:

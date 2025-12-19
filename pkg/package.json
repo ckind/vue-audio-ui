@@ -4,16 +4,16 @@
   "description": "audio ui component library for vue.js",
   "type": "module",
   "files": ["dist", "./package.json"],
-  "types": "./dist/v-audio-ui.d.ts",
-  "module": "./dist/v-audio-ui.js",
-  "main": "./dist/v-audio-ui.umd.js",
+  "types": "./dist/vue-audio-ui.d.ts",
+  "module": "./dist/vue-audio-ui.js",
+  "main": "./dist/vue-audio-ui.umd.js",
   "exports": {
     ".": {
-      "types": "./dist/v-audio-ui.d.ts",
-      "import": "./dist/v-audio-ui.js",
-      "require": "./dist/v-audio-ui.umd.js"
+      "types": "./dist/vue-audio-ui.d.ts",
+      "import": "./dist/vue-audio-ui.js",
+      "require": "./dist/vue-audio-ui.umd.js"
     },
-    "./style.css": "./dist/v-audio-ui.css",
+    "./style.css": "./dist/vue-audio-ui.css",
     "./package.json": "./package.json"
   },
   "engines": {

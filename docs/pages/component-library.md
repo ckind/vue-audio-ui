@@ -11,7 +11,7 @@ import VASpectrumAnalyzerExample from '../components/VASpectrumAnalyzerExample.v
 
 # Available Components
 
-This page documents and demonstrates the available components in v-audio-ui.
+This page documents and demonstrates the available components in vue-audio-ui.
 
 ## v-a-fader
 

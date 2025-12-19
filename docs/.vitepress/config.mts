@@ -3,8 +3,8 @@ import { fileURLToPath } from 'node:url'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "v-audio-ui-docs",
-  description: "Official Documentation for v-audio-ui",
+  title: "vue-audio-ui",
+  description: "Official Documentation for vue-audio-ui",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -25,13 +25,13 @@ export default defineConfig({
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/ckind/v-audio-ui' }
+      { icon: 'github', link: 'https://github.com/ckind/vue-audio-ui' }
     ]
   },
   vite: {
     resolve: {
       alias: {
-        // Alias '@pkg' to dist path of v-audio-ui pkg
+        // Alias '@pkg' to dist path of vue-audio-ui pkg
         '@pkg': fileURLToPath(new URL('../../pkg/dist', import.meta.url)),
         '@public': fileURLToPath(new URL('../public', import.meta.url)),
       }

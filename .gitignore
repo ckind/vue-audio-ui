@@ -13,7 +13,7 @@ dist
 dist-ssr
 coverage
 *.local
-v-audio-ui-*.tgz
+vue-audio-ui-*.tgz
 
 # Editor directories and files
 .vscode/*

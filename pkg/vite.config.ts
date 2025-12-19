@@ -13,15 +13,15 @@ export default defineConfig({
       tsconfigPath: "./tsconfig.build.json",
       // todo: better way to specific output name?
       afterBuild: dtsMap => {
-        fs.rename('./dist/index.d.ts', './dist/v-audio-ui.d.ts', () => {});
+        fs.rename('./dist/index.d.ts', './dist/vue-audio-ui.d.ts', () => {});
       }
     })
   ],
   build: {
     lib: {
       entry: "./index.ts",
-      name: "v-audio-ui",
-      fileName: "v-audio-ui",
+      name: "vue-audio-ui",
+      fileName: "vue-audio-ui",
       formats: ["es", "umd", "cjs"],
     },
     rollupOptions: {

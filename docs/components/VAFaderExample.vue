@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { VAFader } from "@pkg/v-audio-ui";
+import { VAFader } from "@pkg/vue-audio-ui";
 
 import PropsTable from "./PropsTable.vue";
 
