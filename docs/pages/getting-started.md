@@ -13,7 +13,8 @@ Import and install the plugin on your root Vue application.
 ```js{4}
 import { createApp } from 'vue'
 import App from './App.vue'
-import VAudioUI from "v-audio-ui"
+import VAudioUI from 'v-audio-ui'
+import 'v-audio-ui.css'
 
 const app = createApp(App);
 
@@ -21,7 +22,7 @@ app.use(VAudioUI);
 app.mount('#app');
 ```
 
-Or import components and register manually.
+Or import components and register manually (you still need to import the css in your main entry file).
 
 ```js{4}
 import { VAFader } from "v-audio-ui";
@@ -51,4 +52,4 @@ const modelValue = ref(0);
 </script>
 ```
 
-See <a href="/component-library">Components</a> for a full list of available components.
+See <a href="/pages/component-library">Components</a> for a full list of available components.
