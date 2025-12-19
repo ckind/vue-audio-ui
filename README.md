@@ -1,11 +1,11 @@
-# v-audio-ui
+# vue-audio-ui
 
-[![npm version](https://badge.fury.io/js/v-audio-ui.svg)](https://badge.fury.io/js/v-audio-ui)
+[![npm version](https://badge.fury.io/js/vue-audio-ui.svg)](https://badge.fury.io/js/vue/vue-audio-ui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A library of rich UI components for web-based audio applications built with Vue 3 and TypeScript.
 
-Sleak, accessible, and audio-focused components — knobs, faders, meters, analyzers and more — designed for DAW-like and pro-audio interfaces.
+Sleek, accessible, and audio-focused components — knobs, faders, meters, analyzers and more — designed for DAW-like and pro-audio interfaces.
 
 ## Features
 
@@ -14,6 +14,7 @@ Sleak, accessible, and audio-focused components — knobs, faders, meters, analy
 - **Accessible**: Built with accessibility in mind for inclusive user experiences
 - **Customizable**: Highly customizable styling and behavior
 - **Lightweight**: Minimal dependencies, optimized for performance
+- **SSR Compatible**: Designed to work with server-side rendering frameworks
 
 ## Components
 
@@ -30,7 +31,7 @@ Sleak, accessible, and audio-focused components — knobs, faders, meters, analy
 ## Installation
 
 ```bash
-npm install v-audio-ui
+npm install vue-audio-ui
 ```
 
 ## Usage
@@ -40,7 +41,8 @@ Import and install the plugin in your Vue application:
 ```javascript
 import { createApp } from 'vue'
 import App from './App.vue'
-import VAudioUI from 'v-audio-ui'
+import VAudioUI from 'vue-audio-ui'
+import 'v-audio-ui/style.css'
 
 const app = createApp(App)
 app.use(VAudioUI)
@@ -50,7 +52,7 @@ app.mount('#app')
 Or import components individually:
 
 ```javascript
-import { VAFader, VAKnob } from 'v-audio-ui'
+import { VAFader, VAKnob } from 'vue-audio-ui'
 ```
 
 ### Example
@@ -65,7 +67,7 @@ import { VAFader, VAKnob } from 'v-audio-ui'
 
 <script setup>
 import { ref } from 'vue'
-import { VAFader, VAKnob } from 'v-audio-ui'
+import { VAFader, VAKnob } from 'vue-audio-ui'
 
 const volume = ref(50)
 const gain = ref(1)
