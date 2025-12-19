@@ -80,22 +80,25 @@ For detailed documentation, examples, and API reference, visit the [docs](./docs
 
 ## Development
 
-### Demo App
-
-To run the demo application:
-
-```bash
-cd app
-npm install
-npm run dev
-```
-
 ### Building the Library
 
 ```bash
 cd pkg
 npm install
 npm run build
+```
+
+### Running Docs
+
+To run the docs:
+
+```bash
+cd pkg
+npm run publish-local #publishes the package to a local directory for testing
+cd docs
+npm link-package #link docs to local publish, only need to do this once
+npm install
+npm run docs:dev
 ```
 
 ## Contributing
