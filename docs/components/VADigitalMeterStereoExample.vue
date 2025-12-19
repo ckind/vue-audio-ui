@@ -3,7 +3,7 @@
     <div class="example">
 
       <audio controls ref="my-audio">
-        <source src="../public/audio/waterbug.mp3" type="audio/mpeg" />
+        <source src="/audio/waterbug.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
       </audio>
 
