@@ -1,33 +1,35 @@
 <template>
-  <div class="stereo-meter-container">
-    <v-a-digital-meter
-      class="meter-channel"
-      :input="leftInput"
-      :fftSize="fftSize"
-      :type="type"
-      :height="height"
-      :width="width"
-      :barColor="barColor"
-      :backgroundColor="backgroundColor"
-      :markerColor="markerColor"
-      :font="font"
-      :clippingColor="clippingColor"
-      :drawMarkers="false"
-    />
-    <v-a-digital-meter
-      class="meter-channel"
-      :input="rightInput"
-      :fftSize="fftSize"
-      :type="type"
-      :height="height"
-      :width="width"
-      :barColor="barColor"
-      :backgroundColor="backgroundColor"
-      :markerColor="markerColor"
-      :font="font"
-      :clippingColor="clippingColor"
-      :drawMarkers="drawMarkers"
-    />
+  <div>
+    <div class="stereo-meter-container">
+      <v-a-digital-meter
+        class="meter-channel"
+        :input="leftInput"
+        :fftSize="fftSize"
+        :type="type"
+        :height="height"
+        :width="width"
+        :barColor="barColor"
+        :backgroundColor="backgroundColor"
+        :markerColor="markerColor"
+        :font="font"
+        :clippingColor="clippingColor"
+        :drawMarkers="false"
+      />
+      <v-a-digital-meter
+        class="meter-channel"
+        :input="rightInput"
+        :fftSize="fftSize"
+        :type="type"
+        :height="height"
+        :width="width"
+        :barColor="barColor"
+        :backgroundColor="backgroundColor"
+        :markerColor="markerColor"
+        :font="font"
+        :clippingColor="clippingColor"
+        :drawMarkers="drawMarkers"
+      />
+    </div>
   </div>
 </template>
 
