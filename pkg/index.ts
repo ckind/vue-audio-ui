@@ -2,7 +2,6 @@ import { type App, type Plugin } from 'vue';
 import vueAudioUITheme from './src/theme.ts';
 import test from './src/lib/test.vue'
 
-import VAAnalogMeterStereo from './src/lib/v-a-analog-meter-stereo.vue'
 import VAAnalogMeter from './src/lib/v-a-analog-meter.vue'
 import VAAudioFileVisualizer from './src/lib/v-a-audio-file-visualizer.vue'
 import VADigitalMeterStereo from './src/lib/v-a-digital-meter-stereo.vue'
@@ -15,7 +14,6 @@ import VAToggleButton from './src/lib/v-a-toggle-button.vue'
 
 const components = {
   // test,
-  VAAnalogMeterStereo,
   VAAnalogMeter,
   VAAudioFileVisualizer,
   VADigitalMeterStereo,
@@ -41,7 +39,6 @@ export default install;
 // each can be registered via Vue.component()
 export {
   // test,
-  VAAnalogMeterStereo,
   VAAnalogMeter,
   VAAudioFileVisualizer,
   VADigitalMeterStereo,

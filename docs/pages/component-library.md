@@ -5,7 +5,6 @@ import VAKnobExample from '../components/VAKnobExample.vue';
 import VADigitalMeterExample from '../components/VADigitalMeterExample.vue';
 import VADigitalMeterStereoExample from '../components/VADigitalMeterStereoExample.vue';
 import VAAnalogMeterExample from '../components/VAAnalogMeterExample.vue';
-import VAAnalogMeterStereoExample from '../components/VAAnalogMeterStereoExample.vue';
 import VASpectrumAnalyzerExample from '../components/VASpectrumAnalyzerExample.vue';
 import VAOscilloscopeExample from '../components/VAOscilloscopeExample.vue';
 </script>
@@ -55,14 +54,6 @@ VU-style meter. Set the input prop to an <a target="blank" href="https://develop
 <VAAnalogMeterExample />
 
 <!--@include: ../code-snippets/VAAnalogMeterUsage.md -->
-
-## v-a-analog-meter-stereo
-
-Stereo version of <a href="#v-a-analog-meter">v-a-analog-meter</a>.
-
-<VAAnalogMeterStereoExample />
-
-<!--@include: ../code-snippets/VAAnalogMeterStereoUsage.md -->
 
 ## v-a-oscilloscope
 
