@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="example">
-      <div class="fader">
+      <div class="knob">
         <v-a-knob
           class="eq-knob"
           v-model="modelValue"
@@ -11,6 +11,20 @@
           :default="defaultValue"
           :step="step"
         />
+      </div>
+
+      <div class="knob">
+        <v-a-knob
+          class="eq-knob"
+          v-model="modelValue"
+          :size="size"
+          :minValue="minValue"
+          :maxValue="maxValue"
+          :default="defaultValue"
+          :step="step"
+        >
+          <img src="/assets/knob1.svg" alt="My SVG image">
+        </v-a-knob>
       </div>
 
       <div class="props">
@@ -73,7 +87,7 @@ const propsToDisplay = ref(VAKnob.props);
   align-items: center;
   gap: 2em;
 }
-.fader {
+.knob {
   flex: 0 0 auto;
 }
 .props {
