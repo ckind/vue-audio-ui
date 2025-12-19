@@ -12,16 +12,16 @@
 
       <br />
 
-      <v-a-fader v-model="faderGainValue" :minValue="0" :maxValue="1" class="fader"/>
+      <v-a-fader v-model="faderGainValue" :minValue="0" :maxValue="1" class="inline-block"/>
       <v-a-digital-meter-stereo
-        class="ui-component"
+        class="ui-component inline-block"
         type="rms"
         :leftInput="leftChannel"
         :rightInput="rightChannel"
         :drawMarkers="true"
       />
 
-      <v-a-analog-meter :input="faderGainNode" :width="300" />
+      <v-a-analog-meter :input="faderGainNode" :width="300" class="inline-block"/>
     </div>
   </div>
 </template>
@@ -100,7 +100,7 @@ export default defineComponent({
   margin: 5px;
   justify-content: space-around;
 }
-.fader {
+.inline-block {
   display: inline-block;
 }
 </style>
