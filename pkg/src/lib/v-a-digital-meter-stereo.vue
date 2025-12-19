@@ -65,8 +65,7 @@ export default defineComponent({
     },
     barColor: {
       required: false,
-      type: String,
-      default: "#4caf50",
+      type: String
     },
     backgroundColor: {
       required: false,

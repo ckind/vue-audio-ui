@@ -14,6 +14,7 @@ import { useRendering } from "@/composables/useRendering";
 import { type DigitalMeterType } from "@/types/vue-audio-ui-types";
 import { LogCurvedRange } from "@/util/curved-range"
 import { fitToBounds } from "@/util/math-helpers";
+import theme from '@/theme.ts';
 
 const DB_RANGE = 90;
 const curve = new LogCurvedRange(0, DB_RANGE, 2);
@@ -44,7 +45,7 @@ export default defineComponent({
     barColor: {
       required: false,
       type: String,
-      default: "#4caf50",
+      // default: "#4caf50",
     },
     backgroundColor: {
       required: false,
@@ -139,7 +140,7 @@ export default defineComponent({
         this.canvasCxt.fillRect(0, 0, this.width, this.height);
         this.canvasCxt.stroke();
 
-        this.canvasCxt.fillStyle = clipping ? this.clippingColor : this.barColor;
+        this.canvasCxt.fillStyle = clipping ? this.clippingColor : (this.barColor ?? theme.primaryColor);
         this.canvasCxt.beginPath();
         this.canvasCxt.fillRect(
           0,
