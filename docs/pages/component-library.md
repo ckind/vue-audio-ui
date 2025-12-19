@@ -1,12 +1,12 @@
 <script setup>
 import { ref } from 'vue';
-import VAFaderExample from './components/VAFaderExample.vue';
-import VAKnobExample from './components/VAKnobExample.vue';
-import VADigitalMeterExample from './components/VADigitalMeterExample.vue';
-import VADigitalMeterStereoExample from './components/VADigitalMeterStereoExample.vue';
-import VAAnalogMeterExample from './components/VAAnalogMeterExample.vue';
-import VAAnalogMeterStereoExample from './components/VAAnalogMeterStereoExample.vue';
-import VASpectrumAnalyzerExample from './components/VASpectrumAnalyzerExample.vue';
+import VAFaderExample from '../components/VAFaderExample.vue';
+import VAKnobExample from '../components/VAKnobExample.vue';
+import VADigitalMeterExample from '../components/VADigitalMeterExample.vue';
+import VADigitalMeterStereoExample from '../components/VADigitalMeterStereoExample.vue';
+import VAAnalogMeterExample from '../components/VAAnalogMeterExample.vue';
+import VAAnalogMeterStereoExample from '../components/VAAnalogMeterStereoExample.vue';
+import VASpectrumAnalyzerExample from '../components/VASpectrumAnalyzerExample.vue';
 </script>
 
 # Available Components

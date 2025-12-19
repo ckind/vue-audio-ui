@@ -9,17 +9,17 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Components', link: '/component-library' }
+      { text: 'Components', link: '/pages/component-library' }
     ],
 
     sidebar: [
       {
         // text: 'Examples',
         items: [
-          { text: 'Getting Started', link: '/getting-started' },
-          { text: 'Components', link: '/component-library' },
-          { text: 'Web Audio API and SSR', link: '/web-audio-api-and-ssr' },
-          { text: 'Contributing', link: '/contributing' }
+          { text: 'Getting Started', link: '/pages/getting-started' },
+          { text: 'Components', link: '/pages/component-library' },
+          { text: 'Web Audio API and SSR', link: '/pages/web-audio-api-and-ssr' },
+          { text: 'Contributing', link: '/pages/contributing' }
         ]
       }
     ],
