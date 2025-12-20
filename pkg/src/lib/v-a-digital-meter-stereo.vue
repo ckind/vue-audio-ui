@@ -69,8 +69,7 @@ export default defineComponent({
     },
     backgroundColor: {
       required: false,
-      type: String,
-      default: "#e0e0e0",
+      type: String
     },
     markerColor: {
       required: false,

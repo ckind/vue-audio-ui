@@ -40,22 +40,18 @@ export default defineComponent({
     clippingColor: {
       required: false,
       type: String,
-      default: "#e64a19",
     },
     barColor: {
       required: false,
       type: String,
-      // default: "#4caf50",
     },
     backgroundColor: {
       required: false,
-      type: String,
-      default: "#e0e0e0",
+      type: String
     },
     markerColor: {
       required: false,
-      type: String,
-      default: "gray",
+      type: String
     },
     drawMarkers: {
       required: false,
@@ -135,12 +131,14 @@ export default defineComponent({
 
         this.canvasCxt.clearRect(0, 0, this.canvasWidth, this.height);
 
-        this.canvasCxt.fillStyle = this.backgroundColor;
+        this.canvasCxt.fillStyle = this.backgroundColor ?? theme.colors.light;
         this.canvasCxt.beginPath();
         this.canvasCxt.fillRect(0, 0, this.width, this.height);
         this.canvasCxt.stroke();
 
-        this.canvasCxt.fillStyle = clipping ? this.clippingColor : (this.barColor ?? theme.colors.primary);
+        this.canvasCxt.fillStyle = clipping
+          ? (this.clippingColor ?? theme.colors.danger)
+          : (this.barColor ?? theme.colors.success);
         this.canvasCxt.beginPath();
         this.canvasCxt.fillRect(
           0,
@@ -169,7 +167,7 @@ export default defineComponent({
       const x = this.width + 4;
 
       this.canvasCxt!.lineWidth = 1;
-      this.canvasCxt!.strokeStyle = this.markerColor;
+      this.canvasCxt!.strokeStyle = this.markerColor ?? theme.colors.muted;
 
       this.canvasCxt?.beginPath();
       this.canvasCxt?.moveTo(x, y);
@@ -177,7 +175,7 @@ export default defineComponent({
       this.canvasCxt?.stroke();
 
       this.canvasCxt!.font = `10px ${this.font}`;
-      this.canvasCxt!.fillStyle = this.markerColor;
+      this.canvasCxt!.fillStyle = this.markerColor ?? theme.colors.muted;
       this.canvasCxt!.fillText(`${Math.abs(db)}`, x + 8, y + 3);
     },
   },
