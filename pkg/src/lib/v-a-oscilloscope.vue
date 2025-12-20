@@ -1,3 +1,13 @@
+<template>
+  <canvas
+    ref="analyserCanvas"
+    :height="height"
+    :width="width"
+    class="analyser-canvas"
+  >
+  </canvas>
+</template>
+
 <script setup lang="ts">
 import { useTemplateRef, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useMetering } from '@/composables/useMetering';
@@ -97,13 +107,3 @@ function drawTimeDomain() {
   canvasContext.stroke();
 }
 </script>
-
-<template>
-  <canvas
-    ref="analyserCanvas"
-    :height="height"
-    :width="width"
-    class="analyser-canvas"
-  >
-  </canvas>
-</template>
