@@ -1,7 +1,7 @@
 <template>
   <canvas
     ref="analyserCanvas"
-    :height="height"
+    :height="graphHeight"
     :width="width"
     class="analyser-canvas"
   >
