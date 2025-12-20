@@ -140,7 +140,7 @@ export default defineComponent({
         this.canvasCxt.fillRect(0, 0, this.width, this.height);
         this.canvasCxt.stroke();
 
-        this.canvasCxt.fillStyle = clipping ? this.clippingColor : (this.barColor ?? theme.primaryColor);
+        this.canvasCxt.fillStyle = clipping ? this.clippingColor : (this.barColor ?? theme.colors.primary);
         this.canvasCxt.beginPath();
         this.canvasCxt.fillRect(
           0,

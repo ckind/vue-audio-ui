@@ -176,8 +176,8 @@ export default defineComponent({
           this.canvasContext.beginPath();
 
           this.canvasContext.lineWidth = 1;
-          this.canvasContext.strokeStyle = this.lineColor ?? theme.primaryColor;
-          this.canvasContext.fillStyle = this.lineColor ?? theme.primaryColor;
+          this.canvasContext.strokeStyle = this.lineColor ?? theme.colors.primary;
+          this.canvasContext.fillStyle = this.lineColor ?? theme.colors.primary;
 
           this.canvasContext.moveTo(0, this.graphHeight);
 
@@ -285,7 +285,7 @@ export default defineComponent({
         if (drawLabel) {
           this.canvasContext.font = `14px ${this.font}`;
 
-          this.canvasContext.fillStyle = this.hzColor ?? theme.primaryColor;
+          this.canvasContext.fillStyle = this.hzColor ?? theme.colors.primary;
           if (f < 1000) {
             this.canvasContext.fillText(`${f}hz`, x, 50);
           } else {

@@ -79,7 +79,7 @@ function drawTimeDomain() {
   if (!dataArray) return;
 
   canvasContext.lineWidth = 2.5;
-  canvasContext.strokeStyle = props.lineColor ?? theme.primaryColor;
+  canvasContext.strokeStyle = props.lineColor ?? theme.colors.primary;
 
   canvasContext.beginPath();
 
