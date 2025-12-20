@@ -23,24 +23,23 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import theme from '@/theme.ts';
-import { round }from '@/util/math-helpers.ts';
+import { round, fitToBounds } from '@/util/math-helpers.ts';
 
 const props = defineProps({
   modelValue: {
     type: Number,
     required: true
   },
-  // todo: implement min/max clamping
-  // minValue: {
-  //   type: Number,
-  //   required: false,
-  //   default: 0
-  // },
-  // maxValue: {
-  //   type: Number,
-  //   required: false,
-  //   default: 99
-  // },
+  minValue: {
+    type: Number,
+    required: false,
+    default: 0
+  },
+  maxValue: {
+    type: Number,
+    required: false,
+    default: 99
+  },
   fixedDecimals: {
     type: Number,
     required: false,
@@ -70,6 +69,9 @@ const cssVars = computed(() => {
     '--numbox-width': props.width ? `${props.width}px` : 'auto'
   };
 });
+const valueRange = computed(() => {
+  return props.maxValue - props.minValue;
+});
 
 function onDoubleClick() {
   emit('update:modelValue', 0);
@@ -82,8 +84,13 @@ function onMouseDown(event: MouseEvent) {
   const startValue = props.modelValue;
 
   function onMouseMove(e: MouseEvent) {
+    const dragRange = window.innerHeight / 2;
     const deltaY = startY - e.clientY;
-    const newValue = startValue + deltaY * 0.1;
+    const newValue = fitToBounds(
+      props.modelValue + (deltaY / dragRange) * (valueRange.value / 2),
+      props.minValue,
+      props.maxValue
+    );
 
     emit('update:modelValue', round(newValue, props.fixedDecimals));
   }
