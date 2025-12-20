@@ -15,6 +15,7 @@
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
 import { LinearCurvedRange } from "@/util/curved-range";
+import { fitToBounds } from "@/util/math-helpers";
 import defaultKnob from "@/lib/components/default-knob.vue";
 import { type PropType } from "vue";
 
@@ -125,24 +126,16 @@ export default defineComponent({
         throw "step is zero or undefined";
       }
       const roundedValue = Math.round(x / this.step) * this.step;
-      return roundedValue < this.minValue
-        ? this.minValue
-        : roundedValue > this.maxValue
-          ? this.maxValue
-          : roundedValue;
+
+      return fitToBounds(roundedValue, this.minValue, this.maxValue);
     },
     onKnobDrag(currY: number) {
       if (this.prevY >= 0) {
         const diffY = this.prevY - currY;
-        let knobValue =
-          this.unsteppedValue +
+        let knobValue = this.unsteppedValue +
           (diffY / this.dragRange) * (this.valueRange / 2);
-        knobValue =
-          knobValue > this.maxValue
-            ? this.maxValue
-            : knobValue < this.minValue
-              ? this.minValue
-              : knobValue;
+        knobValue = fitToBounds(knobValue, this.minValue, this.maxValue);
+
         this.unsteppedValue = knobValue;
         const steppedValue =
           this.step === 0
