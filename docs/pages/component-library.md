@@ -8,11 +8,20 @@ import VAAnalogMeterExample from '../components/VAAnalogMeterExample.vue';
 import VASpectrumAnalyzerExample from '../components/VASpectrumAnalyzerExample.vue';
 import VAOscilloscopeExample from '../components/VAOscilloscopeExample.vue';
 import VAEnvelopeADSRExample from '../components/VAEnvelopeADSRExample.vue';
+import VANumBoxExample from '../components/VANumBoxExample.vue'
 </script>
 
 # Available Components
 
 This page documents and demonstrates the available components in vue-audio-ui.
+
+## v-a-num-box
+
+DAW-style number box. Click and drag to adjust.
+
+<VANumBoxExample />
+
+<!--@include: ../code-snippets/VANumBoxUsage.md -->
 
 ## v-a-fader
 

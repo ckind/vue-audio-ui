@@ -52,4 +52,12 @@ function isPowerOfTwo(n: number) {
     return (n & (n - 1)) === 0;
 }
 
-export { getBaseLog, solveQuadratic, fitToBounds, isPowerOfTwo };
+
+function round(num: number, decimalPlaces: number): number {
+    // Convert number to exponential string to handle large/small numbers
+    const shifted = Math.round(Number(`${num}e${decimalPlaces}`));
+    // Convert back to a number from exponential notation
+    return Number(`${shifted}e${-decimalPlaces}`);
+}
+
+export { getBaseLog, solveQuadratic, fitToBounds, isPowerOfTwo, round };
