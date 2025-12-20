@@ -7,6 +7,7 @@ import VADigitalMeterStereoExample from '../components/VADigitalMeterStereoExamp
 import VAAnalogMeterExample from '../components/VAAnalogMeterExample.vue';
 import VASpectrumAnalyzerExample from '../components/VASpectrumAnalyzerExample.vue';
 import VAOscilloscopeExample from '../components/VAOscilloscopeExample.vue';
+import VAEnvelopeADSRExample from '../components/VAEnvelopeADSRExample.vue';
 </script>
 
 # Available Components
@@ -69,4 +70,21 @@ A spectrum analyzer for visualizing frequency-domain data. The <a target="blank"
 <VASpectrumAnalyzerExample />
 
 <!--@include: ../code-snippets/VASpectrumAnalyzerUsage.md -->
+
+## v-a-envelope-adsr
+
+An adjustable Attack-Decay-Sustain-Release envolope. The modelValue is an AdsrSettings instance. Note that a new object will be emitted on update:modelValue.
+
+```js
+interface AdsrSettings {
+  attack: number;
+  decay: number;
+  sustain: number;
+  release: number;
+}
+```
+
+<VAEnvelopeADSRExample />
+
+<!--@include: ../code-snippets/VAEnvelopeADSRUsage.md -->
 

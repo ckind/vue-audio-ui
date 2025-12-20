@@ -8,7 +8,7 @@
     <br />
 
     <div class="example">
-      <v-a-oscilloscope :input="analyzerInput" :fftSize="2048" />
+      <v-a-oscilloscope :input="analyzerInput" :fftSize="8192" />
     </div>
 
     <p><strong>Props</strong></p>

@@ -11,6 +11,7 @@ import VAKnob from './src/lib/v-a-knob.vue'
 import VASpectrumAnalyzer from './src/lib/v-a-spectrum-analyzer.vue'
 import VAOscilloscope from './src/lib/v-a-oscilloscope.vue'
 import VAToggleButton from './src/lib/v-a-toggle-button.vue'
+import VAEnvelopeAdsr from './src/lib/v-a-envelope-adsr.vue'
 
 const components = {
   // test,
@@ -23,6 +24,7 @@ const components = {
   VASpectrumAnalyzer,
   VAOscilloscope,
   VAToggleButton,
+  VAEnvelopeAdsr
 };
 
 // install function executed by Vue.use()
@@ -48,6 +50,7 @@ export {
   VASpectrumAnalyzer,
   VAOscilloscope,
   VAToggleButton,
+  VAEnvelopeAdsr,
 
   vueAudioUITheme
 };
