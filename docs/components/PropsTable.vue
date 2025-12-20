@@ -11,7 +11,7 @@
     <tbody>
       <tr v-for="(settings, prop) in propsToDisplay" :key="prop">
         <td>{{ prop }}</td>
-        <td>{{ settings.type.name }}</td>
+        <td>{{ settings.type?.name ?? 'any' }}</td>
         <td>{{ settings.required }}</td>
         <td>{{ settings.default ?? '...' }}</td>
       </tr>

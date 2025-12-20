@@ -26,8 +26,8 @@ import theme from '@/theme.ts';
 import { round, fitToBounds } from '@/util/math-helpers.ts';
 
 const props = defineProps({
+  // todo: needs to be a number if no valueList is provided
   modelValue: {
-    type: Number,
     required: true
   },
   minValue: {
@@ -39,6 +39,10 @@ const props = defineProps({
     type: Number,
     required: false,
     default: 99
+  },
+  valueList: {
+    type: Array<any>,
+    required: false
   },
   fixedDecimals: {
     type: Number,
@@ -70,6 +74,10 @@ const cssVars = computed(() => {
   };
 });
 const valueRange = computed(() => {
+  if (props.valueList) {
+    return props.valueList.length - 1;
+  }
+
   return props.maxValue - props.minValue;
 });
 
@@ -86,13 +94,21 @@ function onMouseDown(event: MouseEvent) {
   function onMouseMove(e: MouseEvent) {
     const dragRange = window.innerHeight / 2;
     const deltaY = startY - e.clientY;
-    const newValue = fitToBounds(
-      props.modelValue + (deltaY / dragRange) * (valueRange.value / 2),
-      props.minValue,
-      props.maxValue
-    );
 
-    emit('update:modelValue', round(newValue, props.fixedDecimals));
+    if (props.valueList) {
+      let i = Math.round(
+        props.valueList.indexOf(props.modelValue)
+          + (deltaY / dragRange) * (valueRange.value / 2));
+      i = fitToBounds(i, 0, props.valueList.length - 1);
+      emit('update:modelValue', props.valueList[i]);
+    } else if (typeof props.modelValue === 'number') {
+      const newValue = fitToBounds(
+        props.modelValue + (deltaY / dragRange) * (valueRange.value / 2),
+        props.minValue,
+        props.maxValue
+      );
+      emit('update:modelValue', round(newValue, props.fixedDecimals));
+    }
   }
 
   function onMouseUp() {
