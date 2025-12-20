@@ -1,5 +1,7 @@
 <template>
   <div>
+    <ModMatrixExample />
+
     <div class="example">
       <div class="knob">
         <v-a-num-box v-model="modelValue" :width="60" :minValue="minValue" :maxValue="maxValue" />
@@ -24,16 +26,13 @@
     <p><strong>Props</strong></p>
 
     <PropsTable :propsToDisplay="propsToDisplay" />
-    
-    <!-- <ModMatrixExample /> -->
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { VANumBox } from "vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
-import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
 
 import ModMatrixExample from "./ModMatrixExample.vue";
 

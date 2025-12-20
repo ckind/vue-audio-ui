@@ -1,6 +1,8 @@
 <template>
   <div>
+    <button @click="handleClick">Setup Matrix</button>
     <ModMatrix :sources="sources" :destinations="destinations" />
+    <v-a-oscilloscope :input="scopeInput" :fftSize="32768" />
   </div>
 </template>
 
@@ -13,30 +15,38 @@ import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
 import ModMatrix from "./ModMatrix.vue";
 
 const sources = ref<Array<AudioNode>>([]);
-const destinations = ref<Array<AudioNode>>([]);
+const destinations = ref<Array<AudioParam>>([]);
+const scopeInput = ref<AudioNode>();
 
-onMounted(() => {
-  const ctx = setupAudioContext();
+function handleClick() {
+    const ctx = setupAudioContext();
 
-  sources.value = [null, null, null, null].map((x) => setupLFO(ctx));
-  destinations.value = [null, null, null].map((x) => setupDestinationOscillator(ctx));
-});
+    sources.value = [
+      setupLFO(ctx, 2),
+      // setupLFO(ctx, 4)
+    ];
+    destinations.value = [
+      setupDestinationOscillator(ctx, 220),
+      // setupDestinationOscillator(ctx, 330)
+    ];
+}
 
-function setupLFO(ctx: AudioContext): OscillatorNode {
+function setupLFO(ctx: AudioContext, frequency: number): OscillatorNode {
   const osc = ctx.createOscillator();
-  osc.type = "sine";
-  osc.frequency.value = (Math.random() * 10) + 1;
+  osc.type = "square";
+  osc.frequency.value = frequency;
   osc.start();
+
+  scopeInput.value = osc;
 
   return osc;
 }
 
-function setupDestinationOscillator(ctx: AudioContext): AudioParam {
+function setupDestinationOscillator(ctx: AudioContext, frequency: number): AudioParam {
   const osc = ctx.createOscillator();
   osc.type = "sine";
-  osc.frequency.value = 220 * Math.pow(2, Math.floor(Math.random() * 4));
-  console.log(osc.frequency.value);
-  osc.connect(ctx.destination);
+  osc.frequency.value = frequency;
+  osc.connect(new GainNode(ctx, { gain: 0.5 })).connect(ctx.destination);
   osc.start();
 
   return osc.frequency;

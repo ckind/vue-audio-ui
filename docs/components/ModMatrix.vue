@@ -1,25 +1,31 @@
 <template>
-  <div
-    class="matrix-row"
-    v-for="(source, srcIndex) in sources"
-    :key="`src-${srcIndex}`"
-  >
+  <div>
+    <button @click="disconnectMatrix(sources, destinations)">Disconnect Matrix</button>
     <div
-      class="matrix-cell"
-      v-for="(destination, destIndex) in destinations"
-      :key="`dest-${destIndex}`"
+      class="matrix-row"
+      v-for="(row, srcIndex) in matrix"
+      :key="`src-${srcIndex}`"
     >
-      <!-- Placeholder for gain nodes between source and destination -->
-      <div class="gain-node-placeholder">
-        {{ sources[srcIndex][destIndex] }}
-        <!-- <v-a-num-box :minValue="0" :maxValue="1" v-model="sources[srcIndex][destIndex].gain.value" /> -->
+      <div
+        class="matrix-cell"
+        v-for="(node, destIndex) in row"
+        :key="`dest-${destIndex}`"
+      >
+        
+        <!-- Placeholder for gain nodes between source and destination -->
+        <div class="gain-node-placeholder">
+          <!-- {{ `S${srcIndex} → D${destIndex}` }} -->
+          <input type="number" v-model="matrix[srcIndex][destIndex].gain.value"></input>
+          <!-- {{ matrix[srcIndex][destIndex] }} -->
+          <!-- <v-a-num-box :minValue="0" :maxValue="1" v-model="sources[srcIndex][destIndex].gain.value" /> -->
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from "vue";
+import { onMounted, watch, ref} from "vue";
 import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
 
 const props = defineProps({
@@ -28,33 +34,49 @@ const props = defineProps({
     required: true
   },
   destinations: {
-    type: Array as () => Array<AudioNode>,
+    type: Array as () => Array<AudioParam>,
     required: true
   }
 });
 
-watch(() => props.sources, (newSources) => {
+const matrix = ref<Array<Array<GainNode>>>([]);
+
+watch(() => props.sources, (newSources, oldSources) => {
+  console.log(' Sources changed:', newSources, 're-connecting matrix');
+  disconnectMatrix(oldSources, props.destinations);
   connectMatrix(newSources, props.destinations);
 });
 
-watch(() => props.destinations, (newDestinations) => {
+watch(() => props.destinations, (newDestinations, oldDestinations) => {
+  console.log(' Destinations changed:', newDestinations, 're-connecting matrix');
+  disconnectMatrix(props.sources, oldDestinations);
   connectMatrix(props.sources, newDestinations);
 });
 
-function connectMatrix(sources: Array<AudioNode>, destinations: Array<AudioNode>) {
+function disconnectMatrix(sources: Array<AudioNode>, destinations: Array<AudioParam>) {
+  sources.forEach(source => {
+    const row = matrix.value.shift();
+    row?.forEach(gainNode => {
+      source.disconnect(gainNode);
+      gainNode.disconnect();
+    });
+  });
+  matrix.value = [];
+}
+
+function connectMatrix(sources: Array<AudioNode>, destinations: Array<AudioParam>) {
   // connect sources to destinations
   const ctx = setupAudioContext();
-  const matrix: Array<Array<AudioNode>> = [];
 
   sources.forEach((source) => {
-    const row: Array<AudioNode> = [];
+    const row: Array<GainNode> = [];
     destinations.forEach((destination) => {
-      const gainNode = ctx.createGain(0);
+      const gainNode = new GainNode(ctx, { gain: 0 });
       source.connect(gainNode);
       gainNode.connect(destination);
       row.push(gainNode);
     });
-    matrix.push(row);
+    matrix.value.push(row);
   });
 }
 
