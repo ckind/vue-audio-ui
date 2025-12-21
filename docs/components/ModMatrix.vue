@@ -1,24 +1,25 @@
 <template>
   <div>
-    <button @click="disconnectMatrix(sources, destinations)">Disconnect Matrix</button>
     <div
       class="matrix-row"
       v-for="(row, srcIndex) in matrix"
       :key="`src-${srcIndex}`"
     >
+    <!-- todo: label sources and destinations -->
+    <!-- {{ row[srcIndex].source.name }} -->
       <div
         class="matrix-cell"
-        v-for="(node, destIndex) in row"
+        v-for="(cell, destIndex) in row"
         :key="`dest-${destIndex}`"
       >
-        
-        <!-- Placeholder for gain nodes between source and destination -->
-        <div class="gain-node-placeholder">
-          <!-- {{ `S${srcIndex} → D${destIndex}` }} -->
-          <input type="number" v-model="matrix[srcIndex][destIndex].gain.value"></input>
-          <!-- {{ matrix[srcIndex][destIndex] }} -->
-          <!-- <v-a-num-box :minValue="0" :maxValue="1" v-model="sources[srcIndex][destIndex].gain.value" /> -->
-        </div>
+        <v-a-num-box
+          :minValue="0"
+          :maxValue="1"
+          @update:modelValue="cellModAmountUpdate(cell.modAmountNode, $event)"
+          v-model="cell.modAmountValue"
+          :fixedDecimals="2"
+          :width="60"
+        />
       </div>
     </div>
   </div>
@@ -28,18 +29,42 @@
 import { onMounted, watch, ref} from "vue";
 import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
 
+type DestinationNode = AudioParam | AudioNode;
+
+type ModMatrixCell = { 
+  modAmountValue: number; // dummy value for v-model binding
+  modAmountNode: GainNode;
+  modMaxNode: GainNode;
+  minOffsetNode: ConstantSourceNode;
+  source: ModMatrixSource;
+  destination: ModMatrixDestination
+}
+
+export type ModMatrixSource = {
+  node: AudioNode;
+  name: string;
+};
+export type ModMatrixDestination = {
+  node: DestinationNode;
+  name: string;
+  minValue: number;
+  maxValue: number;
+};
+
 const props = defineProps({
   sources: {
-    type: Array as () => Array<AudioNode>,
+    type: Array as () => Array<ModMatrixSource>,
     required: true
   },
   destinations: {
-    type: Array as () => Array<AudioParam>,
+    type: Array as () => Array<ModMatrixDestination>,
     required: true
   }
 });
 
-const matrix = ref<Array<Array<GainNode>>>([]);
+const audioContext = ref<AudioContext>();
+
+const matrix = ref<Array<Array<ModMatrixCell>>>([]);
 
 watch(() => props.sources, (newSources, oldSources) => {
   console.log(' Sources changed:', newSources, 're-connecting matrix');
@@ -53,28 +78,62 @@ watch(() => props.destinations, (newDestinations, oldDestinations) => {
   connectMatrix(props.sources, newDestinations);
 });
 
-function disconnectMatrix(sources: Array<AudioNode>, destinations: Array<AudioParam>) {
+function cellModAmountUpdate(gainNode: GainNode, gainValue: number) {
+  gainNode.gain.setValueAtTime(gainValue, audioContext.value!.currentTime);
+}
+
+function disconnectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModMatrixDestination>) {
   sources.forEach(source => {
     const row = matrix.value.shift();
-    row?.forEach(gainNode => {
-      source.disconnect(gainNode);
-      gainNode.disconnect();
+    row?.forEach(cell => {
+      source.node.disconnect(cell.modMaxNode);
+      cell.minOffsetNode.stop();
+      cell.minOffsetNode.disconnect();
+      cell.modMaxNode.disconnect();
+      cell.modAmountNode.disconnect();
     });
   });
   matrix.value = [];
 }
 
-function connectMatrix(sources: Array<AudioNode>, destinations: Array<AudioParam>) {
+function connectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModMatrixDestination>) {
   // connect sources to destinations
-  const ctx = setupAudioContext();
+  audioContext.value = setupAudioContext(); // todo: should require context as prop or get from source nodes
+
+  if (!audioContext.value) {
+    return;
+  }
 
   sources.forEach((source) => {
-    const row: Array<GainNode> = [];
+    const row: Array<ModMatrixCell> = [];
     destinations.forEach((destination) => {
-      const gainNode = new GainNode(ctx, { gain: 0 });
-      source.connect(gainNode);
-      gainNode.connect(destination);
-      row.push(gainNode);
+      const valueRange = destination.maxValue - destination.minValue;
+      const modulationRange = valueRange / 2;
+      const minOffsetNode = new ConstantSourceNode(audioContext.value!, { offset: destination.minValue + modulationRange });
+      const modMaxNode = new GainNode(audioContext.value!, { gain: modulationRange });
+      const modAmountNode = new GainNode(audioContext.value!, { gain: destination.minValue});
+
+      minOffsetNode.start();
+
+      if (destination.node instanceof AudioParam) {
+        source.node.connect(modMaxNode).connect(modAmountNode);
+        minOffsetNode.connect(modAmountNode);
+        modAmountNode.connect(destination.node);
+      }
+      else if (destination.node instanceof AudioNode) {
+        source.node.connect(modMaxNode).connect(modAmountNode);
+        minOffsetNode.connect(modAmountNode);
+        modAmountNode.connect(destination.node);
+      }
+
+      row.push({
+        modAmountValue: destination.minValue,
+        modMaxNode,
+        minOffsetNode,
+        modAmountNode,
+        source,
+        destination
+      });
     });
     matrix.value.push(row);
   });
@@ -86,10 +145,12 @@ function connectMatrix(sources: Array<AudioNode>, destinations: Array<AudioParam
 .matrix-row {
   display: flex;
 }
+/*
 .matrix-cell {
   border: 1px solid #ccc;
   padding: 1em;
   flex: 1;
   text-align: center;
 }
+  */
 </style>

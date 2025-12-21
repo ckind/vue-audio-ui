@@ -215,7 +215,7 @@ export default defineComponent({
           if (this.fillStyle === "solid") this.canvasContext.fill();
         }
 
-        this.drawDbMarkers();
+        this.drawDbMarkers(); // todo: is this actually in decibels?
         this.drawFrequencyMarkers(nyquist);
       }
     },
