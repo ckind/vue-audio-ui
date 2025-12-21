@@ -4,10 +4,8 @@
 <template>
   <audio controls ref="my-audio">
     <source src="a-banger.mp3" type="audio/mpeg" />
-    Your browser does not support the audio element.
   </audio>
   <v-a-analog-meter type="rms" :input="meterInput" />
-
 </template>
 
 <script setup>
