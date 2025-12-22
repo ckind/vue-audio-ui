@@ -1,13 +1,14 @@
 <template>
   <div>
+    <p>Here is a simple filtered sawtooth patch with 3 different LFO's for modulation.</p>
     <button class="mute-btn" @click="toggleMute">{{ isMuted ? "Unmute" : "Mute" }}</button>
     <br />
     <v-a-mod-matrix :sources="sources" :destinations="destinations" />
 
     <!-- <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" /> -->
     <!-- <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" /> -->
-    <!-- <v-a-oscilloscope :input="mainOutput" :fftSize="32768" />
-    <v-a-spectrum-analyzer :input="mainOutput" :fftSize="32768" /> -->
+    <!-- <v-a-oscilloscope :input="mainOutput" :fftSize="32768" /> -->
+    <!-- <v-a-spectrum-analyzer :input="mainOutput" :fftSize="32768" /> -->
   </div>
 </template>
 
@@ -21,7 +22,7 @@ const sources = ref<Array<ModMatrixSource>>([]);
 const destinations = ref<Array<ModMatrixDestination>>([]);
 const nodes: Array<AudioNode> = [];
 const mainOutput = ref<GainNode>();
-const isMuted = ref(true);
+const isMuted = ref(false);
 
 const lfo1ScopeInput = ref<AudioNode>();
 const lfo2ScopeInput = ref<AudioNode>();
@@ -37,12 +38,11 @@ onUnmounted(() => {
 function toggleMute() {
   const gain = mainOutput.value!.gain;
   const ctx = mainOutput.value!.context;
-  if (mainOutput.value!.gain.value === 0) {
+  if (isMuted.value) {
     isMuted.value = false;
     gain.cancelScheduledValues(ctx.currentTime);
     gain.setValueAtTime(gain.value, ctx.currentTime);
-    gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.01);
-
+    gain.linearRampToValueAtTime(1, ctx.currentTime + 0.01);
   } else {
     isMuted.value = true;
     gain.cancelScheduledValues(ctx.currentTime);
@@ -53,7 +53,9 @@ function toggleMute() {
 
 function setupMatrix() {
   const ctx = setupAudioContext();
-  mainOutput.value = new GainNode(ctx, { gain: 0 });
+  mainOutput.value = new GainNode(ctx, { gain: isMuted.value ? 0 : 1 });
+  console.log(mainOutput.value.gain.minValue, mainOutput.value.gain.maxValue);
+
   lfo1ScopeInput.value = new GainNode(ctx, { gain: 1 });
   lfo2ScopeInput.value = new GainNode(ctx, { gain: 1 });
 
@@ -98,7 +100,6 @@ function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, sc
 
 function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {
   const osc = ctx.createOscillator();
-  // todo: cleanup on disconnect
   const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20 });
   const amp = new GainNode(ctx, { gain: 0 });
   osc.type = "sawtooth";
@@ -111,7 +112,7 @@ function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<Mo
   nodes.push(amp);
 
   return [
-        // todo: exponential scaling for frequencies
+    // todo: exponential scaling for frequencies
     { node: osc.frequency, minValue: 20, maxValue: 20000, name: "pitch" },
     { node: amp.gain, minValue: 0, maxValue: 1, name: "amp" },
     { node: filter.frequency, minValue: 20, maxValue: 20000, name: "filter" }

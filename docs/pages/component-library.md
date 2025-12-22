@@ -100,6 +100,8 @@ interface AdsrSettings {
 
 ## v-a-mod-matrix
 
+Modification matrix for creating complex patches. Takes in an array sources and destinations patching them all together with a modulation amount adjustable via <a href="#v-a-num-box">v-a-num-box</a>.
+
 <VAModMatrixExample />
 
 <!--@include: ../code-snippets/VAModMatrixUsage.md -->
