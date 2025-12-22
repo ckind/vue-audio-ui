@@ -10,6 +10,7 @@ import VAOscilloscopeExample from '../components/VAOscilloscopeExample.vue';
 import VAEnvelopeADSRExample from '../components/VAEnvelopeADSRExample.vue';
 import VANumBoxExample from '../components/VANumBoxExample.vue'
 import VAModMatrixExample from '../components/VAModMatrixExample.vue';
+import VAPianoExample from '../components/VAPianoExample.vue';
 </script>
 
 # Available Components
@@ -105,3 +106,11 @@ Modification matrix for creating complex patches. Takes in an array sources and 
 <VAModMatrixExample />
 
 <!--@include: ../code-snippets/VAModMatrixUsage.md -->
+
+## v-a-piano
+
+A virtual piano keyboard for triggering musical notes. Click or touch keys to emit events.
+
+<VAPianoExample />
+
+<!--@include: ../code-snippets/VAPianoUsage.md -->
