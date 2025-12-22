@@ -54,7 +54,6 @@ function toggleMute() {
 function setupMatrix() {
   const ctx = setupAudioContext();
   mainOutput.value = new GainNode(ctx, { gain: isMuted.value ? 0 : 1 });
-  console.log(mainOutput.value.gain.minValue, mainOutput.value.gain.maxValue);
 
   lfo1ScopeInput.value = new GainNode(ctx, { gain: 1 });
   lfo2ScopeInput.value = new GainNode(ctx, { gain: 1 });
