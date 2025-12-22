@@ -1,12 +1,27 @@
 <template>
   <div>
+    <!-- Header row for destination names -->
+    <div class="matrix-row header">
+      <div class="matrix-cell source-label"></div>
+      <div
+        class="matrix-cell destination-label"
+        v-for="(dest, destIndex) in destinations"
+        :key="`header-${destIndex}`"
+      >
+        {{ dest.name }}
+      </div>
+    </div>
+    <!-- Matrix rows -->
     <div
       class="matrix-row"
       v-for="(row, srcIndex) in matrix"
       :key="`src-${srcIndex}`"
     >
-    <!-- todo: label sources and destinations -->
-    <!-- {{ row[srcIndex].source.name }} -->
+      <!-- Source label -->
+      <div class="matrix-cell source-label">
+        {{ row[0]?.source.name }}
+      </div>
+      <!-- Matrix cells -->
       <div
         class="matrix-cell"
         v-for="(cell, destIndex) in row"
@@ -107,12 +122,13 @@ function connectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModM
 
   sources.forEach((source) => {
     const row: Array<ModMatrixCell> = [];
+    const defaultModAmount = 0;
     destinations.forEach((destination) => {
       const valueRange = destination.maxValue - destination.minValue;
       const modulationRange = valueRange / 2;
       const minOffsetNode = new ConstantSourceNode(audioContext.value!, { offset: destination.minValue + modulationRange });
       const modMaxNode = new GainNode(audioContext.value!, { gain: modulationRange });
-      const modAmountNode = new GainNode(audioContext.value!, { gain: destination.minValue});
+      const modAmountNode = new GainNode(audioContext.value!, { gain: defaultModAmount });
 
       minOffsetNode.start();
 
@@ -128,7 +144,7 @@ function connectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModM
       }
 
       row.push({
-        modAmountValue: destination.minValue,
+        modAmountValue: defaultModAmount,
         modMaxNode,
         minOffsetNode,
         modAmountNode,
@@ -145,5 +161,25 @@ function connectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModM
 <style scoped>
 .matrix-row {
   display: flex;
+}
+
+.matrix-cell {
+  padding: 4px;
+  width: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.source-label {
+  width: 80px;
+  text-align: right;
+  padding-right: 8px;
+  /* font-weight: bold; */
+}
+
+.destination-label {
+  text-align: center;
+  /* font-weight: bold; */
 }
 </style>

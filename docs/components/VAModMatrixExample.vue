@@ -4,9 +4,9 @@
     <br />
     <v-a-mod-matrix :sources="sources" :destinations="destinations" />
 
-    <!-- <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" />
-    <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" />
-    <v-a-oscilloscope :input="mainOutput" :fftSize="32768" />
+    <!-- <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" /> -->
+    <!-- <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" /> -->
+    <!-- <v-a-oscilloscope :input="mainOutput" :fftSize="32768" />
     <v-a-spectrum-analyzer :input="mainOutput" :fftSize="32768" /> -->
   </div>
 </template>
@@ -19,11 +19,12 @@ import { type ModMatrixSource, type ModMatrixDestination } from "vue-audio-ui";
 
 const sources = ref<Array<ModMatrixSource>>([]);
 const destinations = ref<Array<ModMatrixDestination>>([]);
-const lfo1ScopeInput = ref<AudioNode>();
-const lfo2ScopeInput = ref<AudioNode>();
-const oscillators: Array<OscillatorNode> = [];
+const nodes: Array<AudioNode> = [];
 const mainOutput = ref<GainNode>();
 const isMuted = ref(true);
+
+const lfo1ScopeInput = ref<AudioNode>();
+const lfo2ScopeInput = ref<AudioNode>();
 
 onMounted(() => {
   setupMatrix();
@@ -57,73 +58,64 @@ function setupMatrix() {
   lfo2ScopeInput.value = new GainNode(ctx, { gain: 1 });
 
   sources.value = [
-    setupLFO(ctx, 1.5, "triangle", lfo1ScopeInput.value!),
-    setupLFO(ctx, 20, "sine", lfo2ScopeInput.value)
+    setupLFO(ctx, 1.5, "triangle", lfo1ScopeInput.value!, "LFO 1"),
+    setupLFO(ctx, 20, "sawtooth", lfo2ScopeInput.value, "LFO 2"),
+    setupLFO(ctx, 0.5, "sine", lfo1ScopeInput.value!, "LFO 3"),
   ];
   destinations.value = [
-    // setupFilteredOscillator(ctx, 220),
-    // setupFilteredOscillator(ctx, 330),
-    setupSineWaveSweep(ctx, 440, 0, 1000),
-    setupSineWaveSweep(ctx, 220, 0, 1000),
-    // setupSineWaveSweep(ctx, 330),
+    ...setupFilteredOscillator(ctx, 440)
   ];
 
   mainOutput.value!.connect(ctx.destination);
 }
 
 function disconnectMatrix() {
-  const ctx = setupAudioContext();
-
-  oscillators.forEach(osc => {
-    osc.stop();
-    osc.disconnect();
+  nodes.forEach(node => {
+    if (node instanceof OscillatorNode) {
+      node.stop();
+    }
+    node.disconnect();
   });
 
   sources.value = [];
   destinations.value = [];
 }
 
-function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, scopeInput: AudioNode): ModMatrixSource {
+function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, scopeInput?: AudioNode, name?: string): ModMatrixSource {
   const osc = ctx.createOscillator();
   osc.type = type;
   osc.frequency.value = frequency;
   osc.start();
 
-  osc.connect(scopeInput);
+  nodes.push(osc);
 
-  return { node: osc, name: `LFO ${frequency}Hz` };
+  if (scopeInput) {
+    osc.connect(scopeInput);
+  }
+
+  return { node: osc, name: name ?? `LFO ${frequency}Hz` };
 }
 
-function setupSineWaveSweep(ctx: AudioContext, frequency: number, min: number, max: number): ModMatrixDestination {
-  const osc = ctx.createOscillator();
-
-  const amp = new GainNode(ctx, { gain: 0.2 });
-  osc.type = "sine";
-  osc.frequency.value = frequency;
-  osc.connect(amp).connect(mainOutput.value!);
-  osc.start();
-
-  oscillators.push(osc);
-
-  return { node: osc.frequency, minValue: min, maxValue: max, name: `Sine ${frequency}Hz` };
-}
-
-function setupFilteredOscillator(ctx: AudioContext, frequency: number): ModMatrixDestination {
+function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {
   const osc = ctx.createOscillator();
   // todo: cleanup on disconnect
   const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20 });
-  const amp = new GainNode(ctx, { gain: 0.5 });
+  const amp = new GainNode(ctx, { gain: 0 });
   osc.type = "sawtooth";
   osc.frequency.value = frequency;
   osc.connect(filter).connect(amp).connect(mainOutput.value!);
   osc.start();
 
-  // todo: need figure out to implement this in a way that's compatible with native AudioParam
-  // scale.connect(filter.frequency);
+  nodes.push(osc);
+  nodes.push(filter);
+  nodes.push(amp);
 
-  oscillators.push(osc);
-
-  return { node: filter.frequency, minValue: 20, maxValue: 20000, name: `Filtered Osc ${frequency}Hz` };
+  return [
+        // todo: exponential scaling for frequencies
+    { node: osc.frequency, minValue: 20, maxValue: 20000, name: "pitch" },
+    { node: amp.gain, minValue: 0, maxValue: 1, name: "amp" },
+    { node: filter.frequency, minValue: 20, maxValue: 20000, name: "filter" }
+  ];
 }
 
 </script>
