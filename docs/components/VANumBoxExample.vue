@@ -2,7 +2,7 @@
   <div>
     <div class="example">
       <div class="knob">
-        <v-a-num-box v-model="modelValue" :width="60" :minValue="minValue" :maxValue="maxValue"/>
+        <v-a-num-box v-model="modelValue" :width="60" :minValue="minValue" :maxValue="maxValue" />
       </div>
 
       <div class="props">
@@ -32,7 +32,6 @@ import { ref } from "vue";
 import { VANumBox } from "vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
 
-
 const modelValue = ref(0);
 const minValue = ref(-10);
 const maxValue = ref(10);
@@ -46,14 +45,17 @@ const propsToDisplay = ref(VANumBox.props);
   align-items: center;
   gap: 2em;
 }
+
 .knob {
   flex: 0 0 auto;
 }
+
 .props {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
+
 .props input {
   width: 9rem;
 }

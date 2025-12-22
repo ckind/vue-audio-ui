@@ -71,6 +71,8 @@ function dispose() {
 function drawTimeDomain() {
   let dataArray = metering.getFloatTimeDomainData();
 
+  // console.log(dataArray);
+
   if (!canvasContext) return;
 
   canvasContext.fillStyle = "black";

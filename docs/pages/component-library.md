@@ -9,6 +9,7 @@ import VASpectrumAnalyzerExample from '../components/VASpectrumAnalyzerExample.v
 import VAOscilloscopeExample from '../components/VAOscilloscopeExample.vue';
 import VAEnvelopeADSRExample from '../components/VAEnvelopeADSRExample.vue';
 import VANumBoxExample from '../components/VANumBoxExample.vue'
+import VAModMatrixExample from '../components/VAModMatrixExample.vue';
 </script>
 
 # Available Components
@@ -75,7 +76,7 @@ An oscilloscope for visualizing time-domain data. The <a target="blank" href="ht
 
 ## v-a-spectrum-analyzer
 
-A spectrum analyzer for visualizing frequency-domain data. The <a target="blank" href="https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode/fftSize">fftSize</a> prop must be a power of 2 between 2^5 and 2^15. A larger fftSize will result in higher resolution across the spectrum but a less responsive graph. 
+A spectrum analyzer for visualizing frequency-domain data. The <a target="blank" href="https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode/fftSize">fftSize</a> prop must be a power of 2 between 2^5 and 2^15. A larger fftSize will result in higher resolution across the spectrum but a higher latency in the graph.
 <VASpectrumAnalyzerExample />
 
 <!--@include: ../code-snippets/VASpectrumAnalyzerUsage.md -->
@@ -97,3 +98,8 @@ interface AdsrSettings {
 
 <!--@include: ../code-snippets/VAEnvelopeADSRUsage.md -->
 
+## v-a-mod-matrix
+
+<VAModMatrixExample />
+
+<!--@include: ../code-snippets/VAModMatrixUsage.md -->

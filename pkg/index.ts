@@ -13,6 +13,9 @@ import VAOscilloscope from './src/lib/v-a-oscilloscope.vue'
 import VAToggleButton from './src/lib/v-a-toggle-button.vue'
 import VAEnvelopeAdsr from './src/lib/v-a-envelope-adsr.vue'
 import VANumBox from './src/lib/v-a-num-box.vue'
+import VAModMatrix from './src/lib/v-a-mod-matrix.vue'
+
+import { type ModMatrixSource, type ModMatrixDestination } from './src/lib/v-a-mod-matrix.vue';
 
 const components = {
   // test,
@@ -26,7 +29,8 @@ const components = {
   VAOscilloscope,
   VAToggleButton,
   VAEnvelopeAdsr,
-  VANumBox
+  VANumBox,
+  VAModMatrix
 };
 
 // install function executed by Vue.use()
@@ -54,6 +58,10 @@ export {
   VAToggleButton,
   VAEnvelopeAdsr,
   VANumBox,
+  VAModMatrix,
+
+  ModMatrixSource,
+  ModMatrixDestination,
 
   vueAudioUITheme
 };

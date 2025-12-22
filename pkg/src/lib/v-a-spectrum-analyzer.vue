@@ -159,7 +159,7 @@ export default defineComponent({
         const yRange = 0 - NOISE_FLOOR;
 
         // todo: input won't get assigned until callback in SSR 
-        // assume 48000 sample rate for now until set for now,
+        // assume 48000 sample rate until set for now,
         // will snap to actual sample rate as soon as input is set though
         const nyquist = this.input
           ? this.input.context.sampleRate / 2
@@ -215,7 +215,7 @@ export default defineComponent({
           if (this.fillStyle === "solid") this.canvasContext.fill();
         }
 
-        this.drawDbMarkers();
+        this.drawDbMarkers(); // todo: is this actually in decibels?
         this.drawFrequencyMarkers(nyquist);
       }
     },
