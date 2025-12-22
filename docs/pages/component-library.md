@@ -9,6 +9,7 @@ import VASpectrumAnalyzerExample from '../components/VASpectrumAnalyzerExample.v
 import VAOscilloscopeExample from '../components/VAOscilloscopeExample.vue';
 import VAEnvelopeADSRExample from '../components/VAEnvelopeADSRExample.vue';
 import VANumBoxExample from '../components/VANumBoxExample.vue'
+import VAModMatrixExample from '../components/VAModMatrixExample.vue';
 </script>
 
 # Available Components
@@ -97,3 +98,8 @@ interface AdsrSettings {
 
 <!--@include: ../code-snippets/VAEnvelopeADSRUsage.md -->
 
+## v-a-mod-matrix
+
+<VAModMatrixExample />
+
+<!--@include: ../code-snippets/VAModMatrixUsage.md -->

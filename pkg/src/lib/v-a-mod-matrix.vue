@@ -27,7 +27,6 @@
 
 <script setup lang="ts">
 import { onMounted, watch, ref} from "vue";
-import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
 
 type DestinationNode = AudioParam | AudioNode;
 
@@ -62,7 +61,7 @@ const props = defineProps({
   }
 });
 
-const audioContext = ref<AudioContext>();
+const audioContext = ref<BaseAudioContext>();
 
 const matrix = ref<Array<Array<ModMatrixCell>>>([]);
 
@@ -98,7 +97,9 @@ function disconnectMatrix(sources: Array<ModMatrixSource>, destinations: Array<M
 
 function connectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModMatrixDestination>) {
   // connect sources to destinations
-  audioContext.value = setupAudioContext(); // todo: should require context as prop or get from source nodes
+  if (sources.length > 0) {
+    audioContext.value = sources[0]?.node.context;
+  }
 
   if (!audioContext.value) {
     return;
@@ -145,12 +146,4 @@ function connectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModM
 .matrix-row {
   display: flex;
 }
-/*
-.matrix-cell {
-  border: 1px solid #ccc;
-  padding: 1em;
-  flex: 1;
-  text-align: center;
-}
-  */
 </style>

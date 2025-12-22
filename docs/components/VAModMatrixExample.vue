@@ -3,7 +3,8 @@
     <button @click="setupMatrix">Setup Matrix</button>
     <br />
     <button @click="disconnectMatrix">Disconnect Matrix</button>
-    <ModMatrix :sources="sources" :destinations="destinations" />
+    <v-a-mod-matrix :sources="sources" :destinations="destinations" />
+    <p></p>
     <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" />
     <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" />
     <v-a-oscilloscope :input="scopeInput" :fftSize="32768" />
@@ -12,12 +13,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
-import * as Tone from "tone";
 
-import ModMatrix from "./ModMatrix.vue";
-import { type ModMatrixSource, type ModMatrixDestination } from "./ModMatrix.vue";
+import { type ModMatrixSource, type ModMatrixDestination } from "vue-audio-ui";
 
 const sources = ref<Array<ModMatrixSource>>([]);
 const destinations = ref<Array<ModMatrixDestination>>([]);
@@ -95,7 +94,6 @@ function setupFilteredOscillator(ctx: AudioContext, frequency: number): ModMatri
   osc.connect(filter).connect(amp).connect(ctx.destination);
   osc.start();
 
-  const scale = new Tone.ScaleExp(20, 20000, 2);
   // todo: need figure out to implement this in a way that's compatible with native AudioParam
   // scale.connect(filter.frequency);
 

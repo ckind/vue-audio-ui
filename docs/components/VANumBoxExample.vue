@@ -1,7 +1,5 @@
 <template>
   <div>
-    <ModMatrixExample />
-
     <div class="example">
       <div class="knob">
         <v-a-num-box v-model="modelValue" :width="60" :minValue="minValue" :maxValue="maxValue" />
@@ -33,8 +31,6 @@
 import { ref } from "vue";
 import { VANumBox } from "vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
-
-import ModMatrixExample from "./ModMatrixExample.vue";
 
 const modelValue = ref(0);
 const minValue = ref(-10);
