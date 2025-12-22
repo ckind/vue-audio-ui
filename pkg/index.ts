@@ -60,8 +60,8 @@ export {
   VANumBox,
   VAModMatrix,
 
-  ModMatrixSource,
-  ModMatrixDestination,
+  type ModMatrixSource,
+  type ModMatrixDestination,
 
   vueAudioUITheme
 };
