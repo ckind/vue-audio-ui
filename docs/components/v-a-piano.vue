@@ -34,16 +34,75 @@ export interface IDomPiano {
 }
 
 export default defineComponent({
-  emits: ["keySlideOn", "keySlideOff", "keyMouseDown", "keyMouseUp"],
+  emits: [
+    "keySlideOn",
+    "keySlideOff",
+    "keyMouseDown",
+    "keyMouseUp",
+    "keyboardKeyDown",
+    "keyboardKeyUp"
+  ],
   props: {
     disabled: { type: Boolean, required: false, default: false },
     enableKeyControls: { type: Boolean, required: false, default: true },
     startingOctave: { type: Number, required: false, default: 3 },
-    numOctaves: { type: Number, required: false, default: 2 }
+    numOctaves: { type: Number, required: false, default: 2 },
+    enableKeyboardControls: { type: Boolean, required: false, default: true }
   },
   setup(props, context) {
     const keyPressedColor = "#ff2929"; // todo: use theme color (danger?)
     const blackKeys = [1, 3, 6, 8, 10];
+    const noteKeyCodes = [
+      "KeyA",
+      "KeyW",
+      "KeyS",
+      "KeyE",
+      "KeyD",
+      "KeyF",
+      "KeyT",
+      "KeyG",
+      "KeyY",
+      "KeyH",
+      "KeyU",
+      "KeyJ",
+      "KeyK",
+      "KeyO",
+      "KeyL",
+    ];
+    let userOctaveOffset = props.startingOctave * 12;
+
+    function userKeyPressed(e: KeyboardEvent) {
+      const n = noteKeyCodes.findIndex((c) => {
+        return c === e.code;
+      });
+      if (n > -1) {
+        const keyNum = n + userOctaveOffset;
+        displayKeyDown(keyNum);
+        context.emit("keyboardKeyDown", keyNum);
+      }
+    }
+
+    function userKeyReleased(e: KeyboardEvent) {
+      const n = noteKeyCodes.findIndex((c) => {
+        return c === e.code;
+      });
+      if (n > -1) {
+        // todo: doesn't release if you change octave or transpose while holding a key
+        const keyNum = n + userOctaveOffset
+        displayKeyUp(keyNum);
+        context.emit("keyboardKeyUp", keyNum);
+      } else if (e.code === "KeyZ") {
+        // go down an octave
+        userOctaveOffset -= 12;
+      } else if (e.code === "KeyX") {
+        // go up an octave
+        userOctaveOffset += 12;
+      } else if (e.code === "KeyC") {
+        // todo: transpose down a step?
+      } else if (e.code === "KeyV") {
+        // todo: transpose up a step?
+      }
+    }
 
     function displayKeyDown(keyNumber: number) {
       const key: HTMLElement | null = document.querySelector(`#key${keyNumber}`);
@@ -120,6 +179,9 @@ export default defineComponent({
       document.addEventListener("mousedown", documentMouseDown);
       document.addEventListener("mouseup", documentMouseUp);
 
+      document.addEventListener("keydown", userKeyPressed);
+      document.addEventListener("keyup", userKeyReleased);
+
       const keys = document.querySelectorAll(
         "div.keyboard div.key, div.keyboard div.black-key"
       );
@@ -137,6 +199,9 @@ export default defineComponent({
     function clearKeyboardListeners() {
       document.removeEventListener("mousedown", documentMouseDown);
       document.removeEventListener("mouseup", documentMouseUp);
+
+      document.removeEventListener("keydown", userKeyPressed);
+      document.removeEventListener("keyup", userKeyReleased);
 
       const keys = document.querySelectorAll(
         "div.keyboard div.key, div.keyboard div.black-key"
