@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUnmount, onMounted, ref} from "vue";
+import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 const isMouseDown = ref(false);
 
@@ -108,7 +108,18 @@ export default defineComponent({
       }
     }
 
+    function documentMouseDown() {
+      isMouseDown.value = true;
+    }
+
+    function documentMouseUp() {
+      isMouseDown.value = false;
+    }
+
     function assignKeyboardListeners() {
+      document.addEventListener("mousedown", documentMouseDown);
+      document.addEventListener("mouseup", documentMouseUp);
+
       const keys = document.querySelectorAll(
         "div.keyboard div.key, div.keyboard div.black-key"
       );
@@ -124,6 +135,9 @@ export default defineComponent({
     }
 
     function clearKeyboardListeners() {
+      document.removeEventListener("mousedown", documentMouseDown);
+      document.removeEventListener("mouseup", documentMouseUp);
+
       const keys = document.querySelectorAll(
         "div.keyboard div.key, div.keyboard div.black-key"
       );
@@ -149,6 +163,8 @@ export default defineComponent({
     onBeforeUnmount(() => {
       clearKeyboardListeners();
     });
+
+    watch(() => props.numOctaves, resetKeyboardListeners);
   },
 });
 </script>
