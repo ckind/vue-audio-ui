@@ -25,7 +25,7 @@
 
 <script setup>
 import { ref } from "vue";
-import VAPiano from './v-a-piano.vue';
+import { VAPiano } from "vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
 
 const propsToDisplay = ref(VAPiano.props);

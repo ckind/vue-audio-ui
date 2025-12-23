@@ -14,6 +14,7 @@ import VAToggleButton from './src/lib/v-a-toggle-button.vue'
 import VAEnvelopeAdsr from './src/lib/v-a-envelope-adsr.vue'
 import VANumBox from './src/lib/v-a-num-box.vue'
 import VAModMatrix from './src/lib/v-a-mod-matrix.vue'
+import VAPiano from './src/lib/v-a-piano.vue'
 
 import { type ModMatrixSource, type ModMatrixDestination } from './src/lib/v-a-mod-matrix.vue';
 
@@ -30,7 +31,8 @@ const components = {
   VAToggleButton,
   VAEnvelopeAdsr,
   VANumBox,
-  VAModMatrix
+  VAModMatrix,
+  VAPiano
 };
 
 // install function executed by Vue.use()
@@ -59,6 +61,7 @@ export {
   VAEnvelopeAdsr,
   VANumBox,
   VAModMatrix,
+  VAPiano,
 
   type ModMatrixSource,
   type ModMatrixDestination,
