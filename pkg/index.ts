@@ -17,6 +17,8 @@ import VAModMatrix from './src/lib/v-a-mod-matrix.vue'
 import VAPiano from './src/lib/v-a-piano.vue'
 
 import { type ModMatrixSource, type ModMatrixDestination } from './src/lib/v-a-mod-matrix.vue';
+import { ScalerNode, ExpScalerNode, type ScalerFunction } from './src/util/web-audio-extensions.ts';
+
 
 const components = {
   // test,
@@ -65,6 +67,10 @@ export {
 
   type ModMatrixSource,
   type ModMatrixDestination,
+
+  ScalerNode,
+  ExpScalerNode,
+  type ScalerFunction,
 
   vueAudioUITheme
 };

@@ -26,6 +26,7 @@ const isMuted = ref(false);
 
 const lfo1ScopeInput = ref<AudioNode>();
 const lfo2ScopeInput = ref<AudioNode>();
+const lfo3ScopeInput = ref<AudioNode>();
 
 onMounted(() => {
   setupMatrix();
@@ -57,6 +58,7 @@ function setupMatrix() {
 
   lfo1ScopeInput.value = new GainNode(ctx, { gain: 1 });
   lfo2ScopeInput.value = new GainNode(ctx, { gain: 1 });
+  lfo3ScopeInput.value = new GainNode(ctx, { gain: 1 });
 
   sources.value = [
     setupLFO(ctx, 1.5, "triangle", lfo1ScopeInput.value!, "LFO 1"),
@@ -90,11 +92,11 @@ function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, sc
 
   nodes.push(osc);
 
-  if (scopeInput) {
-    osc.connect(scopeInput);
-  }
+    if (scopeInput) {
+      osc.connect(scopeInput);
+    }
 
-  return { node: osc, name: name ?? `LFO ${frequency}Hz` };
+    return { node: osc, name: name ?? `LFO ${frequency}Hz` };
 }
 
 function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {

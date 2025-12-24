@@ -30,7 +30,7 @@
         <v-a-num-box
           :minValue="0"
           :maxValue="1"
-          @update:modelValue="cellModAmountUpdate(cell.modAmountNode, $event)"
+          @update:modelValue="cellModAmountUpdate(cell, $event)"
           v-model="cell.modAmountValue"
           :fixedDecimals="2"
           :width="60"
@@ -92,8 +92,8 @@ watch(() => props.destinations, (newDestinations, oldDestinations) => {
   connectMatrix(props.sources, newDestinations);
 });
 
-function cellModAmountUpdate(gainNode: GainNode, gainValue: number) {
-  gainNode.gain.setValueAtTime(gainValue, audioContext.value!.currentTime);
+function cellModAmountUpdate(cell: ModMatrixCell, value: number) {
+  cell.modAmountNode.gain.setValueAtTime(value, audioContext.value!.currentTime);
 }
 
 function disconnectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModMatrixDestination>) {
