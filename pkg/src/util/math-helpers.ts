@@ -3,7 +3,7 @@ function getBaseLog(base: number, x: number): number {
     return Math.log(x) / Math.log(base);
 }
 
-function fitToBounds(value: number, min: number, max: number) {
+function clamp(value: number, min: number, max: number) {
     if (value < min) {
         return min;
     } else if (value > max) {
@@ -60,4 +60,4 @@ function round(num: number, decimalPlaces: number): number {
     return Number(`${shifted}e${-decimalPlaces}`);
 }
 
-export { getBaseLog, solveQuadratic, fitToBounds, isPowerOfTwo, round };
+export { getBaseLog, solveQuadratic, clamp, isPowerOfTwo, round };

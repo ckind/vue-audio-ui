@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import theme from '@/theme.ts';
-import { round, fitToBounds } from '@/util/math-helpers.ts';
+import { round, clamp } from '@/util/math-helpers.ts';
 
 const props = defineProps({
   // todo: needs to be a number if no valueList is provided
@@ -99,10 +99,10 @@ function onMouseDown(event: MouseEvent) {
       let i = Math.round(
         props.valueList.indexOf(props.modelValue)
           + (deltaY / dragRange) * (valueRange.value / 2));
-      i = fitToBounds(i, 0, props.valueList.length - 1);
+      i = clamp(i, 0, props.valueList.length - 1);
       emit('update:modelValue', props.valueList[i]);
     } else if (typeof props.modelValue === 'number') {
-      const newValue = fitToBounds(
+      const newValue = clamp(
         props.modelValue + (deltaY / dragRange) * (valueRange.value / 2),
         props.minValue,
         props.maxValue

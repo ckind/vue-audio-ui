@@ -13,7 +13,7 @@ import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
 import { type DigitalMeterType } from "@/types/vue-audio-ui-types";
 import { LogCurvedRange } from "@/util/curved-range.ts"
-import { fitToBounds } from "@/util/math-helpers.ts";
+import { clamp } from "@/util/math-helpers.ts";
 import theme from '@/theme.ts';
 
 const DB_RANGE = 90;
@@ -125,7 +125,7 @@ export default defineComponent({
         // todo: discarding everything above 0 for now
         // find a way way to display clipping
         const clipping = db > 0;
-        db = fitToBounds(db, -DB_RANGE, 0);
+        db = clamp(db, -DB_RANGE, 0);
 
         const meterHeight = this.getMeterHeight(this.scaleY(db));
 

@@ -13,7 +13,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { type CurvedRange, LinearCurvedRange, LogCurvedRange } from "@/util/curved-range.ts";
-import { fitToBounds } from "@/util/math-helpers.ts";
+import { clamp } from "@/util/math-helpers.ts";
 
 const DEFAULT_ASPECT_RATIO = 3;
 const DRAG_RANGE = 300;
@@ -302,14 +302,14 @@ export default defineComponent({
           const minShift = -this.zoomWindowStartIndex;
           const maxShift = this.amplitudeData.length - this.zoomWindowEndIndex;
 
-          shiftXNumSamples = fitToBounds(shiftXNumSamples, minShift, maxShift);
+          shiftXNumSamples = clamp(shiftXNumSamples, minShift, maxShift);
 
           this.shiftZoomWindow(shiftXNumSamples);
           this.markerIndex += shiftXNumSamples;
         }
       } else {
         if (this.prevY >= 0) {
-          this.zoom = fitToBounds(this.zoom - (diffY / DRAG_RANGE) * 1, 0, 1);
+          this.zoom = clamp(this.zoom - (diffY / DRAG_RANGE) * 1, 0, 1);
           this.setZoomWindow();
         }
       }
