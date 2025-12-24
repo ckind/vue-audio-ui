@@ -87,13 +87,15 @@ A spectrum analyzer for visualizing frequency-domain data. The <a target="blank"
 
 An interactive audio file visualizer for displaying amplitude data. Click and drag to select. Ctrl+click (or command+click on mac) and drag to zoom.
 
+- `audioSelection`: Emitted when user makes a selection. Returns the selection start and end indexes in the floating point sample array. Note that start can be before end.
+
 <VAAudioFileVisualizerExample />
 
 <!--@include: ../code-snippets/VAAudioFileVisualizerUsage.md -->
 
 ## v-a-envelope-adsr
 
-An adjustable Attack-Decay-Sustain-Release envolope. The modelValue is an AdsrSettings instance. Note that a new object will be emitted on update:modelValue.
+An adjustable Attack-Decay-Sustain-Release envolope. The modelValue is an AdsrSettings instance. Note that a new object will be emitted on update:modelValue. Emits the 
 
 ```js
 interface AdsrSettings {

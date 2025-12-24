@@ -355,11 +355,20 @@ export default defineComponent({
       }
     },
     onCanvasDoubleClick() {
-      this.markerIndex = 0;
-      this.markerPosition = 0;
+      // zoom out all the way
       this.zoom = 1;
       this.zoomWindowStartIndex = 0;
       this.zoomWindowEndIndex = this.amplitudeData.length;
+
+      // keep marker position but adjust sample index based on new zoom
+      this.markerIndex =
+        Math.round(this.pixelsToSamples(this.markerPosition)) + this.zoomWindowStartIndex;
+
+      // clear selection
+      this.selectionPosition = undefined;
+      this.selectionIndex = undefined;
+
+      window.requestAnimationFrame(this.drawAmplitude);
     },
     onCanvasMouseDown(e: MouseEvent) {
       this.prevX = e.pageX;

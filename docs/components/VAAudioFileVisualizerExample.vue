@@ -9,9 +9,9 @@
           @audioSelection="onAudioSelection"
         />
       </div>
-
-      {{ audioSelectedDisplay }}
     </div>
+
+    {{ audioSelectedDisplay }}
 
     <p><strong>Props</strong></p>
 
@@ -60,12 +60,12 @@ async function loadSampleDataFile() {
 
 function onAudioSelection(data: any) {
   audioSelectedDisplay.value =
-    `audio selected - startIndex: ${data.startIndex}, endIndex: ${data.endIndex}`
+    `@audioSelection - ${JSON.stringify(data)}`
 }
 
 onMounted(() => {
-  loadSampleDataSine();
-  // loadSampleDataFile();
+  // loadSampleDataSine();
+  loadSampleDataFile();
 });
 </script>
 
