@@ -85,7 +85,7 @@ A spectrum analyzer for visualizing frequency-domain data. The <a target="blank"
 
 ## v-a-audio-file-visualizer
 
-An interactive audio file visualizer for displaying amplitude data. Supports zooming, panning, and marker placement. Load amplitude data using the loadAudioFromAmplitudeData method.
+An interactive audio file visualizer for displaying amplitude data. Click and drag to select. Ctrl+click (or command+click on mac) and drag to zoom.
 
 <VAAudioFileVisualizerExample />
 

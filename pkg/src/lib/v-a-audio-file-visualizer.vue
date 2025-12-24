@@ -340,10 +340,6 @@ export default defineComponent({
       this.zoomWindowEndIndex = this.amplitudeData.length;
     },
     onCanvasMouseDown(e: MouseEvent) {
-      document!
-        .getElementsByTagName("body")[0]!
-        .classList.add("--no-text-select");
-
       const canvasX = this.canvas?.getBoundingClientRect()?.x as number;
       const xpos = e.clientX - canvasX;
 
@@ -354,12 +350,23 @@ export default defineComponent({
       this.markerPosition = xpos;
 
       window.requestAnimationFrame(this.drawAmplitude);
+      
+      if (e.metaKey || e.ctrlKey) {
+        this.onCanvasCtrlMouseDown(e);
+      }
 
-      window.addEventListener("mousemove", this.onClickDrag);
-      window.addEventListener("mouseup", this.endDrag);
+      // todo: else select section
     },
-    endDrag() {
-      window.removeEventListener("mousemove", this.onClickDrag);
+    onCanvasCtrlMouseDown(e: MouseEvent) {
+      document!
+        .getElementsByTagName("body")[0]!
+        .classList.add("--no-text-select");
+
+      window.addEventListener("mousemove", this.onCtrlClickDrag);
+      window.addEventListener("mouseup", this.endCtrlClickDrag);
+    },
+    endCtrlClickDrag() {
+      window.removeEventListener("mousemove", this.onCtrlClickDrag);
       this.prevY = -1;
       this.prevX = -1;
 
@@ -367,7 +374,7 @@ export default defineComponent({
         .getElementsByTagName("body")[0]!
         .classList.remove("--no-text-select");
     },
-    onClickDrag(e: MouseEvent) {
+    onCtrlClickDrag(e: MouseEvent) {
       const currY = e.pageY;
       const currX = e.pageX;
 
