@@ -269,7 +269,7 @@ export default defineComponent({
   user-select: none;
   display: inline-block;
 }
-.keyboard > .key:last-child {
+.keyboard > .octave-section:last-child > .key:last-child {
   border-right: 1px solid black;
 }
 .octave-section {
