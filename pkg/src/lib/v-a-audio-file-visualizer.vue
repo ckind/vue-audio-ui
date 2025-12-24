@@ -19,6 +19,7 @@ import theme from '@/theme.ts';
 
 const DEFAULT_ASPECT_RATIO = 3;
 const DRAG_RANGE = 300;
+const MAX_ZOOM_SAMPLES = 16;
 
 export default defineComponent({
   name: "VAAudioFileVisualizer",
@@ -26,7 +27,7 @@ export default defineComponent({
     return {
       canvas: null as HTMLCanvasElement | null,
       canvasContext: null as CanvasRenderingContext2D | null,
-      amplitudeData: new Float32Array(),
+
       // x coordinate of the marker position on the canvas (in px)
       markerPosition: 0,
       // sample index of where the marker is placed
@@ -41,6 +42,7 @@ export default defineComponent({
       zoomWindowEndIndex: 0,
       // value between 0 and 1 representing how far zoomed the graph is
       zoom: 1,
+
       prevY: -1,
       prevX: -1,
       // todo: adjust curve based on sample length?
@@ -48,6 +50,10 @@ export default defineComponent({
     };
   },
   props: {
+    amplitudeData: {
+      required: false,
+      type: Float32Array<ArrayBuffer>
+    },
     lineColor: {
       required: false,
       type: String,
@@ -80,7 +86,8 @@ export default defineComponent({
       return this.height ?? this.width / DEFAULT_ASPECT_RATIO;
     },
     zoomMult() {
-      const MAX_ZOOM_SAMPLES = 16;
+      if (!this.amplitudeData) return 1;
+
       const scaledZoom = this.curedRange.getCurvedValue(this.zoom);
       // todo: this bugs out if total num samples is < 16
       return Math.max(scaledZoom, MAX_ZOOM_SAMPLES / this.amplitudeData.length); 
@@ -107,10 +114,6 @@ export default defineComponent({
     this.canvasContext = this.canvas.getContext("2d");
   },
   methods: {
-    loadAudioFromAmplitudeData(data: Float32Array<ArrayBuffer>) {
-      this.amplitudeData = data;
-      window.requestAnimationFrame(this.drawZoom);
-    },
     pixelsToSamples(px: number): number {
       const samplesPerPixel = this.zoomWindowLength / this.graphWidth;
       return samplesPerPixel * px;
@@ -120,6 +123,14 @@ export default defineComponent({
       this.zoomWindowEndIndex += numSamples;
     },
     setZoomWindow() {
+      if (!this.amplitudeData) {
+        this.zoomWindowStartIndex = 0;
+        this.zoomWindowEndIndex = 0;
+        this.zoom = 1;
+
+        return;
+      }
+
       // zoom in on markerIndex as if it were the center
       this.zoomWindowStartIndex =
         this.markerIndex -
@@ -216,6 +227,8 @@ export default defineComponent({
       this.canvasContext?.fillRect(0, 0, this.graphWidth, this.graphHeight);
     },
     drawAmplitudeMinMax() {
+      if (!this.amplitudeData) return;
+
       const samplesPerPixel = this.zoomWindowLength / this.graphWidth;
       const binSize = Math.max(Math.round(samplesPerPixel), 1);
 
@@ -258,6 +271,8 @@ export default defineComponent({
       this.drawMarker();
     },
     drawAmplitudeSampleLine(drawSamplePoints: boolean = false) {
+      if (!this.amplitudeData) return;
+
       const samplesPerPixel = this.zoomWindowLength / this.graphWidth;
       const binSize = Math.max(Math.round(samplesPerPixel), 1);
       const pointDistance = this.graphWidth / this.zoomWindowLength;
@@ -298,6 +313,8 @@ export default defineComponent({
       this.drawMarker();
     },
     drawAmplitudeAvg() {
+      if (!this.amplitudeData) return;
+
       const samplesPerPixel = this.zoomWindowLength / this.graphWidth;
       const binSize = Math.max(Math.round(samplesPerPixel), 1);
 
@@ -354,6 +371,8 @@ export default defineComponent({
       }
     },
     onCanvasDoubleClick() {
+      if (!this.amplitudeData) return;
+
       // zoom out all the way
       this.zoom = 1;
       this.zoomWindowStartIndex = 0;
@@ -435,6 +454,8 @@ export default defineComponent({
         .classList.remove("--no-text-select");
     },
     onCtrlClickDrag(e: MouseEvent) {
+      if (!this.amplitudeData) return;
+
       const currY = e.pageY;
       const currX = e.pageX;
 
@@ -488,6 +509,11 @@ export default defineComponent({
         .classList.remove("--no-text-select");
     },
   },
+  watch: {
+    amplitudeData(newValue, oldValue) {
+      window.requestAnimationFrame(this.drawZoom);
+    }
+  }
 });
 </script>
 

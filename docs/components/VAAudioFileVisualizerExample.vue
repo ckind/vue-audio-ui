@@ -3,7 +3,7 @@
     <div class="example">
       <div class="visualizer-container">
         <v-a-audio-file-visualizer
-          ref="visualizerRef"
+          :amplitudeData="amplitudeData"
           @audioSelection="onAudioSelection"
         />
       </div>
@@ -24,9 +24,7 @@ import { VAAudioFileVisualizer } from "vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
 import { setupAudioContext } from "../helpers/web-audio-helpers";
 
-const width = ref(600);
-const height = ref(-1); // computed based on width
-const visualizerRef = ref<InstanceType<typeof VAAudioFileVisualizer> | null>(null);
+const amplitudeData = ref<Float32Array<ArrayBuffer>>();
 const propsToDisplay = ref(VAAudioFileVisualizer.props);
 const audioSelectedDisplay = ref("");
 
@@ -35,14 +33,14 @@ function loadSampleDataSine() {
   const sampleRate = 44100;
   const duration = 2; // seconds
   const numSamples = sampleRate * duration;
-  const amplitudeData = new Float32Array(numSamples);
+  const data = new Float32Array(numSamples);
   const sineHz = 440;
 
   for (let i = 0; i < numSamples; i++) {
-    amplitudeData[i] = Math.sin((2 * Math.PI * sineHz * i) / sampleRate) * 0.5; // 440Hz sine wave
+    data[i] = Math.sin((2 * Math.PI * sineHz * i) / sampleRate) * 0.5; // 440Hz sine wave
   }
 
-  visualizerRef.value?.loadAudioFromAmplitudeData(amplitudeData);
+  amplitudeData.value = data;
 };
 
 async function loadSampleDataFile() {
@@ -51,9 +49,7 @@ async function loadSampleDataFile() {
   const response = await fetch('/audio/brink.mp3');
   const arrayBuffer = await response.arrayBuffer();
   const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-  const channelData = audioBuffer.getChannelData(0);
-
-  visualizerRef.value?.loadAudioFromAmplitudeData(channelData);
+  amplitudeData.value = audioBuffer.getChannelData(0);
 }
 
 function onAudioSelection(data: any) {
