@@ -4,8 +4,6 @@
       <div class="visualizer-container">
         <v-a-audio-file-visualizer
           ref="visualizerRef"
-          :width="512"
-          :height="height"
           @audioSelection="onAudioSelection"
         />
       </div>

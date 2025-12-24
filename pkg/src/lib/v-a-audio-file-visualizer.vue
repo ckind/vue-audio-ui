@@ -59,12 +59,11 @@ export default defineComponent({
     width: {
       required: false,
       type: Number,
-      default: 600,
+      default: 500,
     },
     height: {
       required: false,
-      type: Number,
-      default: -1,
+      type: Number
     },
   },
   computed: {
@@ -78,7 +77,7 @@ export default defineComponent({
       return this.width;
     },
     graphHeight() {
-      return this.width / DEFAULT_ASPECT_RATIO;
+      return this.height ?? this.width / DEFAULT_ASPECT_RATIO;
     },
     zoomMult() {
       const MAX_ZOOM_SAMPLES = 16;
