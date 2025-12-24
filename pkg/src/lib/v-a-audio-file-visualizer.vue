@@ -15,6 +15,7 @@
 import { defineComponent } from "vue";
 import { type CurvedRange, LinearCurvedRange, LogCurvedRange } from "@/util/curved-range.ts";
 import { clamp } from "@/util/math-helpers.ts";
+import theme from '@/theme.ts';
 
 const DEFAULT_ASPECT_RATIO = 3;
 const DRAG_RANGE = 300;
@@ -46,12 +47,10 @@ export default defineComponent({
     lineColor: {
       required: false,
       type: String,
-      default: "white",
     },
     backgroundColor: {
       required: false,
       type: String,
-      default: "black",
     },
     width: {
       required: false,
@@ -67,8 +66,8 @@ export default defineComponent({
   computed: {
     cssVars() {
       return {
-        "--line-color": `${this.lineColor}`,
-        "--background-color": `${this.backgroundColor}`,
+        "--line-color": `${this.canvasLineColor}`,
+        "--background-color": `${this.canvasBackgroundColor}`,
       };
     },
     graphWidth() {
@@ -87,6 +86,15 @@ export default defineComponent({
     zoomWindowLength() {
       return this.zoomWindowEndIndex - this.zoomWindowStartIndex;
     },
+    canvasLineColor() {
+      return this.lineColor ?? theme.colors.white;
+    },
+    canvasBackgroundColor() {
+      return this.backgroundColor ?? theme.colors.black;
+    },
+    canvasMarkerColor() {
+      return theme.colors.primary;
+    }
   },
   mounted() {
     this.canvas = this.$refs.visualizer as HTMLCanvasElement;
@@ -170,21 +178,24 @@ export default defineComponent({
       return sum/(endIndex - startIndex);
     },
     drawMarker() {
-      this.canvasContext?.beginPath();
-      this.canvasContext!.strokeStyle = "red"; // todo: theme color
-      this.canvasContext?.moveTo(this.markerPosition, 0);
-      this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
-      this.canvasContext?.stroke();
+      // this.canvasContext?.beginPath();
+      // this.canvasContext!.strokeStyle = this.canvasMarkerColor;
+      // this.canvasContext?.moveTo(this.markerPosition, 0);
+      // this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
+      // this.canvasContext?.stroke();
+
+      this.canvasContext!.fillStyle = this.canvasMarkerColor;
+      this.canvasContext?.fillRect(this.markerPosition, 0, 2, this.graphHeight);
     },
     drawPoint(x: number, y: number) {
-      this.canvasContext!.fillStyle = this.lineColor;
+      this.canvasContext!.fillStyle = this.canvasLineColor;
       this.canvasContext?.beginPath();
       this.canvasContext?.arc(x + 0.5, y + 0.5, 2, 0, Math.PI * 2);
       this.canvasContext?.fill();
     },
     drawBackground() {
       this.canvasContext?.clearRect(0, 0, this.graphWidth, this.graphHeight);
-      this.canvasContext!.fillStyle = this.backgroundColor;
+      this.canvasContext!.fillStyle = this.canvasBackgroundColor;
       this.canvasContext?.fillRect(0, 0, this.graphWidth, this.graphHeight);
     },
     drawAmplitudeMinMax() {
@@ -222,7 +233,7 @@ export default defineComponent({
           this.graphHeight -
           (this.graphHeight / 2 + (max * this.graphHeight) / 2);
 
-        this.canvasContext!.fillStyle = this.lineColor;
+        this.canvasContext!.fillStyle = this.canvasLineColor;
         this.canvasContext?.fillRect(x, miny, 1, maxy - miny);
       }
 
@@ -261,7 +272,7 @@ export default defineComponent({
       }
 
       path.lineTo(this.graphWidth, this.graphHeight / 2);
-      this.canvasContext!.strokeStyle = this.lineColor;
+      this.canvasContext!.strokeStyle = this.canvasLineColor;
       this.canvasContext?.stroke(path);
 
       this.drawMarker();
@@ -303,7 +314,7 @@ export default defineComponent({
       }
 
       path.lineTo(this.graphWidth, this.graphHeight / 2);
-      this.canvasContext!.strokeStyle = this.lineColor;
+      this.canvasContext!.strokeStyle = this.canvasLineColor;
       this.canvasContext?.stroke(path);
 
       this.drawMarker();
@@ -407,8 +418,6 @@ export default defineComponent({
 <style scoped>
 .visualizer-canvas {
   display: inline-block;
-  border: 1px solid;
-  border-color: var(--border-color);
   cursor: move;
 }
 </style>

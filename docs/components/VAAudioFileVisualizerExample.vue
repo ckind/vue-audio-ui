@@ -6,8 +6,6 @@
           ref="visualizerRef"
           :width="512"
           :height="height"
-          :lineColor="lineColor"
-          :backgroundColor="backgroundColor"
         />
       </div>
 
@@ -58,8 +56,6 @@ import { setupAudioContext } from "../helpers/web-audio-helpers";
 
 const width = ref(600);
 const height = ref(-1); // computed based on width
-const lineColor = ref("#ffffff");
-const backgroundColor = ref("#000000");
 const visualizerRef = ref<InstanceType<typeof VAAudioFileVisualizer> | null>(null);
 const propsToDisplay = ref(VAAudioFileVisualizer.props);
 
@@ -81,7 +77,7 @@ const loadSampleDataSine = () => {
 async function loadSampleDataFile() {
   const ctx = setupAudioContext();
 
-  const response = await fetch('/audio/waterbug.mp3');
+  const response = await fetch('/audio/brink.mp3');
   const arrayBuffer = await response.arrayBuffer();
   const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
   const channelData = audioBuffer.getChannelData(0);
