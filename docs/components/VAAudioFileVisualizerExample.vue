@@ -6,6 +6,7 @@
           ref="visualizerRef"
           :width="512"
           :height="height"
+          @audioSelection="onAudioSelection"
         />
       </div>
 
@@ -59,7 +60,7 @@ const height = ref(-1); // computed based on width
 const visualizerRef = ref<InstanceType<typeof VAAudioFileVisualizer> | null>(null);
 const propsToDisplay = ref(VAAudioFileVisualizer.props);
 
-const loadSampleDataSine = () => {
+function loadSampleDataSine() {
   // Generate sample amplitude data (sine wave)
   const sampleRate = 44100;
   const duration = 2; // seconds
@@ -85,6 +86,10 @@ async function loadSampleDataFile() {
   console.log(visualizerRef.value);
 
   visualizerRef.value?.loadAudioFromAmplitudeData(channelData);
+}
+
+function onAudioSelection(data: any) {
+  console.log(data);
 }
 
 onMounted(() => {

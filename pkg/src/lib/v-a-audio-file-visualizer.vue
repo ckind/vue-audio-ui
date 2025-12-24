@@ -31,6 +31,10 @@ export default defineComponent({
       markerPosition: 0,
       // sample index of where the marker is placed
       markerIndex: 0,
+      // x coordinate of where selection ends (can be before marker index)
+      selectionPosition: undefined as number | undefined,
+      // sample index of where selection ends (can be before marker index)
+      selectionIndex: undefined as number | undefined,
       // starting sample index of the zoom window
       zoomWindowStartIndex: 0,
       // ending sample index of the zoom window
@@ -94,6 +98,9 @@ export default defineComponent({
     },
     canvasMarkerColor() {
       return theme.colors.primary;
+    },
+    canvasSelectColor() {
+      return theme.colors.primary;
     }
   },
   mounted() {
@@ -104,6 +111,10 @@ export default defineComponent({
     loadAudioFromAmplitudeData(data: Float32Array<ArrayBuffer>) {
       this.amplitudeData = data;
       window.requestAnimationFrame(this.drawZoom);
+    },
+    pixelsToSamples(px: number): number {
+      const samplesPerPixel = this.zoomWindowLength / this.graphWidth;
+      return samplesPerPixel * px;
     },
     shiftZoomWindow(numSamples: number) {
       this.zoomWindowStartIndex += numSamples;
@@ -178,14 +189,21 @@ export default defineComponent({
       return sum/(endIndex - startIndex);
     },
     drawMarker() {
-      // this.canvasContext?.beginPath();
-      // this.canvasContext!.strokeStyle = this.canvasMarkerColor;
-      // this.canvasContext?.moveTo(this.markerPosition, 0);
-      // this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
-      // this.canvasContext?.stroke();
-
       this.canvasContext!.fillStyle = this.canvasMarkerColor;
       this.canvasContext?.fillRect(this.markerPosition, 0, 2, this.graphHeight);
+    },
+    drawSelection() {
+      if (this.selectionPosition === undefined) return;
+
+      this.canvasContext!.globalAlpha = 0.5;
+      this.canvasContext!.fillStyle = this.canvasSelectColor;
+      this.canvasContext!.fillRect(
+        this.markerPosition,
+        0,
+        this.selectionPosition - this.markerPosition,
+        this.graphHeight
+      );
+      this.canvasContext!.globalAlpha = 1.0;
     },
     drawPoint(x: number, y: number) {
       this.canvasContext!.fillStyle = this.canvasLineColor;
@@ -237,6 +255,7 @@ export default defineComponent({
         this.canvasContext?.fillRect(x, miny, 1, maxy - miny);
       }
 
+      this.drawSelection();
       this.drawMarker();
     },
     drawAmplitudeSampleLine(drawSamplePoints: boolean = false) {
@@ -247,7 +266,6 @@ export default defineComponent({
       this.drawBackground();
 
       const path = new Path2D();
-      path.moveTo(0, 0);
 
       let x = 0;
       let y = 0;
@@ -266,15 +284,18 @@ export default defineComponent({
         y =
           this.graphHeight -
           (this.graphHeight / 2 + (amplitude * this.graphHeight) / 2);
-        path.lineTo(x, y);
+
+        if (i === 0) path.moveTo(x, y);
+        else path.lineTo(x, y);
 
         if (drawSamplePoints) this.drawPoint(x, y);
       }
 
-      path.lineTo(this.graphWidth, this.graphHeight / 2);
+      path.lineTo(this.graphWidth, y);
       this.canvasContext!.strokeStyle = this.canvasLineColor;
       this.canvasContext?.stroke(path);
 
+      this.drawSelection();
       this.drawMarker();
     },
     drawAmplitudeAvg() {
@@ -317,6 +338,7 @@ export default defineComponent({
       this.canvasContext!.strokeStyle = this.canvasLineColor;
       this.canvasContext?.stroke(path);
 
+      this.drawSelection();
       this.drawMarker();
     },
     drawAmplitude() {
@@ -340,36 +362,65 @@ export default defineComponent({
       this.zoomWindowEndIndex = this.amplitudeData.length;
     },
     onCanvasMouseDown(e: MouseEvent) {
+      this.prevX = e.pageX;
+      this.prevY = e.pageY;
+
       const canvasX = this.canvas?.getBoundingClientRect()?.x as number;
       const xpos = e.clientX - canvasX;
 
       this.markerIndex =
-        Math.round((xpos / this.graphWidth) * this.zoomWindowLength) +
-        this.zoomWindowStartIndex;
+        Math.round(this.pixelsToSamples(xpos)) + this.zoomWindowStartIndex;
 
       this.markerPosition = xpos;
+      this.selectionPosition = undefined;
+      this.selectionIndex = undefined;
 
       window.requestAnimationFrame(this.drawAmplitude);
-      
-      if (e.metaKey || e.ctrlKey) {
-        this.onCanvasCtrlMouseDown(e);
-      }
 
-      // todo: else select section
-    },
-    onCanvasCtrlMouseDown(e: MouseEvent) {
       document!
         .getElementsByTagName("body")[0]!
         .classList.add("--no-text-select");
 
-      window.addEventListener("mousemove", this.onCtrlClickDrag);
-      window.addEventListener("mouseup", this.endCtrlClickDrag);
+      if (e.metaKey || e.ctrlKey) {
+        window.addEventListener("mousemove", this.onCtrlClickDrag);
+        window.addEventListener("mouseup", this.endCtrlClickDrag);
+      } else {
+        window.addEventListener("mousemove", this.onClickDrag);
+        window.addEventListener("mouseup", this.endClickDrag);
+      }
     },
-    endCtrlClickDrag() {
-      window.removeEventListener("mousemove", this.onCtrlClickDrag);
+    onClickDrag(e: MouseEvent) {
+      const currY = e.pageY;
+      const currX = e.pageX;
+
+      const diffX = currX - this.prevX;
+      const diffY = currY - this.prevY;
+
+      // todo: need to convert pixels to samples
+      // create method pixelsToSamples?
+      this.selectionPosition = this.selectionPosition === undefined
+        ? this.markerPosition + diffX
+        : this.selectionPosition + diffX;
+
+      // todo: shouldn't have to redraw whole graph, just selection
+      // noticeably slow with larger audio files
+      window.requestAnimationFrame(this.drawAmplitude);
+
+      this.prevY = currY;
+      this.prevX = currX;
+    },
+    endClickDrag() {
+      window.removeEventListener("mousemove", this.onClickDrag);
       this.prevY = -1;
       this.prevX = -1;
 
+      if (this.selectionPosition) {
+        this.$emit('audioSelection', {
+          startIndex: this.markerIndex,
+          endIndex: Math.round(this.pixelsToSamples(this.selectionPosition)) + this.zoomWindowStartIndex
+        });
+      }
+      
       document!
         .getElementsByTagName("body")[0]!
         .classList.remove("--no-text-select");
@@ -417,6 +468,15 @@ export default defineComponent({
 
       this.prevY = currY;
       this.prevX = currX;
+    },
+    endCtrlClickDrag() {
+      window.removeEventListener("mousemove", this.onCtrlClickDrag);
+      this.prevY = -1;
+      this.prevX = -1;
+
+      document!
+        .getElementsByTagName("body")[0]!
+        .classList.remove("--no-text-select");
     },
   },
 });
