@@ -12,8 +12,8 @@ import { defineComponent, type PropType, watch } from "vue";
 import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
 import { type DigitalMeterType } from "@/types/vue-audio-ui-types";
-import { LogCurvedRange } from "@/util/curved-range"
-import { fitToBounds } from "@/util/math-helpers";
+import { LogCurvedRange } from "@/util/curved-range.ts"
+import { fitToBounds } from "@/util/math-helpers.ts";
 import theme from '@/theme.ts';
 
 const DB_RANGE = 90;

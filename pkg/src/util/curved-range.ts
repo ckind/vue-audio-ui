@@ -1,4 +1,4 @@
-import { solveQuadratic } from "./math-helpers";
+import { solveQuadratic } from "./math-helpers.ts";
 
 interface CurvedRange {
   getCurvedValue(_linearValue: number): number;

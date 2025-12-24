@@ -1,43 +1,21 @@
 <template>
   <canvas
-    :width="graphWidth"
-    :height="graphHeight"
     ref="visualizer"
     class="visualizer-canvas"
     :style="cssVars"
+    :width="graphWidth"
+    :height="graphHeight"
     @mousedown="onCanvasMouseDown"
     @dblclick="onCanvasDoubleClick"
   ></canvas>
-  <p>zoom: {{ zoom }}</p>
-  <p>zoomWindowStartIndex: {{ zoomWindowStartIndex }}</p>
-  <p>zoomWindowEndIndex: {{ zoomWindowEndIndex }}</p>
-  <p>zoomWindowLength: {{ zoomWindowLength }}</p>
-  <p>totalSamples: {{ amplitudeData.length }}</p>
-  <p>markerIndex: {{ markerIndex }}</p>
-  <p>markerPosition: {{ markerPosition }}</p>
-  <p>graphWidth: {{ graphWidth }}</p>
-  <p>
-    binSize:
-    {{ Math.max(Math.floor(zoomWindowLength / graphWidth), 1) }}
-  </p>
-  <p>
-    binSize (raw):
-    {{ Math.max(zoomWindowLength / graphWidth, 1) }}
-  </p>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { type CurvedRange, LogCurvedRange } from "@/util/curved-range";
-import { fitToBounds } from "@/util/math-helpers";
+import { type CurvedRange, LinearCurvedRange, LogCurvedRange } from "@/util/curved-range.ts";
+import { fitToBounds } from "@/util/math-helpers.ts";
 
 const DEFAULT_ASPECT_RATIO = 3;
-
-// greater number = greater drawing resolution
-// lower number = better performance when drawing
-// must be >= 1
-const RESOLUTION_SCALER = 4;
-RESOLUTION_SCALER;
 const DRAG_RANGE = 300;
 
 export default defineComponent({
@@ -47,14 +25,20 @@ export default defineComponent({
       canvas: null as HTMLCanvasElement | null,
       canvasContext: null as CanvasRenderingContext2D | null,
       amplitudeData: new Float32Array(),
+      // x coordinate of the marker position on the canvas (in px)
       markerPosition: 0,
+      // sample index of where the marker is placed
       markerIndex: 0,
+      // starting sample index of the zoom window
       zoomWindowStartIndex: 0,
+      // ending sample index of the zoom window
       zoomWindowEndIndex: 0,
+      // value between 0 and 1 representing how far zoomed the graph is
       zoom: 1,
       prevY: -1,
       prevX: -1,
-      curedRange: new LogCurvedRange(0, 1, 8) as CurvedRange, // todo: adjust curve based on sample length?,
+      // todo: adjust curve based on sample length?
+      curedRange: new LogCurvedRange(0, 1, 8) as CurvedRange, 
     };
   },
   props: {
@@ -71,7 +55,7 @@ export default defineComponent({
     width: {
       required: false,
       type: Number,
-      default: 800,
+      default: 600,
     },
     height: {
       required: false,
@@ -93,10 +77,12 @@ export default defineComponent({
       return this.width / DEFAULT_ASPECT_RATIO;
     },
     zoomMult() {
-      // todo: find a better curve?
+      const MAX_ZOOM_SAMPLES = 16;
       const scaledZoom = this.curedRange.getCurvedValue(this.zoom);
-      return Math.max(scaledZoom, 16 / this.amplitudeData.length); // don't allow zooming in past X samples
+      // todo: this bugs out if total num samples is < 16
+      return Math.max(scaledZoom, MAX_ZOOM_SAMPLES / this.amplitudeData.length); 
     },
+    // number of samples between start and end of zoom window
     zoomWindowLength() {
       return this.zoomWindowEndIndex - this.zoomWindowStartIndex;
     },
@@ -149,28 +135,6 @@ export default defineComponent({
       this.setZoomWindow();
       this.drawAmplitude();
     },
-    getMaxSampleValue(
-      sampleData: Float32Array,
-      startIndex: number,
-      endIndex: number
-    ): number {
-      let max = Number.MIN_VALUE;
-      for (let i = startIndex; i < endIndex; i++) {
-        max = Math.max(max, sampleData[i]!);
-      }
-      return max;
-    },
-    getMinSampleValue(
-      sampleData: Float32Array,
-      startIndex: number,
-      endIndex: number
-    ): number {
-      let min = Number.MAX_VALUE;
-      for (let i = startIndex; i < endIndex; i++) {
-        min = Math.min(min, sampleData[i]!);
-      }
-      return min;
-    },
     getAvgSampleValue(
       sampleData: Float32Array,
       startIndex: number,
@@ -182,8 +146,14 @@ export default defineComponent({
       }
       return sum/(endIndex - startIndex);
     },
+    drawMarker() {
+      this.canvasContext?.beginPath();
+      this.canvasContext!.strokeStyle = "red"; // todo: theme color
+      this.canvasContext?.moveTo(this.markerPosition, 0);
+      this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
+      this.canvasContext?.stroke();
+    },
     drawAmplitudeSamples() {
-      // todo: low pass filter to prevent aliasing when down-sampling?
       const binSize = Math.max(
         Math.ceil(this.zoomWindowLength / this.graphWidth),
         1
@@ -195,40 +165,34 @@ export default defineComponent({
       this.canvasContext!.fillStyle = this.backgroundColor;
       this.canvasContext?.fillRect(0, 0, this.graphWidth, this.graphHeight);
       this.canvasContext!.strokeStyle = this.lineColor;
-      this.canvasContext?.beginPath();
 
-      // todo: apply some sort of sinusoidal interpolation?
+      const sampleLinePath = new Path2D();
+      sampleLinePath.moveTo(0, 0);
+
       let x = 0;
       let y = 0;
       let amplitude = 0;
 
       // draw samples within the zoomWindow
-
-      // todo: instead of drawing of nth pixel, take the max or average of each bin?
-      // draw line at each x with min and max sample value?
       for (
         let i = this.zoomWindowStartIndex;
         i < this.zoomWindowEndIndex;
         i += binSize
       ) {
-        // amplitude = this.getMaxSampleValue(this.amplitudeData, i, i + binSize);
+        // todo: figure out aliasing issues with the display
         amplitude = this.amplitudeData[i]!;
 
         x = (i - this.zoomWindowStartIndex) * pointDistance;
         y =
           this.graphHeight -
           (this.graphHeight / 2 + (amplitude * this.graphHeight) / 2);
-        this.canvasContext?.lineTo(x, y); // todo: do we need to draw line if distance between samples is less than 1 px;
+        sampleLinePath.lineTo(x, y);
       }
 
-      this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
-      this.canvasContext?.stroke();
+      sampleLinePath.lineTo(this.graphWidth, this.graphHeight / 2);
+      this.canvasContext?.stroke(sampleLinePath);
 
-      this.canvasContext?.beginPath();
-      this.canvasContext!.strokeStyle = "red";
-      this.canvasContext?.moveTo(this.markerPosition, 0);
-      this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
-      this.canvasContext?.stroke();
+      this.drawMarker();
     },
     drawAmplitudeAvg() {
       const binSize = Math.max(
@@ -272,70 +236,11 @@ export default defineComponent({
       this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
       this.canvasContext?.stroke();
 
-      this.canvasContext?.beginPath();
-      this.canvasContext!.strokeStyle = "red";
-      this.canvasContext?.moveTo(this.markerPosition, 0);
-      this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
-      this.canvasContext?.stroke();
-    },
-    drawAmplitudeMinMax() {
-      const binSize = Math.max(
-        Math.floor(this.zoomWindowLength / this.graphWidth),
-        1
-      );
-
-      this.canvasContext?.clearRect(0, 0, this.graphWidth, this.graphHeight);
-      this.canvasContext!.fillStyle = this.backgroundColor;
-      this.canvasContext?.fillRect(0, 0, this.graphWidth, this.graphHeight);
-      this.canvasContext!.strokeStyle = this.lineColor;
-      this.canvasContext?.beginPath();
-
-      let x = 0;
-      let y = 0;
-      let min = 0;
-      let max = 0;
-
-      // draw samples within the zoomWindow
-      for (let i = 0; i < this.graphWidth; i++) {
-        x = i;
-
-        min = this.getMinSampleValue(
-          this.amplitudeData,
-          this.zoomWindowStartIndex + i * binSize,
-          this.zoomWindowStartIndex + (i + 1) * binSize
-        );
-        max = this.getMaxSampleValue(
-          this.amplitudeData,
-          this.zoomWindowStartIndex + i * binSize,
-          this.zoomWindowStartIndex + (i + 1) * binSize
-        );
-
-        y =
-          this.graphHeight -
-          (this.graphHeight / 2 + (min * this.graphHeight) / 2);
-
-        this.canvasContext?.moveTo(x, y);
-
-        y =
-          this.graphHeight -
-          (this.graphHeight / 2 + (max * this.graphHeight) / 2);
-
-        this.canvasContext?.lineTo(x, y);
-      }
-
-      this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
-      this.canvasContext?.stroke();
-
-      this.canvasContext?.beginPath();
-      this.canvasContext!.strokeStyle = "red";
-      this.canvasContext?.moveTo(this.markerPosition, 0);
-      this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
-      this.canvasContext?.stroke();
+      this.drawMarker();
     },
     drawAmplitude() {
-      if (this.zoomWindowLength > this.graphWidth) {
-        // this.drawAmplitudeMinMax();
-        // this.drawAmplitudeSamples();
+      // breakpoint for drawing individual samples
+      if (this.zoomWindowLength > (this.graphWidth * 16)) {
         this.drawAmplitudeAvg();
       } else {
         this.drawAmplitudeSamples();
@@ -380,22 +285,27 @@ export default defineComponent({
       const currY = e.pageY;
       const currX = e.pageX;
 
+      // horizontal changes shift the zoom window
       const diffX = currX - this.prevX;
+      // vertical changes change the zoom amount
       const diffY = currY - this.prevY;
 
+      // pick which direction to move in
       if (Math.abs(diffX) >= Math.abs(diffY)) {
         if (this.prevX >= 0) {
-          let shiftXNumSamples = Math.round(
-            (diffX / this.graphWidth) * this.zoomWindowLength
-          );
+          // moving to the right shifts the window left (negative direction)
+          // and moving to the left shifts the window right (positive direction)
+          let shiftXNumSamples =
+            -Math.round((diffX / this.graphWidth) * this.zoomWindowLength);
 
-          const minShift = -this.zoomWindowStartIndex; // don't allowing shifting past zero
-          const maxShift = this.amplitudeData.length - this.zoomWindowEndIndex; // don't allowing shifting after end
+          // don't allowing shifting out of amplitudeData range
+          const minShift = -this.zoomWindowStartIndex;
+          const maxShift = this.amplitudeData.length - this.zoomWindowEndIndex;
 
           shiftXNumSamples = fitToBounds(shiftXNumSamples, minShift, maxShift);
 
-          this.shiftZoomWindow(-shiftXNumSamples);
-          this.markerIndex -= shiftXNumSamples;
+          this.shiftZoomWindow(shiftXNumSamples);
+          this.markerIndex += shiftXNumSamples;
         }
       } else {
         if (this.prevY >= 0) {

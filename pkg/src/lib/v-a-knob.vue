@@ -14,8 +14,8 @@
 
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
-import { LinearCurvedRange } from "@/util/curved-range";
-import { fitToBounds } from "@/util/math-helpers";
+import { LinearCurvedRange } from "@/util/curved-range.ts";
+import { fitToBounds } from "@/util/math-helpers.ts";
 import defaultKnob from "@/lib/components/default-knob.vue";
 import { type PropType } from "vue";
 

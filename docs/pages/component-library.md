@@ -11,6 +11,7 @@ import VAEnvelopeADSRExample from '../components/VAEnvelopeADSRExample.vue';
 import VANumBoxExample from '../components/VANumBoxExample.vue'
 import VAModMatrixExample from '../components/VAModMatrixExample.vue';
 import VAPianoExample from '../components/VAPianoExample.vue';
+import VAAudioFileVisualizerExample from '../components/VAAudioFileVisualizerExample.vue';
 </script>
 
 # Available Components
@@ -114,3 +115,11 @@ A virtual piano keyboard for triggering musical notes. Click or touch keys to em
 <VAPianoExample />
 
 <!--@include: ../code-snippets/VAPianoUsage.md -->
+
+## v-a-audio-file-visualizer
+
+An interactive audio file visualizer for displaying amplitude data. Supports zooming, panning, and marker placement. Load amplitude data using the loadAudioFromAmplitudeData method.
+
+<VAAudioFileVisualizerExample />
+
+<!--@include: ../code-snippets/VAAudioFileVisualizerUsage.md -->
