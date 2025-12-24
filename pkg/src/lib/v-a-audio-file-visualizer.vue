@@ -1,4 +1,5 @@
 <template>
+  <!-- todo: touch events -->
   <canvas
     ref="visualizer"
     class="visualizer-canvas"
@@ -135,6 +136,28 @@ export default defineComponent({
       this.setZoomWindow();
       this.drawAmplitude();
     },
+    getMaxSampleValue(
+      sampleData: Float32Array,
+      startIndex: number,
+      endIndex: number
+    ): number {
+      let max = Number.NEGATIVE_INFINITY;
+      for (let i = startIndex; i < endIndex; i++) {
+        max = Math.max(max, sampleData[i]!);
+      }
+      return max;
+    },
+    getMinSampleValue(
+      sampleData: Float32Array,
+      startIndex: number,
+      endIndex: number
+    ): number {
+      let min = Number.POSITIVE_INFINITY;
+      for (let i = startIndex; i < endIndex; i++) {
+        min = Math.min(min, sampleData[i]!);
+      }
+      return min;
+    },
     getAvgSampleValue(
       sampleData: Float32Array,
       startIndex: number,
@@ -153,21 +176,67 @@ export default defineComponent({
       this.canvasContext?.lineTo(this.markerPosition, this.graphHeight);
       this.canvasContext?.stroke();
     },
-    drawAmplitudeSamples() {
-      const binSize = Math.max(
-        Math.ceil(this.zoomWindowLength / this.graphWidth),
-        1
-      );
-      const pointDistance =
-        this.graphWidth / (this.zoomWindowEndIndex - this.zoomWindowStartIndex);
-
+    drawPoint(x: number, y: number) {
+      this.canvasContext!.fillStyle = this.lineColor;
+      this.canvasContext?.beginPath();
+      this.canvasContext?.arc(x + 0.5, y + 0.5, 2, 0, Math.PI * 2);
+      this.canvasContext?.fill();
+    },
+    drawBackground() {
       this.canvasContext?.clearRect(0, 0, this.graphWidth, this.graphHeight);
       this.canvasContext!.fillStyle = this.backgroundColor;
       this.canvasContext?.fillRect(0, 0, this.graphWidth, this.graphHeight);
-      this.canvasContext!.strokeStyle = this.lineColor;
+    },
+    drawAmplitudeMinMax() {
+      const samplesPerPixel = this.zoomWindowLength / this.graphWidth;
+      const binSize = Math.max(Math.round(samplesPerPixel), 1);
 
-      const sampleLinePath = new Path2D();
-      sampleLinePath.moveTo(0, 0);
+      this.drawBackground();
+
+      let x = 0;
+      let miny = 0;
+      let maxy = 0;
+      let min = 0;
+      let max = 0;
+
+      // draw samples within the zoomWindow
+      for (let i = 0; i < this.graphWidth; i++) {
+        x = i;
+
+        min = this.getMinSampleValue(
+          this.amplitudeData,
+          this.zoomWindowStartIndex + i * binSize,
+          this.zoomWindowStartIndex + (i + 1) * binSize
+        );
+        max = this.getMaxSampleValue(
+          this.amplitudeData,
+          this.zoomWindowStartIndex + i * binSize,
+          this.zoomWindowStartIndex + (i + 1) * binSize
+        );
+
+        miny =
+          this.graphHeight -
+          (this.graphHeight / 2 + (min * this.graphHeight) / 2);
+
+        maxy =
+          this.graphHeight -
+          (this.graphHeight / 2 + (max * this.graphHeight) / 2);
+
+        this.canvasContext!.fillStyle = this.lineColor;
+        this.canvasContext?.fillRect(x, miny, 1, maxy - miny);
+      }
+
+      this.drawMarker();
+    },
+    drawAmplitudeSampleLine(drawSamplePoints: boolean = false) {
+      const samplesPerPixel = this.zoomWindowLength / this.graphWidth;
+      const binSize = Math.max(Math.round(samplesPerPixel), 1);
+      const pointDistance = this.graphWidth / this.zoomWindowLength;
+
+      this.drawBackground();
+
+      const path = new Path2D();
+      path.moveTo(0, 0);
 
       let x = 0;
       let y = 0;
@@ -186,25 +255,25 @@ export default defineComponent({
         y =
           this.graphHeight -
           (this.graphHeight / 2 + (amplitude * this.graphHeight) / 2);
-        sampleLinePath.lineTo(x, y);
+        path.lineTo(x, y);
+
+        if (drawSamplePoints) this.drawPoint(x, y);
       }
 
-      sampleLinePath.lineTo(this.graphWidth, this.graphHeight / 2);
-      this.canvasContext?.stroke(sampleLinePath);
+      path.lineTo(this.graphWidth, this.graphHeight / 2);
+      this.canvasContext!.strokeStyle = this.lineColor;
+      this.canvasContext?.stroke(path);
 
       this.drawMarker();
     },
     drawAmplitudeAvg() {
-      const binSize = Math.max(
-        Math.floor(this.zoomWindowLength / this.graphWidth),
-        1
-      );
+      const samplesPerPixel = this.zoomWindowLength / this.graphWidth;
+      const binSize = Math.max(Math.round(samplesPerPixel), 1);
 
-      this.canvasContext?.clearRect(0, 0, this.graphWidth, this.graphHeight);
-      this.canvasContext!.fillStyle = this.backgroundColor;
-      this.canvasContext?.fillRect(0, 0, this.graphWidth, this.graphHeight);
-      this.canvasContext!.strokeStyle = this.lineColor;
-      this.canvasContext?.beginPath();
+      this.drawBackground();
+
+      const path = new Path2D();
+      path.moveTo(0, 0);
 
       let x = 0;
       let y = 0;
@@ -224,26 +293,32 @@ export default defineComponent({
           this.graphHeight -
           (this.graphHeight / 2 + (avg * this.graphHeight) / 2);
 
-        this.canvasContext?.moveTo(x, y);
+        path.moveTo(x, y);
 
         y =
           this.graphHeight -
           (this.graphHeight / 2 + (-avg * this.graphHeight) / 2);
 
-        this.canvasContext?.lineTo(x, y);
+        path.lineTo(x, y);
       }
 
-      this.canvasContext?.lineTo(this.graphWidth, this.graphHeight / 2);
-      this.canvasContext?.stroke();
+      path.lineTo(this.graphWidth, this.graphHeight / 2);
+      this.canvasContext!.strokeStyle = this.lineColor;
+      this.canvasContext?.stroke(path);
 
       this.drawMarker();
     },
     drawAmplitude() {
-      // breakpoint for drawing individual samples
-      if (this.zoomWindowLength > (this.graphWidth * 16)) {
-        this.drawAmplitudeAvg();
-      } else {
-        this.drawAmplitudeSamples();
+      // zoom breakpoint for drawing dots for each sample
+      if (this.zoomWindowLength/this.graphWidth < 1) {
+        this.drawAmplitudeSampleLine(true);
+      // zoom breakpoint for plotting each sample vs using aggregate drawing method
+      } else if (this.zoomWindowLength/this.graphWidth <= 2) {
+        this.drawAmplitudeSampleLine(false);
+      }
+      else {
+        // this.drawAmplitudeAvg();
+        this.drawAmplitudeMinMax();
       }
     },
     onCanvasDoubleClick() {
