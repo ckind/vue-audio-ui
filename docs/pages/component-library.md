@@ -83,6 +83,14 @@ A spectrum analyzer for visualizing frequency-domain data. The <a target="blank"
 
 <!--@include: ../code-snippets/VASpectrumAnalyzerUsage.md -->
 
+## v-a-audio-file-visualizer
+
+An interactive audio file visualizer for displaying amplitude data. Supports zooming, panning, and marker placement. Load amplitude data using the loadAudioFromAmplitudeData method.
+
+<VAAudioFileVisualizerExample />
+
+<!--@include: ../code-snippets/VAAudioFileVisualizerUsage.md -->
+
 ## v-a-envelope-adsr
 
 An adjustable Attack-Decay-Sustain-Release envolope. The modelValue is an AdsrSettings instance. Note that a new object will be emitted on update:modelValue.
@@ -115,11 +123,3 @@ A virtual piano keyboard for triggering musical notes. Click or touch keys to em
 <VAPianoExample />
 
 <!--@include: ../code-snippets/VAPianoUsage.md -->
-
-## v-a-audio-file-visualizer
-
-An interactive audio file visualizer for displaying amplitude data. Supports zooming, panning, and marker placement. Load amplitude data using the loadAudioFromAmplitudeData method.
-
-<VAAudioFileVisualizerExample />
-
-<!--@include: ../code-snippets/VAAudioFileVisualizerUsage.md -->
