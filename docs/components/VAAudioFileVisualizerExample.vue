@@ -10,36 +10,7 @@
         />
       </div>
 
-      <!-- <div class="props">
-        <div>
-          <label for="width">width: </label>
-          <input
-            id="width"
-            v-model.number="width"
-            type="number"
-            min="100"
-            max="1200"
-          />
-        </div>
-
-        <div>
-          <label for="height">height: </label>
-          <span id="height">{{ height }}</span>
-        </div>
-
-        <div>
-          <label for="lineColor">lineColor: </label>
-          <input id="lineColor" v-model="lineColor" type="color" />
-        </div>
-
-        <div>
-          <label for="backgroundColor">backgroundColor: </label>
-          <input id="backgroundColor" v-model="backgroundColor" type="color" />
-        </div>
-
-        <button @click="loadSampleData">Load Sample Data</button>
-      </div>
-       -->
+      {{ audioSelectedDisplay }}
     </div>
 
     <p><strong>Props</strong></p>
@@ -59,6 +30,7 @@ const width = ref(600);
 const height = ref(-1); // computed based on width
 const visualizerRef = ref<InstanceType<typeof VAAudioFileVisualizer> | null>(null);
 const propsToDisplay = ref(VAAudioFileVisualizer.props);
+const audioSelectedDisplay = ref("");
 
 function loadSampleDataSine() {
   // Generate sample amplitude data (sine wave)
@@ -83,18 +55,17 @@ async function loadSampleDataFile() {
   const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
   const channelData = audioBuffer.getChannelData(0);
 
-  console.log(visualizerRef.value);
-
   visualizerRef.value?.loadAudioFromAmplitudeData(channelData);
 }
 
 function onAudioSelection(data: any) {
-  console.log(data);
+  audioSelectedDisplay.value =
+    `audio selected - startIndex: ${data.startIndex}, endIndex: ${data.endIndex}`
 }
 
 onMounted(() => {
-  // loadSampleDataSine();
-  loadSampleDataFile();
+  loadSampleDataSine();
+  // loadSampleDataFile();
 });
 </script>
 

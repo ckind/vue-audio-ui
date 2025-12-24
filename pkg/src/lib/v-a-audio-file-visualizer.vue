@@ -14,7 +14,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { type CurvedRange, LinearCurvedRange, LogCurvedRange } from "@/util/curved-range.ts";
-import { clamp } from "@/util/math-helpers.ts";
+import { clamp, absMax } from "@/util/math-helpers.ts";
 import theme from '@/theme.ts';
 
 const DEFAULT_ASPECT_RATIO = 3;
@@ -252,7 +252,7 @@ export default defineComponent({
           (this.graphHeight / 2 + (max * this.graphHeight) / 2);
 
         this.canvasContext!.fillStyle = this.canvasLineColor;
-        this.canvasContext?.fillRect(x, miny, 1, maxy - miny);
+        this.canvasContext?.fillRect(x, miny, 1, absMax(maxy - miny, 1));
       }
 
       this.drawSelection();
@@ -343,7 +343,7 @@ export default defineComponent({
     },
     drawAmplitude() {
       // zoom breakpoint for drawing dots for each sample
-      if (this.zoomWindowLength/this.graphWidth < 1) {
+      if (this.zoomWindowLength/this.graphWidth < 0.25) {
         this.drawAmplitudeSampleLine(true);
       // zoom breakpoint for plotting each sample vs using aggregate drawing method
       } else if (this.zoomWindowLength/this.graphWidth <= 2) {
@@ -415,6 +415,7 @@ export default defineComponent({
       this.prevX = -1;
 
       if (this.selectionPosition) {
+        // todo: this can emit negative values for start index
         this.$emit('audioSelection', {
           startIndex: this.markerIndex,
           endIndex: Math.round(this.pixelsToSamples(this.selectionPosition)) + this.zoomWindowStartIndex
