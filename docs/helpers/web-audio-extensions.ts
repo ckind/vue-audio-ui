@@ -13,8 +13,9 @@ function scaleValue(
 }
 
 
-function getWaveShaperCurve(transferFn: TransferFunction, length = 1024, noramlize = false): Float32Array<ArrayBuffer> {
+function getWaveShaperCurve(transferFn: TransferFunction, length = 1024, normalize = false): Float32Array<ArrayBuffer> {
   const curveMapping = new Array<number>(length);
+
   for (let i = 0; i < length; i++) {
     // linear mapping of values from -1 to 1
     const linearValue = (i/(length - 1) * 2) - 1;
@@ -22,8 +23,8 @@ function getWaveShaperCurve(transferFn: TransferFunction, length = 1024, noramli
     curveMapping[i] = transferFn(linearValue, i);
   }
 
-  if (noramlize) {
-    // normalize curved mapping back from -1 to 1
+  if (normalize) {
+    // normalize curved mapping back to [-1,1]
     for (let i = 0; i < length; i++) {
       curveMapping[i] = scaleValue(
         curveMapping[i],
@@ -69,5 +70,3 @@ export class MultiplicationNode extends ScalerNode {
     super(context, (value, index) => value * amount, false);
   }
 }
-
-// todo: how to chain these if wave shaper curve only operates on signals between -1 and 1?

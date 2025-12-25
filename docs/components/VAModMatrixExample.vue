@@ -52,8 +52,10 @@ function toggleMute() {
   }
 }
 
-function setupMatrix() {
+async function setupMatrix() {
   const ctx = setupAudioContext();
+  await ctx.audioWorklet.addModule("../helpers/AudioWorklets/PowCurveWorkletProcessor.js");
+
   mainOutput.value = new GainNode(ctx, { gain: isMuted.value ? 0 : 1 });
 
   lfo1ScopeInput.value = new GainNode(ctx, { gain: 1 });
@@ -61,8 +63,8 @@ function setupMatrix() {
   lfo3ScopeInput.value = new GainNode(ctx, { gain: 1 });
 
   sources.value = [
-    setupLFO(ctx, 1, "triangle", lfo1ScopeInput.value!, "LFO 1", true),
-    setupLFO(ctx, 1, "triangle", lfo2ScopeInput.value, "LFO 2"),
+    setupLFO(ctx, 2, "triangle", lfo1ScopeInput.value!, "LFO 1"),
+    setupLFO(ctx, 10, "sine", lfo2ScopeInput.value, "LFO 2"),
     setupLFO(ctx, 0.1, "sine", lfo3ScopeInput.value!, "LFO 3"),
   ];
   destinations.value = [
@@ -84,7 +86,7 @@ function disconnectMatrix() {
   destinations.value = [];
 }
 
-function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, scopeInput?: AudioNode, name?: string, useScaler: boolean = false): ModMatrixSource {
+function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, scopeInput?: AudioNode, name?: string): ModMatrixSource {
   const osc = ctx.createOscillator();
   osc.type = type;
   osc.frequency.value = frequency;
@@ -92,19 +94,10 @@ function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, sc
 
   nodes.push(osc);
 
-  if (useScaler) {
-    const scaler = new ScalerNode(ctx, (n, i) => Math.pow(i, 2), true);
-    nodes.push(scaler);
-    if (scopeInput) {
-      osc.connect(scaler).connect(scopeInput);
-    }
-    return { node: scaler, name: name ?? `LFO ${frequency}Hz` };
-  } else {
-    if (scopeInput) {
-      osc.connect(scopeInput);
-    }
-    return { node: osc, name: name ?? `LFO ${frequency}Hz` };
+  if (scopeInput) {
+    osc.connect(scopeInput);
   }
+  return { node: osc, name: name ?? `LFO ${frequency}Hz` };
 }
 
 function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {
@@ -116,15 +109,24 @@ function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<Mo
   osc.connect(filter).connect(amp).connect(mainOutput.value!);
   osc.start();
 
+  const frequencyScaler = new AudioWorkletNode(
+    ctx,
+    "pow-curve-processor",
+    { parameterData: { min: 20, max: 20000, base: 2 } }
+  );
+
+  frequencyScaler.connect(filter.frequency);
+
   nodes.push(osc);
   nodes.push(filter);
   nodes.push(amp);
+  nodes.push(frequencyScaler);
 
   return [
     // todo: exponential scaling for frequencies
     { node: osc.frequency, minValue: 20, maxValue: 20000, name: "pitch" },
     { node: amp.gain, minValue: 0, maxValue: 1, name: "amp" },
-    { node: filter.frequency, minValue: 20, maxValue: 20000, name: "filter" }
+    { node: frequencyScaler, minValue: 20, maxValue: 20000, name: "filter" }
   ];
 }
 
