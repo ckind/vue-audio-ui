@@ -131,8 +131,6 @@ function commitManualInput() {
   document.removeEventListener('mouseup', onManualInputDocumentMouseUp);
 }
 
-
-
 // todo: could refactor dragging logic into composable and share with knob, fader, etc.
 function onMouseDown(e: MouseEvent | TouchEvent) {
   if (!manualInput.value) {
