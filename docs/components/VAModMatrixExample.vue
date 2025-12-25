@@ -5,18 +5,18 @@
     <br />
     <v-a-mod-matrix :sources="sources" :destinations="destinations" />
 
-    <!-- <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" /> -->
-    <!-- <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" /> -->
+    <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" />
+    <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" />
     <!-- <v-a-oscilloscope :input="mainOutput" :fftSize="32768" /> -->
-    <!-- <v-a-spectrum-analyzer :input="mainOutput" :fftSize="32768" /> -->
+    <v-a-spectrum-analyzer :input="mainOutput" :fftSize="32768" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
-
 import { type ModMatrixSource, type ModMatrixDestination } from "vue-audio-ui";
+import { ScalerNode } from "../helpers/web-audio-extensions.ts";
 
 const sources = ref<Array<ModMatrixSource>>([]);
 const destinations = ref<Array<ModMatrixDestination>>([]);
@@ -61,12 +61,12 @@ function setupMatrix() {
   lfo3ScopeInput.value = new GainNode(ctx, { gain: 1 });
 
   sources.value = [
-    setupLFO(ctx, 1.5, "triangle", lfo1ScopeInput.value!, "LFO 1"),
-    setupLFO(ctx, 20, "sawtooth", lfo2ScopeInput.value, "LFO 2"),
-    setupLFO(ctx, 0.5, "sine", lfo1ScopeInput.value!, "LFO 3"),
+    setupLFO(ctx, 1, "triangle", lfo1ScopeInput.value!, "LFO 1", true),
+    setupLFO(ctx, 1, "triangle", lfo2ScopeInput.value, "LFO 2"),
+    setupLFO(ctx, 0.1, "sine", lfo3ScopeInput.value!, "LFO 3"),
   ];
   destinations.value = [
-    ...setupFilteredOscillator(ctx, 440)
+    ...setupFilteredOscillator(ctx, 0)
   ];
 
   mainOutput.value!.connect(ctx.destination);
@@ -84,7 +84,7 @@ function disconnectMatrix() {
   destinations.value = [];
 }
 
-function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, scopeInput?: AudioNode, name?: string): ModMatrixSource {
+function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, scopeInput?: AudioNode, name?: string, useScaler: boolean = false): ModMatrixSource {
   const osc = ctx.createOscillator();
   osc.type = type;
   osc.frequency.value = frequency;
@@ -92,18 +92,26 @@ function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, sc
 
   nodes.push(osc);
 
+  if (useScaler) {
+    const scaler = new ScalerNode(ctx, (n, i) => Math.pow(i, 2), true);
+    nodes.push(scaler);
+    if (scopeInput) {
+      osc.connect(scaler).connect(scopeInput);
+    }
+    return { node: scaler, name: name ?? `LFO ${frequency}Hz` };
+  } else {
     if (scopeInput) {
       osc.connect(scopeInput);
     }
-
     return { node: osc, name: name ?? `LFO ${frequency}Hz` };
+  }
 }
 
 function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {
   const osc = ctx.createOscillator();
-  const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20 });
-  const amp = new GainNode(ctx, { gain: 0 });
-  osc.type = "sawtooth";
+  const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20000 });
+  const amp = new GainNode(ctx, { gain: 1 });
+  osc.type = "sine";
   osc.frequency.value = frequency;
   osc.connect(filter).connect(amp).connect(mainOutput.value!);
   osc.start();

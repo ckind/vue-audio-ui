@@ -37,4 +37,3 @@ export function requestMicrophoneAccess(audioCtx: AudioContext, callback: (a: Me
       console.log("error requesting microphone access:" + err);
     });
 };
-

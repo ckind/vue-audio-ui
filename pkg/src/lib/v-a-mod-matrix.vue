@@ -81,13 +81,15 @@ const audioContext = ref<BaseAudioContext>();
 const matrix = ref<Array<Array<ModMatrixCell>>>([]);
 
 watch(() => props.sources, (newSources, oldSources) => {
-  console.log(' Sources changed:', newSources, 're-connecting matrix');
+  // todo: clicks or pops when reconnecting?
+  // console.log(' Sources changed:', newSources, 're-connecting matrix');
   disconnectMatrix(oldSources, props.destinations);
   connectMatrix(newSources, props.destinations);
 });
 
 watch(() => props.destinations, (newDestinations, oldDestinations) => {
-  console.log(' Destinations changed:', newDestinations, 're-connecting matrix');
+  // todo: clicks or pops when reconnecting?
+  // console.log(' Destinations changed:', newDestinations, 're-connecting matrix');
   disconnectMatrix(props.sources, oldDestinations);
   connectMatrix(props.sources, newDestinations);
 });
