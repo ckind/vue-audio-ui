@@ -91,6 +91,8 @@ function drawTimeDomain() {
   let y = 0;
 
   for (let i = 0; i < dataArray.length; i++) {
+    // todo: allow props input for min and max (default to -1 and 1)
+    
     // dataArray[i] is a float between -1 and 1
     // flip the phase because canvas y coordinates are top-down
     const v = -(dataArray[i]!) * graphHeight.value / 2;
