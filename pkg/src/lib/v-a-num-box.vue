@@ -92,6 +92,7 @@ function onMouseDown(event: MouseEvent) {
   const startValue = props.modelValue;
 
   function onMouseMove(e: MouseEvent) {
+    // todo: this is a little wonky
     const dragRange = window.innerHeight / 2;
     const deltaY = startY - e.clientY;
 
