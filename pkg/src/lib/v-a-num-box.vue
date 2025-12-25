@@ -25,10 +25,12 @@ import { computed, ref } from 'vue';
 import theme from '@/theme.ts';
 import { round, clamp } from '@/util/math-helpers.ts';
 
+const emit = defineEmits(['update:modelValue']);
+
 const props = defineProps({
-  // todo: needs to be a number if no valueList is provided
   modelValue: {
-    required: true
+    required: true,
+    type: Number
   },
   minValue: {
     type: Number,
@@ -39,10 +41,6 @@ const props = defineProps({
     type: Number,
     required: false,
     default: 99
-  },
-  valueList: {
-    type: Array<any>,
-    required: false
   },
   fixedDecimals: {
     type: Number,
@@ -61,8 +59,9 @@ const props = defineProps({
 });
 
 const dragging = ref(false);
+const DRAG_RANGE = 90; // todo: responsive?
+let prevY = -1;
 
-const emit = defineEmits(['update:modelValue']);
 const triangleColor = computed(() => {
   return dragging.value ? theme.colors.primary : theme.colors.secondary;
 });
@@ -73,53 +72,56 @@ const cssVars = computed(() => {
     '--numbox-width': props.width ? `${props.width}px` : 'auto'
   };
 });
-const valueRange = computed(() => {
-  if (props.valueList) {
-    return props.valueList.length - 1;
-  }
 
+const valueRange = computed(() => {
   return props.maxValue - props.minValue;
 });
 
+// todo: allow user to manually type value
 function onDoubleClick() {
   emit('update:modelValue', 0);
 }
 
-function onMouseDown(event: MouseEvent) {
-  dragging.value = true;
-  event.preventDefault();
-  const startY = event.clientY;
-  const startValue = props.modelValue;
+// todo: could refactor dragging logic into composable and share with knob, fader, etc.
+function onMouseDown(e: MouseEvent | TouchEvent) {
+  e.preventDefault();
+  document.addEventListener("mousemove", onNumBoxMouseDrag);
+  document.addEventListener("touchmove", onNumBoxTouchDrag);
+  document.addEventListener("mouseup", onDocumentMouseUp);
+  document.addEventListener("touchend", onDocumentMouseUp);
+}
 
-  function onMouseMove(e: MouseEvent) {
-    // todo: this is a little wonky
-    const dragRange = window.innerHeight / 2;
-    const deltaY = startY - e.clientY;
+function onDocumentMouseUp() {
+  document.removeEventListener("mousemove", onNumBoxMouseDrag);
+  document.removeEventListener("touchmove", onNumBoxTouchDrag);
+  document.removeEventListener("mouseup", onDocumentMouseUp);
+  document.removeEventListener("touchend", onDocumentMouseUp);
+  prevY = -1;
+}
 
-    if (props.valueList) {
-      let i = Math.round(
-        props.valueList.indexOf(props.modelValue)
-          + (deltaY / dragRange) * (valueRange.value / 2));
-      i = clamp(i, 0, props.valueList.length - 1);
-      emit('update:modelValue', props.valueList[i]);
-    } else if (typeof props.modelValue === 'number') {
-      const newValue = clamp(
-        props.modelValue + (deltaY / dragRange) * (valueRange.value / 2),
-        props.minValue,
-        props.maxValue
-      );
-      emit('update:modelValue', round(newValue, props.fixedDecimals));
-    }
+function onNumBoxDrag(currY: number) {
+  if (prevY >= 0) {
+    const diffY = prevY - currY;
+    const value = clamp(
+      props.modelValue + (diffY / DRAG_RANGE) * (valueRange.value / 2),
+      props.minValue,
+      props.maxValue
+    );
+
+    emit("update:modelValue", round(value, props.fixedDecimals));
   }
+}
 
-  function onMouseUp() {
-    dragging.value = false;
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
+function onNumBoxTouchDrag(e: TouchEvent) {
+  if (e.touches[0]) {
+    onNumBoxDrag(e.touches[0].pageY);
+    prevY = e.touches[0].pageY;
   }
+}
 
-  window.addEventListener('mousemove', onMouseMove);
-  window.addEventListener('mouseup', onMouseUp);
+function onNumBoxMouseDrag(e: MouseEvent) {
+  onNumBoxDrag(e.pageY);
+  prevY = e.pageY;
 }
 
 </script>

@@ -66,7 +66,7 @@ function setupMatrix() {
     setupLFO(ctx, 0.1, "sine", lfo3ScopeInput.value!, "LFO 3"),
   ];
   destinations.value = [
-    ...setupFilteredOscillator(ctx, 0)
+    ...setupFilteredOscillator(ctx, 100)
   ];
 
   mainOutput.value!.connect(ctx.destination);
@@ -109,9 +109,9 @@ function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, sc
 
 function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {
   const osc = ctx.createOscillator();
-  const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20000 });
-  const amp = new GainNode(ctx, { gain: 1 });
-  osc.type = "sine";
+  const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20 });
+  const amp = new GainNode(ctx, { gain: 0 });
+  osc.type = "sawtooth";
   osc.frequency.value = frequency;
   osc.connect(filter).connect(amp).connect(mainOutput.value!);
   osc.start();
