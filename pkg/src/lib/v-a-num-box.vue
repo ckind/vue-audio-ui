@@ -1,10 +1,11 @@
 <template>
   <div
+    ref="numBox"
     class="numbox"
     :style="cssVars"
     :class="{ 'show-border': showBorder }"
     @mousedown="onMouseDown"
-    @doubleclick="onDoubleClick"
+    @dblclick="onDoubleClick"
   >
     <svg
       width="8"
@@ -16,12 +17,22 @@
       <polygon points="0,0 0,12 8,6" :fill="triangleColor" />
     </svg>
 
-    <span class="num-value">{{ modelValue }}</span>
+    <span v-if="!manualInput" class="num-value">{{ modelValue }}</span>
+    <input
+      v-if="manualInput"
+      id="manualInputEl"
+      ref="manualInputEl"
+      type="number"
+      :min="minValue"
+      :max="maxValue"
+      v-model="manualInputValue"
+      @keydown="onManualInputKeyDown"
+    ></input> 
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch, useTemplateRef, nextTick } from 'vue';
 import theme from '@/theme.ts';
 import { round, clamp } from '@/util/math-helpers.ts';
 
@@ -59,7 +70,12 @@ const props = defineProps({
 });
 
 const dragging = ref(false);
+const manualInput = ref(false);
+const manualInputValue = ref<number>(props.modelValue);
+const manualInputEl = useTemplateRef('manualInputEl');
+const numBox = useTemplateRef('numBox');
 const DRAG_RANGE = 90; // todo: responsive?
+
 let prevY = -1;
 
 const triangleColor = computed(() => {
@@ -77,21 +93,59 @@ const valueRange = computed(() => {
   return props.maxValue - props.minValue;
 });
 
-// todo: allow user to manually type value
+watch(() => props.modelValue, (val) => manualInputValue.value = val);
+
 function onDoubleClick() {
-  emit('update:modelValue', 0);
+  manualInput.value = true;
+  manualInputValue.value = props.modelValue;
+
+  nextTick().then(() => {
+    manualInputEl.value?.select();
+    document.addEventListener('mouseup', onManualInputDocumentMouseUp);
+  });
 }
+
+function onManualInputDocumentMouseUp(e: MouseEvent) {
+  // commit manual input changes if use clicks outside of num box
+  if (!numBox.value!.contains(e.target as Node)) {
+    commitManualInput();
+  }
+}
+
+function onManualInputKeyDown(e: KeyboardEvent) {
+  // commit manual input changes if use presses enter
+  if (e.key === 'Enter') {
+    commitManualInput();
+  }
+}
+
+function commitManualInput() {
+  emit("update:modelValue",
+    clamp(
+      round(manualInputValue.value, props.fixedDecimals),
+      props.minValue,
+      props.maxValue
+    )
+  );
+  manualInput.value = false;
+  document.removeEventListener('mouseup', onManualInputDocumentMouseUp);
+}
+
+
 
 // todo: could refactor dragging logic into composable and share with knob, fader, etc.
 function onMouseDown(e: MouseEvent | TouchEvent) {
-  e.preventDefault();
-  document.addEventListener("mousemove", onNumBoxMouseDrag);
-  document.addEventListener("touchmove", onNumBoxTouchDrag);
-  document.addEventListener("mouseup", onDocumentMouseUp);
-  document.addEventListener("touchend", onDocumentMouseUp);
+  if (!manualInput.value) {
+    e.preventDefault();
+    document.addEventListener("mousemove", onNumBoxMouseDrag);
+    document.addEventListener("touchmove", onNumBoxTouchDrag);
+    document.addEventListener("mouseup", onDocumentMouseUp);
+    document.addEventListener("touchend", onDocumentMouseUp);
+  } 
 }
 
 function onDocumentMouseUp() {
+  dragging.value = false;
   document.removeEventListener("mousemove", onNumBoxMouseDrag);
   document.removeEventListener("touchmove", onNumBoxTouchDrag);
   document.removeEventListener("mouseup", onDocumentMouseUp);
@@ -100,6 +154,7 @@ function onDocumentMouseUp() {
 }
 
 function onNumBoxDrag(currY: number) {
+  dragging.value = true;
   if (prevY >= 0) {
     const diffY = prevY - currY;
     const value = clamp(
@@ -155,6 +210,12 @@ function onNumBoxMouseDrag(e: MouseEvent) {
   overflow: hidden;
   white-space: nowrap;  /* optional */
   text-overflow: ellipsis; /* optional */
+}
+
+input[type="number"] {
+  font-family: inherit;
+  font-size: inherit;
+  /* You may also want to set the width to a specific value if needed */
 }
 
 </style>
