@@ -2,7 +2,9 @@ let globalAudioContext: (AudioContext | undefined);
 
 export async function addAudioWorkletModules(ctx: AudioContext) {
   const promises = [
-    ctx.audioWorklet.addModule("../helpers/audio-worklets/PowCurveWorkletProcessor.js")
+    ctx.audioWorklet.addModule("../helpers/audio-worklets/PowCurveWorkletProcessor.js"),
+    ctx.audioWorklet.addModule("../helpers/audio-worklets/DbToGainWorkletProcessor.js"),
+    ctx.audioWorklet.addModule("../helpers/audio-worklets/ScaleWorkletProcessor.js"),
   ];
   await Promise.all(promises);
 }

@@ -5,18 +5,19 @@
     <br />
     <v-a-mod-matrix :sources="sources" :destinations="destinations" />
 
-    <!-- <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" />
-    <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" /> -->
+    <!-- <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" /> -->
+    <!-- <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" /> -->
+    <!-- <v-a-oscilloscope :input="lfo3ScopeInput" :fftSize="32768" /> -->
     <!-- <v-a-oscilloscope :input="mainOutput" :fftSize="32768" /> -->
-    <!-- <v-a-spectrum-analyzer :input="mainOutput" :fftSize="32768" />
-    <v-a-digital-meter :input="mainOutput" drawMarkers /> -->
+    <!-- <v-a-spectrum-analyzer :input="mainOutput" :fftSize="32768" /> -->
+    <!-- <v-a-digital-meter :input="mainOutput" drawMarkers /> -->
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { requestGlobalAudioContext } from "../helpers/web-audio-helpers.ts";
-import { createPowCurveNode } from "../helpers/audio-worklet-factory.ts"
+import { createPowCurveNode, createDbToGainNode, createScaleNode } from "../helpers/audio-worklet-factory.ts"
 import { type ModMatrixSource, type ModMatrixDestination } from "vue-audio-ui";
 
 const sources = ref<Array<ModMatrixSource>>([]);
@@ -102,29 +103,34 @@ function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, sc
 
 function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {
   const osc = ctx.createOscillator();
-  const pitchCurve = createPowCurveNode(ctx, 20, 20000, 2);
+  const pitchNode = createPowCurveNode(ctx, 20, 20000, 2);
   const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20 });
-  const filterCurve = createPowCurveNode(ctx, 20, 20000, 2);
+  const filterCutoffNode = createPowCurveNode(ctx, 20, 20000, 2);
   const amp = new GainNode(ctx, { gain: 0 });
+  const volumeNode = createDbToGainNode(ctx, -80);
+  const volumeScaleNode = createScaleNode(ctx, 0, 1, -80, 0);
 
   osc.type = "sawtooth";
   osc.frequency.value = frequency;
   osc.connect(filter).connect(amp).connect(mainOutput.value!);
   osc.start();
 
-  filterCurve.connect(filter.frequency);
-  pitchCurve.connect(osc.frequency);
+  filterCutoffNode.connect(filter.frequency);
+  pitchNode.connect(osc.frequency);
+  volumeScaleNode.connect(volumeNode).connect(amp.gain);
 
   nodes.push(osc);
-  nodes.push(pitchCurve);
+  nodes.push(pitchNode);
   nodes.push(filter);
-  nodes.push(filterCurve);
+  nodes.push(filterCutoffNode);
   nodes.push(amp);
+  nodes.push(volumeNode);
+  nodes.push(volumeScaleNode);
 
   return [
-    { node: amp.gain, minValue: 0, maxValue: 1, name: "amp" },
-    { node: pitchCurve, minValue: 20, maxValue: 20000, name: "pitch" },
-    { node: filterCurve, minValue: 20, maxValue: 20000, name: "filter" }
+    { node: volumeScaleNode, minValue: 0, maxValue: 1, name: "amp" },
+    { node: pitchNode, minValue: 20, maxValue: 20000, name: "pitch" },
+    { node: filterCutoffNode, minValue: 20, maxValue: 20000, name: "filter" }
   ];
 }
 
@@ -140,6 +146,6 @@ function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<Mo
 .mute-btn {
   padding: 0.5rem;
   margin: 1rem 0;
-  border: 1px solid #ccc;
+  border: 1px solid var(--vp-c-border)
 }
 </style>
