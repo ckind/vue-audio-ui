@@ -47,12 +47,15 @@ class PowCurveWorkletProcessor extends AudioWorkletProcessor {
     const logMax = logBaseN(n, max);
     const logRange = logMax - logMin;
 
-    // for each render quantum.
-    for (let channel = 0; channel < output.length; ++channel) {
-      for (let i = 0; i < output[channel].length; ++i) {
-        const t = (input[channel][i] - min) / range;
-        output[channel][i] = powBaseN(n, t * logRange + logMin);
-      }
+    // assume only one input channel and output channel for now
+    const inputChannel = input[0];
+    const outputChannel = output[0]
+
+    if (!inputChannel || !outputChannel) return true;
+
+    for (let i = 0; i < inputChannel.length; ++i) {
+      const t = (inputChannel[i] - min) / range;
+      outputChannel[i] = powBaseN(n, t * logRange + logMin);
     }
 
     return true;

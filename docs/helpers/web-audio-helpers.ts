@@ -1,4 +1,11 @@
-export let globalAudioContext = null as AudioContext | null;
+let globalAudioContext: (AudioContext | undefined);
+
+export async function addAudioWorkletModules(ctx: AudioContext) {
+  const promises = [
+    ctx.audioWorklet.addModule("../helpers/audio-worklets/PowCurveWorkletProcessor.js")
+  ];
+  await Promise.all(promises);
+}
 
 export function setupAutoResume(ctx: AudioContext) {
   document.addEventListener("mousedown", () => {
@@ -8,22 +15,23 @@ export function setupAutoResume(ctx: AudioContext) {
   });
 };
 
-export function setupAudioContext(useGlobal = true): AudioContext {
-  if (useGlobal) {
-    if (globalAudioContext == null) {
-      globalAudioContext = new window.AudioContext();
-      setupAutoResume(globalAudioContext);
+export async function createAudioContext(): Promise<AudioContext> {
+  const ctx = new window.AudioContext();
+  await addAudioWorkletModules(ctx); 
+  setupAutoResume(ctx);
+
+  return ctx;
+}
+
+export async function requestGlobalAudioContext(): Promise<AudioContext> {
+  await navigator.locks.request("globalAudioContext", async (lock) => {
+    if (globalAudioContext === undefined) {
+      globalAudioContext = await createAudioContext();
+      console.log("initialized global audio context", globalAudioContext);
     }
+	});
 
-    return globalAudioContext;
-  }
-  else {
-    const ctx = new window.AudioContext();
-
-    setupAutoResume(ctx);
-
-    return ctx;
-  }
+  return globalAudioContext!;
 };
 
 export function requestMicrophoneAccess(audioCtx: AudioContext, callback: (a: MediaStreamAudioSourceNode) => void) {

@@ -5,18 +5,19 @@
     <br />
     <v-a-mod-matrix :sources="sources" :destinations="destinations" />
 
-    <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" />
-    <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" />
+    <!-- <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" />
+    <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" /> -->
     <!-- <v-a-oscilloscope :input="mainOutput" :fftSize="32768" /> -->
-    <v-a-spectrum-analyzer :input="mainOutput" :fftSize="32768" />
+    <!-- <v-a-spectrum-analyzer :input="mainOutput" :fftSize="32768" />
+    <v-a-digital-meter :input="mainOutput" drawMarkers /> -->
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
+import { requestGlobalAudioContext } from "../helpers/web-audio-helpers.ts";
+import { createPowCurveNode } from "../helpers/audio-worklet-factory.ts"
 import { type ModMatrixSource, type ModMatrixDestination } from "vue-audio-ui";
-import { ScalerNode } from "../helpers/web-audio-extensions.ts";
 
 const sources = ref<Array<ModMatrixSource>>([]);
 const destinations = ref<Array<ModMatrixDestination>>([]);
@@ -28,8 +29,8 @@ const lfo1ScopeInput = ref<AudioNode>();
 const lfo2ScopeInput = ref<AudioNode>();
 const lfo3ScopeInput = ref<AudioNode>();
 
-onMounted(() => {
-  setupMatrix();
+onMounted(async () => {
+  await setupMatrix();
 });
 
 onUnmounted(() => {
@@ -53,8 +54,7 @@ function toggleMute() {
 }
 
 async function setupMatrix() {
-  const ctx = setupAudioContext();
-  await ctx.audioWorklet.addModule("../helpers/AudioWorklets/PowCurveWorkletProcessor.js");
+  const ctx = await requestGlobalAudioContext();
 
   mainOutput.value = new GainNode(ctx, { gain: isMuted.value ? 0 : 1 });
 
@@ -102,31 +102,29 @@ function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, sc
 
 function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {
   const osc = ctx.createOscillator();
+  const pitchCurve = createPowCurveNode(ctx, 20, 20000, 2);
   const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20 });
+  const filterCurve = createPowCurveNode(ctx, 20, 20000, 2);
   const amp = new GainNode(ctx, { gain: 0 });
+
   osc.type = "sawtooth";
   osc.frequency.value = frequency;
   osc.connect(filter).connect(amp).connect(mainOutput.value!);
   osc.start();
 
-  const frequencyScaler = new AudioWorkletNode(
-    ctx,
-    "pow-curve-processor",
-    { parameterData: { min: 20, max: 20000, base: 2 } }
-  );
-
-  frequencyScaler.connect(filter.frequency);
+  filterCurve.connect(filter.frequency);
+  pitchCurve.connect(osc.frequency);
 
   nodes.push(osc);
+  nodes.push(pitchCurve);
   nodes.push(filter);
+  nodes.push(filterCurve);
   nodes.push(amp);
-  nodes.push(frequencyScaler);
 
   return [
-    // todo: exponential scaling for frequencies
-    { node: osc.frequency, minValue: 20, maxValue: 20000, name: "pitch" },
     { node: amp.gain, minValue: 0, maxValue: 1, name: "amp" },
-    { node: frequencyScaler, minValue: 20, maxValue: 20000, name: "filter" }
+    { node: pitchCurve, minValue: 20, maxValue: 20000, name: "pitch" },
+    { node: filterCurve, minValue: 20, maxValue: 20000, name: "filter" }
   ];
 }
 

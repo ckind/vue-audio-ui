@@ -37,15 +37,15 @@
 import { ref, onMounted, useTemplateRef } from "vue";
 import { VADigitalMeter } from "vue-audio-ui";
 import PropsTable from "./PropsTable.vue";
-import { setupAudioContext } from "../helpers/web-audio-helpers.ts";
+import { requestGlobalAudioContext } from "../helpers/web-audio-helpers.ts";
 
 const propsToDisplay = ref(VADigitalMeter.props);
 const meterInput = ref<AudioNode>();
 const myAudio = useTemplateRef("my-audio");
 let ctx: AudioContext;
 
-onMounted(() => {
-  ctx = setupAudioContext();
+onMounted(async () => {
+  ctx = await requestGlobalAudioContext();
 
   // get the audio element
   const audioElement = myAudio.value as HTMLAudioElement;

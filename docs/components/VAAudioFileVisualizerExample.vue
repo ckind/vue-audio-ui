@@ -22,7 +22,7 @@ import { ref, onMounted } from "vue";
 import { VAAudioFileVisualizer } from "vue-audio-ui";
 
 import PropsTable from "./PropsTable.vue";
-import { setupAudioContext } from "../helpers/web-audio-helpers";
+import { requestGlobalAudioContext } from "../helpers/web-audio-helpers";
 
 const amplitudeData = ref<Float32Array<ArrayBuffer>>();
 const propsToDisplay = ref(VAAudioFileVisualizer.props);
@@ -44,7 +44,7 @@ function loadSampleDataSine() {
 };
 
 async function loadSampleDataFile() {
-  const ctx = setupAudioContext();
+  const ctx = await requestGlobalAudioContext();
 
   const response = await fetch('/audio/brink.mp3');
   const arrayBuffer = await response.arrayBuffer();
