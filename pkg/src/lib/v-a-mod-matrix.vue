@@ -43,20 +43,25 @@
 <script setup lang="ts">
 import { onMounted, watch, ref} from "vue";
 import { SignalScaler, type SignalScalerType } from "@/util/SignalScaler";
+import { SignalToRatio, type SignalToRatioType } from "@/util/SignalToRatio";
 
 type DestinationNode = AudioParam | AudioNode;
 
 type ModMatrixCell = { 
   modAmountValue: number; // dummy value for v-model binding
   modAmountNode: GainNode;
-  scaler: SignalScalerType;
+  signalToRatioConverter: SignalToRatioType;
   source: ModMatrixSource;
   destination: ModMatrixDestination
 }
 
 type ModulationBus  = {
   destination: ModMatrixDestination,
-  node: AudioNode
+  sourceCells: Array<ModMatrixCell>,
+  ratioSum?: AudioNode,
+  clamper?: AudioNode,
+  outputScaler?: SignalScaler,
+  output?: AudioNode
 }
 
 export type ModMatrixSource = {
@@ -92,7 +97,7 @@ const props = defineProps({
 // could just use a regular let
 const audioContext = ref<BaseAudioContext>();
 const matrix = ref<Array<Array<ModMatrixCell>>>([]);
-const modulationBuses: ModulationBus[] = [];
+let modulationBuses: Array<ModulationBus> = [];
 
 watch(() => props.sources, (newSources, oldSources) => {
   // todo: clicks or pops when reconnecting?
@@ -112,19 +117,45 @@ function cellModAmountUpdate(cell: ModMatrixCell, value: number) {
   cell.modAmountNode.gain.setValueAtTime(value, audioContext.value!.currentTime);
 }
 
-function disconnectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModMatrixDestination>) {
-  sources.forEach(source => {
-    const row = matrix.value.shift();
-    row?.forEach(cell => {
-      source.node.disconnect(cell.scaler.input);
-      cell.modAmountNode.disconnect();
-      cell.scaler.dispose();
-    });
+function connectModulationBus(ctx: BaseAudioContext, bus: ModulationBus) {
+  // 1. sum all of the ratios together
+  // 2. clamp the ratio sum to [0, 1] - with waveshaper node?
+  // 3. scale the ratios to the output min and max
+
+  bus.ratioSum = new GainNode(ctx, { gain: 1 });
+  bus.sourceCells.forEach((cell => {
+    if (bus.ratioSum) cell.modAmountNode.connect(bus.ratioSum);
+  }));
+
+  // use waveshaper to clamp ratioSum to [0, 1]
+  bus.clamper = new WaveShaperNode(ctx, { curve: [0, 0, 1] });
+  bus.ratioSum.connect(bus.clamper);
+  // scale clamper output to [dest.min, dest.max]
+  // todo: could use more efficient signal scaler if input is known to be [0,1]
+  bus.outputScaler = new SignalScaler(ctx, 0, 1, bus.destination.minValue, bus.destination.maxValue); 
+  bus.clamper.connect(bus.outputScaler.input);
+  bus.output = bus.outputScaler.output;
+
+  if (bus.destination.node instanceof AudioParam) {
+    bus.output.connect(bus.destination.node);
+  } else if (bus.destination.node instanceof AudioNode) {
+    bus.output.connect(bus.destination.node);
+  }
+}
+
+function disconnectModulationBus(bus: ModulationBus) {
+  bus.sourceCells.forEach(cell => {
+    cell.modAmountNode.disconnect();
   });
-  matrix.value = [];
+  bus.ratioSum?.disconnect();
+  bus.ratioSum = undefined;
+  bus.clamper?.disconnect();
+  bus.clamper = undefined;
 }
 
 function connectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModMatrixDestination>) {
+  // todo: just build the matrix out of modulation buses instead of dual-maintaining data structures
+
   // connect sources to destinations
   if (sources.length > 0) {
     audioContext.value = sources[0]?.node.context;
@@ -135,41 +166,57 @@ function connectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModM
   }
 
   const ctx = audioContext.value;
+  const cells: ModMatrixCell[] = [];
 
   sources.forEach((source) => {
     const row: Array<ModMatrixCell> = [];
     const defaultModAmount = 0;
 
-    // todo: should bus all the modulations to one node then connect that to the destination
-    // that way the bus can be clamped with dest min/max and offsets can be controlled
-    // potential optimization - sources with the same min and max could share a scaler node
-    destinations.forEach((destination) => {
-      // scale signal on source range to destination range
-      const scaler = new SignalScaler(ctx, source.minValue, source.maxValue, destination.minValue, destination.maxValue);      
+    destinations.forEach((destination) => { 
       const modAmountNode = new GainNode(ctx, { gain: defaultModAmount });
-
-      // todo: still issue with negative numbers
-      // multiplying by mod amount moves the value towards 0,
-      // which is an issue for decibels (where 0 is max value)
-      if (destination.node instanceof AudioParam) {
-        source.node.connect(scaler.input);
-        scaler.output.connect(modAmountNode).connect(destination.node);
-      }
-      else if (destination.node instanceof AudioNode) {
-        source.node.connect(scaler.input);
-        scaler.output.connect(modAmountNode).connect(destination.node);
-      }
-
-      row.push({
+      const signalToRatioConverter = new SignalToRatio(ctx, source.minValue, source.maxValue);
+      source.node.connect(signalToRatioConverter.input);
+      signalToRatioConverter.output.connect(modAmountNode);
+      const cell = {
         modAmountValue: defaultModAmount,
         modAmountNode,
-        scaler,
+        signalToRatioConverter,
         source,
         destination
-      });
+      };
+      row.push(cell);
+      cells.push(cell);
     });
     matrix.value.push(row);
   });
+
+  destinations.forEach(dest => {
+    const bus: ModulationBus = {
+      destination: dest,
+      sourceCells: cells.filter(cell => cell.destination === dest)
+    }
+    connectModulationBus(ctx, bus);
+    modulationBuses.push(bus);
+  });
+}
+
+function disconnectMatrix(sources: Array<ModMatrixSource>, destinations: Array<ModMatrixDestination>) {
+  sources.forEach(source => {
+    const row = matrix.value.shift();
+    row?.forEach(cell => {
+      cell.source.node.disconnect(cell.signalToRatioConverter.input);
+      cell.signalToRatioConverter.dispose();
+      cell.modAmountNode.disconnect();
+    });
+  });
+
+  matrix.value = [];
+
+  modulationBuses.forEach(bus => {
+    disconnectModulationBus(bus);
+  });
+
+  modulationBuses = [];
 }
 
 </script>

@@ -4,6 +4,9 @@ export type SignalScalerType = {
   dispose(): void;
 }
 
+/**
+ * scales the incoming signal from (inputMin, inputMax) to (outputMin, outputMax)
+ */
 export class SignalScaler implements SignalScalerType {
   private _minusInputMin: ConstantSourceNode;
   private _plusOutputMin: ConstantSourceNode;

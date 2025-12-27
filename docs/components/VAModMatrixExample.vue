@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Here is a simple filtered sawtooth patch with 3 different LFO's for modulation.</p>
+    <p>Here is a simple filtered sawtooth patch with 2 different LFO's and a white noise source for modulation.</p>
     <button class="mute-btn" @click="toggleMute">{{ isMuted ? "Unmute" : "Mute" }}</button>
     <br />
     <v-a-mod-matrix :sources="sources" :destinations="destinations" :loggerNode="logger" />
@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { requestGlobalAudioContext } from "../helpers/web-audio-helpers.ts";
-import { createPowCurveNode, createDbToGainNode, createScaleNode, createLoggerNode } from "../helpers/audio-worklet-factory.ts"
+import { createPowCurveNode, createDbToGainNode, createScaleNode, createLoggerNode, createWhiteNoiseNode } from "../helpers/audio-worklet-factory.ts"
 import { type ModMatrixSource, type ModMatrixDestination } from "vue-audio-ui";
 
 const sources = ref<Array<ModMatrixSource>>([]);
@@ -65,12 +65,12 @@ async function setupMatrix() {
   lfo2ScopeInput.value = new GainNode(ctx, { gain: 1 });
   lfo3ScopeInput.value = new GainNode(ctx, { gain: 1 });
 
-  // logger.value = createLoggerNode(ctx);
+  logger.value = createLoggerNode(ctx);
 
   sources.value = [
-    setupLFO(ctx, 2, "triangle", "LFO 1", lfo1ScopeInput.value),
-    setupLFO(ctx, 10, "sine", "LFO 2", lfo2ScopeInput.value),
-    setupLFO(ctx, 0.1, "sine", "LFO 3", lfo3ScopeInput.value),
+    setupLFO(ctx, 10, "triangle", "LFO 1", lfo1ScopeInput.value),
+    setupLFO(ctx, 0.5, "sine", "LFO 2", lfo2ScopeInput.value),
+    setupNoise(ctx, "Noise", lfo3ScopeInput.value)
   ];
   destinations.value = [
     ...setupFilteredOscillator(ctx, 100)
@@ -105,12 +105,24 @@ function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, na
   return { node: osc, minValue: -1, maxValue: 1, name };
 }
 
+function setupNoise(ctx: AudioContext, name: string, scopeInput?: AudioNode): ModMatrixSource {
+  const noise = createWhiteNoiseNode(ctx);
+  noise.start();
+  nodes.push(noise);
+
+  if (scopeInput) {
+    noise.connect(scopeInput);
+  }
+
+  return { node: noise, minValue: -1, maxValue: 1, name };
+}
+
 function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {
   const osc = ctx.createOscillator();
   const pitchNode = createPowCurveNode(ctx, 20, 20000, 2);
   const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20 });
   const filterCutoffNode = createPowCurveNode(ctx, 20, 20000, 2);
-  const amp = new GainNode(ctx, { gain: 0 });
+  const amp = new GainNode(ctx, { gain: 0.2 });
   const volumeNode = createDbToGainNode(ctx, -60);
 
   osc.type = "sawtooth";
@@ -130,9 +142,9 @@ function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<Mo
   nodes.push(volumeNode);
 
   return [
-    { node: volumeNode, minValue: -60, maxValue: 0, name: "amp" },
+    // { node: volumeNode, minValue: -60, maxValue: 0, name: "amp" },
     { node: pitchNode, minValue: 20, maxValue: 20000, name: "pitch" },
-    { node: filterCutoffNode, minValue: 20, maxValue: 20000, name: "filter" }
+    { node: filterCutoffNode, minValue: 20, maxValue: 18000, name: "filter" }
   ];
 }
 
