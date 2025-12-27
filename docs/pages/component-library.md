@@ -20,7 +20,7 @@ This page documents and demonstrates the available components in vue-audio-ui.
 
 ## v-a-num-box
 
-DAW-style number box. Click and drag to adjust.
+DAW-style number box. Click and drag to adjust. Double-click to type in values.
 
 <VANumBoxExample />
 

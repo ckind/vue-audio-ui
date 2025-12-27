@@ -32,3 +32,8 @@ export function createScaleNode(
   );
   return node;
 }
+
+export function createLoggerNode(ctx: BaseAudioContext): AudioWorkletNode {
+  const node = new AudioWorkletNode(ctx, "logger-processor");
+  return node;
+}

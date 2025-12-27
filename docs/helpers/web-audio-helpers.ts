@@ -5,6 +5,7 @@ export async function addAudioWorkletModules(ctx: AudioContext) {
     ctx.audioWorklet.addModule("../helpers/audio-worklets/PowCurveWorkletProcessor.js"),
     ctx.audioWorklet.addModule("../helpers/audio-worklets/DbToGainWorkletProcessor.js"),
     ctx.audioWorklet.addModule("../helpers/audio-worklets/ScaleWorkletProcessor.js"),
+    ctx.audioWorklet.addModule("../helpers/audio-worklets/LoggerWorkletProcessor.js"),
   ];
   await Promise.all(promises);
 }
