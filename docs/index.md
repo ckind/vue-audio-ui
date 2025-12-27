@@ -17,8 +17,8 @@ hero:
 features:
   - title: Lightweight
     details: minimal setup required
-  - title: Framework Agnostic
-    details: easily drag and drop into any project
+  - title: Flexible
+    details: customizable theme and assets
   - title: Open-source
     details: view code, fork, submit a PR
 
