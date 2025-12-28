@@ -21,11 +21,16 @@ jobs:
           submodules: true
           lfs: false
 
-      - name: npm install, build and test docs
+      - name: npm install, build and test
         run: |
-          ls
-          cd ./docs
+          cd ./pkg
           npm install
+          npm run build
+          npm run test --if-present
+          npm run publish-local
+          cd ../docs
+          npm install
+          npm run link-package
           npm run docs:build
           npm run docs:test --if-present
 
@@ -54,4 +59,5 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VUE_AUDIO_UI_DOCS }}
           action: "close"
+
 
