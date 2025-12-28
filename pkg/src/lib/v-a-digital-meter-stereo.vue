@@ -42,11 +42,11 @@ export default defineComponent({
   props: {
     leftInput: {
       required: false,
-      type: AudioNode,
+      type: Object, // type: AudioNode -- need to use Object for SSR
     },
     rightInput: {
       required: false,
-      type: AudioNode,
+      type: Object, // type: AudioNode -- need to use Object for SSR
     },
     type: {
       required: false,

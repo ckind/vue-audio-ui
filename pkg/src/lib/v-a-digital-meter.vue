@@ -24,7 +24,7 @@ export default defineComponent({
   props: {
     input: {
       required: false,
-      type: AudioNode,
+      type: Object, // type: AudioNode -- need to use Object for SSR
       default: undefined
     },
     type: {
@@ -80,9 +80,11 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const metering = useMetering(props.fftSize, props.input);
+    const metering = useMetering(props.fftSize, props.input as AudioNode);
 
-    watch(() => props.input, metering.onInputChanged);
+    watch(() => props.input, (newVal, oldVal) => {
+      metering.onInputChanged(newVal as AudioNode | undefined, oldVal as AudioNode | undefined);
+    });
 
     return {
       ...metering,

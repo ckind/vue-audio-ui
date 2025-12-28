@@ -88,7 +88,7 @@ const props = defineProps({
     required: true
   },
   loggerNode: {
-    type: AudioNode,
+    type: Object, // type: AudioNode -- need to use Object for SSR
     required: false
   }
 });
