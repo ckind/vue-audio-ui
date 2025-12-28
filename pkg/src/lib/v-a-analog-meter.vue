@@ -143,7 +143,7 @@ export default defineComponent({
   props: {
     input: {
       required: false,
-      type: AudioNode,
+      type: Object, // type: AudioNode -- need to use Object for SSR
       default: undefined
     },
     type: {
@@ -164,9 +164,11 @@ export default defineComponent({
   },
   setup(props) {
     const { getPeakDb, getRmsDb, getFloatTimeDomainData, onInputChanged } =
-      useMetering(props.fftSize, props.input);
+      useMetering(props.fftSize, props.input as AudioNode);
 
-    watch(() => props.input, onInputChanged);
+    watch(() => props.input, (newVal, oldVal) => {
+      onInputChanged(newVal as AudioNode | undefined, oldVal as AudioNode | undefined);
+    });
 
     const { startRendering, stopRendering } = useRendering();
 

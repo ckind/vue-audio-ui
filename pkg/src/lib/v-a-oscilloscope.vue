@@ -19,7 +19,7 @@ const DEFAULT_ASPECT_RATIO = 3;
 
 const props = defineProps({
   input: {
-    type: AudioNode,
+    type: Object, // type: AudioNode -- need to use Object for SSR
     required: false
   },
   width: {
@@ -45,10 +45,12 @@ const props = defineProps({
   },
 });
 
-const metering = useMetering(props.fftSize, props.input);
+const metering = useMetering(props.fftSize, props.input as AudioNode | undefined);
 const rendering = useRendering();
 
-watch(() => props.input, metering.onInputChanged);
+watch(() => props.input, (newVal, oldVal) => {
+  metering.onInputChanged(newVal as AudioNode | undefined, oldVal as AudioNode | undefined);
+});
 
 const analyserCanvas = useTemplateRef("analyserCanvas");
 let canvasContext: CanvasRenderingContext2D;
@@ -65,7 +67,7 @@ const graphHeight = computed(() => {
 })
 
 function dispose() {
-  metering.disposeMetering(props.input);
+  metering.disposeMetering(props.input as AudioNode | undefined);
 }
 
 function drawTimeDomain() {
