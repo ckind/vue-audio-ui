@@ -14,9 +14,6 @@ jobs:
     name: Build and Deploy Job
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-diectory: ./docs
 
     steps:
       - uses: actions/checkout@v3
@@ -26,6 +23,8 @@ jobs:
 
       - name: npm install, build and test docs
         run: |
+          ls
+          cd ./docs
           npm install
           npm run docs:build
           npm run docs:test --if-present
@@ -55,3 +54,4 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VUE_AUDIO_UI_DOCS }}
           action: "close"
+
