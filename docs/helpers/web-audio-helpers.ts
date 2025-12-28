@@ -1,12 +1,18 @@
 let globalAudioContext: (AudioContext | undefined);
 
+import loggerWorkletUrl from "../helpers/audio-worklets/LoggerWorkletProcessor.js?url";
+import dbToGainWorkletUrl from "../helpers/audio-worklets/DbToGainWorkletProcessor.js?url";
+import scaleWorkletUrl from "../helpers/audio-worklets/ScaleWorkletProcessor.js?url";
+import powCurveWorkletUrl from "../helpers/audio-worklets/PowCurveWorkletProcessor.js?url";
+
 export async function addAudioWorkletModules(ctx: AudioContext) {
   const promises = [
-    ctx.audioWorklet.addModule("../helpers/audio-worklets/PowCurveWorkletProcessor.js"),
-    ctx.audioWorklet.addModule("../helpers/audio-worklets/DbToGainWorkletProcessor.js"),
-    ctx.audioWorklet.addModule("../helpers/audio-worklets/ScaleWorkletProcessor.js"),
-    ctx.audioWorklet.addModule("../helpers/audio-worklets/LoggerWorkletProcessor.js"),
+    ctx.audioWorklet.addModule(loggerWorkletUrl),
+    ctx.audioWorklet.addModule(dbToGainWorkletUrl),
+    ctx.audioWorklet.addModule(scaleWorkletUrl),
+    ctx.audioWorklet.addModule(powCurveWorkletUrl),
   ];
+
   await Promise.all(promises);
 }
 

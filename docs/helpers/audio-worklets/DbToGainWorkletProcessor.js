@@ -1,4 +1,7 @@
-import { dbToGain, logBaseN, powBaseN } from "../math-helpers";
+
+function gainToDb(gain) {
+	return 20 * (Math.log(gain) / Math.LN10);
+}
 
 /**
  * converts an incoming decibel value [0, -infinity) to a gain value [0, 1]

@@ -1,4 +1,10 @@
-import { logBaseN, powBaseN } from "../math-helpers";
+
+function logBaseN(n, x) {
+  return Math.log(x) / Math.log(n);
+}
+function powBaseN(n, x) {
+  return Math.pow(n, x);
+}
 
 /**
  * maps the input value along an n^x curve from min to max

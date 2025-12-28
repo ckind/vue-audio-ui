@@ -1,4 +1,15 @@
-import { scaleValue } from "../math-helpers";
+
+// scales an input value along the input range to the output range
+function scaleValue(
+  inputValue,
+  inputMin,
+  inputMax,
+  outputMin,
+  outputMax
+) {
+  return outputMin
+    + (outputMax-outputMin) * ((inputValue-inputMin) / (inputMax-inputMin));
+}
 
 /**
  * scales an input value along the input range to the output range
