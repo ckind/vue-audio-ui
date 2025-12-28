@@ -5,6 +5,9 @@ import { fileURLToPath } from 'node:url'
 export default defineConfig({
   title: "vue-audio-ui",
   description: "Official Documentation for vue-audio-ui",
+  head: [
+    ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }]
+  ],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
