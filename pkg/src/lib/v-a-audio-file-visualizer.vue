@@ -226,7 +226,7 @@ export default defineComponent({
       this.canvasContext!.fillStyle = this.canvasBackgroundColor;
       this.canvasContext?.fillRect(0, 0, this.graphWidth, this.graphHeight);
     },
-    drawAmplitudeMinMax() {
+    drawAmplitudeMinMax(binWidth: number = 1) {
       if (!this.amplitudeData) return;
 
       const samplesPerPixel = this.zoomWindowLength / this.graphWidth;
@@ -239,9 +239,10 @@ export default defineComponent({
       let maxy = 0;
       let min = 0;
       let max = 0;
+      let columnWidth = binWidth > 1 ? binWidth - 1: 1;
 
       // draw samples within the zoomWindow
-      for (let i = 0; i < this.graphWidth; i++) {
+      for (let i = 0; i < this.graphWidth; i+=binWidth) {
         x = i;
 
         min = this.getMinSampleValue(
@@ -264,7 +265,7 @@ export default defineComponent({
           (this.graphHeight / 2 + (max * this.graphHeight) / 2);
 
         this.canvasContext!.fillStyle = this.canvasLineColor;
-        this.canvasContext?.fillRect(x, miny, 1, absMax(maxy - miny, 1));
+        this.canvasContext?.fillRect(x, miny, columnWidth, absMax(maxy - miny, 1));
       }
 
       this.drawSelection();
@@ -364,10 +365,11 @@ export default defineComponent({
       // zoom breakpoint for plotting each sample vs using aggregate drawing method
       } else if (this.zoomWindowLength/this.graphWidth <= 2) {
         this.drawAmplitudeSampleLine(false);
-      }
-      else {
+      } else if (this.zoomWindowLength/this.graphWidth <= 128) {
+        this.drawAmplitudeMinMax(1);
+      } else {
         // this.drawAmplitudeAvg();
-        this.drawAmplitudeMinMax();
+        this.drawAmplitudeMinMax(3);
       }
     },
     onCanvasDoubleClick() {
