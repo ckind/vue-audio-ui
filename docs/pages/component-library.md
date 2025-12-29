@@ -95,7 +95,7 @@ An interactive audio file visualizer for displaying amplitude data. Click and dr
 
 ## v-a-envelope-adsr
 
-An adjustable Attack-Decay-Sustain-Release envolope. The modelValue is an AdsrSettings instance. Note that a new object will be emitted on update:modelValue. Emits the 
+An adjustable Attack-Decay-Sustain-Release envolope. The modelValue is an AdsrSettings instance. Note that a new object will be emitted on update:modelValue.
 
 ```js
 interface AdsrSettings {
