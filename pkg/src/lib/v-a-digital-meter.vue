@@ -1,10 +1,25 @@
 <template>
-  <canvas
-    class="meter"
-    ref="meterCanvas"
-    :height="height"
-    :width="canvasWidth"
-  />
+  <div class="meter-container">
+    <canvas
+      class="meter"
+      ref="meterCanvas"
+      :height="height" 
+      :width="canvasWidth"
+    />
+    <div class="db-markers" v-if="drawMarkers">
+      <div
+        class="db-marker"
+        v-for="(db, i) in dbMarkerValues"
+        :key="i"
+        :style="{
+          height: getDbMarkerHeight(db, i > 0 ? dbMarkerValues[i - 1] : undefined) + 'px', 
+          color: dbMarkerColor
+        }"
+      >
+        <span class="db-dash">-</span>{{ Math.abs(db) }}
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -17,6 +32,7 @@ import { clamp } from "@/util/math-helpers.ts";
 import theme from '@/theme.ts';
 
 const DB_RANGE = 90;
+const DB_PADDING_TOP = 10;
 const curve = new LogCurvedRange(0, DB_RANGE, 2);
 
 export default defineComponent({
@@ -67,16 +83,14 @@ export default defineComponent({
       required: false,
       type: Number,
       default: 20,
-    },
-    font: {
-      required: false,
-      type: String,
-      default: "Helvetica, sans-serif",
-    },
+    }
   },
   computed: {
+    dbMarkerColor(): string {
+      return this.markerColor ?? theme.colors.muted;
+    },
     canvasWidth(): number {
-      return this.width + (this.drawMarkers ? 30 : 0);
+      return this.width;
     },
   },
   setup(props) {
@@ -94,6 +108,7 @@ export default defineComponent({
   data() {
     return {
       canvasCxt: null as CanvasRenderingContext2D | null,
+      dbMarkerValues: [0, -10, -20, -30, -40, -60]
     };
   },
   mounted() {
@@ -102,11 +117,23 @@ export default defineComponent({
     this.startRendering(this.draw);
   },
   methods: {
+    getDbMarkerHeight(db: number, previousDb?: number) {
+      // for top marker, calculate total height from top
+      if (previousDb === undefined) {
+        return this.height - this.getMeterHeight(this.scaleY(db));
+      }
+
+      // else calculate height difference from previous marker
+      const y = this.height - this.getMeterHeight(this.scaleY(db));
+      const prevY = this.height - this.getMeterHeight(this.scaleY(previousDb));
+      return y - prevY;
+    },
+    // convert dB to height from the bottom of the graph in pixels
     getMeterHeight(db: number) {
       return (
         this.height *
         ((DB_RANGE + db) / DB_RANGE) *
-        (DB_RANGE / (DB_RANGE + 10)) // add a little padding up to the top
+        (DB_RANGE / (DB_RANGE + DB_PADDING_TOP))
       );
     },
     scaleY(db: number): number {
@@ -124,8 +151,6 @@ export default defineComponent({
           db = this.getRmsDb(dataArray);
         }
 
-        // todo: discarding everything above 0 for now
-        // find a way way to display clipping
         const clipping = db > 0;
         db = clamp(db, -DB_RANGE, 0);
 
@@ -149,40 +174,30 @@ export default defineComponent({
           meterHeight
         );
         this.canvasCxt.stroke();
-
-        if (this.drawMarkers) {
-          this.drawDbMarkers();
-        }
       }
-    },
-    drawDbMarkers(): void {
-      // this.drawDbMarker(6);
-      this.drawDbMarker(0);
-      this.drawDbMarker(-10);
-      this.drawDbMarker(-20);
-      this.drawDbMarker(-30);
-      this.drawDbMarker(-40);
-      this.drawDbMarker(-60);
-    },
-    drawDbMarker(db: number): void {
-      const y = this.height - this.getMeterHeight(this.scaleY(db));
-      const x = this.width + 4;
-
-      this.canvasCxt!.lineWidth = 1;
-      this.canvasCxt!.strokeStyle = this.markerColor ?? theme.colors.muted;
-
-      this.canvasCxt?.beginPath();
-      this.canvasCxt?.moveTo(x, y);
-      this.canvasCxt?.lineTo(x + 4, y);
-      this.canvasCxt?.stroke();
-
-      this.canvasCxt!.font = `10px ${this.font}`;
-      this.canvasCxt!.fillStyle = this.markerColor ?? theme.colors.muted;
-      this.canvasCxt!.fillText(`${Math.abs(db)}`, x + 8, y + 3);
-    },
+    }
   },
 });
 </script>
 
 <style scoped>
+.meter-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+.db-markers {
+  display: flex;
+  flex-direction: column;
+}
+.db-marker {
+  display: flex;
+  align-items: center;
+  transform: translateY(calc(50% - 0.1em)); /* shift the element down to center it on the exact db value */
+  font-size: 0.6em;
+}
+.db-dash {
+  padding-left: 4px;
+  padding-right: 4px;
+}
 </style>
