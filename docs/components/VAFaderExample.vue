@@ -14,6 +14,7 @@
           :minValue="minValue"
           :maxValue="maxValue"
           :default="defaultValue"
+          :width="120"
           class="fader"
         >
           <template #faderBackground>
