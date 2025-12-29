@@ -14,21 +14,21 @@ type ThemeColors = {
   muted: string;
   white: string;
   black: string;
-}
+};
 
 const vueAudioUITheme = {
   colors: {
-    primary: '#70bfff',
-    secondary: '#6c757d',
-    success: '#28a745',
-    danger: '#dc3545',
-    warning: '#ffc107',
-    info: '#17a2b8',
-    light: '#e0e0e0',
-    dark: '#343a40',
-    muted: '#6c757d',
-    white: '#ffffff',
-    black: '#000000'
+    primary: "#70bfff",
+    secondary: "#6c757d",
+    success: "#28a745",
+    danger: "#dc3545",
+    warning: "#ffc107",
+    info: "#17a2b8",
+    light: "#e0e0e0",
+    dark: "#343a40",
+    muted: "#6c757d",
+    white: "#ffffff",
+    black: "#000000",
   },
 } as VueAudioUITheme;
 

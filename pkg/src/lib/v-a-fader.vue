@@ -5,8 +5,13 @@
         <defaultFaderBackground />
       </slot>
     </div>
-    <div ref="faderHead" class="fader-head" @mousedown="onHeadMouseDown" @touchstart="onHeadMouseDown"
-      @dblclick="onHeadDblClick">
+    <div
+      ref="faderHead"
+      class="fader-head"
+      @mousedown="onHeadMouseDown"
+      @touchstart="onHeadMouseDown"
+      @dblclick="onHeadDblClick"
+    >
       <slot name="faderHead">
         <defaultFaderHead />
       </slot>
@@ -24,12 +29,14 @@ export default defineComponent({
   name: "VAFader",
   components: {
     defaultFaderHead,
-    defaultFaderBackground
+    defaultFaderBackground,
   },
-  emits: ['update:modelValue'],
+  emits: ["update:modelValue"],
   setup(props) {
     // todo: should refactor all these and stop using a combination of composition and options api
-    const valueCurve = ref(new LinearCurvedRange(props.minValue, props.maxValue));
+    const valueCurve = ref(
+      new LinearCurvedRange(props.minValue, props.maxValue)
+    );
     const faderContainerY = ref(0);
     const linearValue = ref(props.modelValue);
     const curvedValue = ref(valueCurve.value.getCurvedValue(props.modelValue));
@@ -50,7 +57,7 @@ export default defineComponent({
       // faderBackground,
       // faderHead,
       faderHeadHeight,
-      resizeObserver
+      resizeObserver,
     };
   },
   props: {
@@ -94,21 +101,24 @@ export default defineComponent({
     faderHeadTop(): number {
       // set top position prop of fader head based on value of control
       // need to invert so highest value is top: 0
-      const valueRatio = (this.linearValue - this.minValue) / (this.maxValue - this.minValue);
-      return this.faderDragRange - (valueRatio * this.faderDragRange);
+      const valueRatio =
+        (this.linearValue - this.minValue) / (this.maxValue - this.minValue);
+      return this.faderDragRange - valueRatio * this.faderDragRange;
     },
     cssVars() {
       return {
         "--fader-height": `${this.height}px`,
         "--fader-width": `${this.width}px`,
-        "--fader-head-top": `${this.faderHeadTop}px`
-      }
-    }
+        "--fader-head-top": `${this.faderHeadTop}px`,
+      };
+    },
   },
   mounted() {
-    this.resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[], observer: ResizeObserver) => {
-      this.faderHeadHeight = this.getFaderHeadHeight();
-    });
+    this.resizeObserver = new ResizeObserver(
+      (entries: ResizeObserverEntry[], observer: ResizeObserver) => {
+        this.faderHeadHeight = this.getFaderHeadHeight();
+      }
+    );
 
     this.resizeObserver.observe(this.$refs.faderHead as HTMLElement);
   },
@@ -135,8 +145,9 @@ export default defineComponent({
       // to match the img or svg height exactly with proper css
       const headImg = this.getContainedImgOrSvg(faderHead);
 
-      return headImg ? headImg.getBoundingClientRect().height :
-        faderHead.getBoundingClientRect().height;
+      return headImg
+        ? headImg.getBoundingClientRect().height
+        : faderHead.getBoundingClientRect().height;
     },
     onHeadMouseDown(e: MouseEvent | TouchEvent) {
       e.preventDefault();
@@ -182,8 +193,7 @@ export default defineComponent({
       );
     },
     onHeadTouchDrag(e: TouchEvent) {
-      if (e.touches[0])
-        this.onHeadDrag(e.touches[0].clientY);
+      if (e.touches[0]) this.onHeadDrag(e.touches[0].clientY);
     },
     onHeadMouseDrag(e: MouseEvent) {
       this.onHeadDrag(e.clientY);

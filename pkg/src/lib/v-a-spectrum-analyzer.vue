@@ -5,15 +5,15 @@
     ref="analyserCanvas"
     class="analyser-canvas"
     :style="cssVars"
-    ></canvas>
+  ></canvas>
 </template>
 
 <script lang="ts">
 import { defineComponent, type PropType, watch } from "vue";
 import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
-import { isPowerOfTwo } from '@/util/math-helpers';
-import theme from '@/theme.ts';
+import { isPowerOfTwo } from "@/util/math-helpers";
+import theme from "@/theme.ts";
 
 const HIGH_PASS_CUTOFF = 20;
 const NOISE_FLOOR = -120;
@@ -27,7 +27,7 @@ export default defineComponent({
     return {
       continueDrawing: false,
       canvas: null as HTMLCanvasElement | null,
-      canvasContext: null as CanvasRenderingContext2D | null
+      canvasContext: null as CanvasRenderingContext2D | null,
     };
   },
   props: {
@@ -46,7 +46,7 @@ export default defineComponent({
     },
     height: {
       type: Number,
-      required: false
+      required: false,
     },
     width: {
       type: Number,
@@ -56,11 +56,11 @@ export default defineComponent({
     fillStyle: {
       type: String as PropType<FillStyleType>,
       required: false,
-      default: "none"
+      default: "none",
     },
     lineColor: {
       type: String,
-      required: false
+      required: false,
     },
     backgroundColor: {
       type: String,
@@ -88,14 +88,22 @@ export default defineComponent({
       type: String,
       default: "Helvetica, sans-serif",
     },
-
   },
   setup(props) {
-    const metering = useMetering(props.fftSize, props.input as AudioNode | undefined);
+    const metering = useMetering(
+      props.fftSize,
+      props.input as AudioNode | undefined
+    );
 
-    watch(() => props.input, (newVal, oldVal) => {
-      metering.onInputChanged(newVal as AudioNode | undefined, oldVal as AudioNode | undefined);
-    });
+    watch(
+      () => props.input,
+      (newVal, oldVal) => {
+        metering.onInputChanged(
+          newVal as AudioNode | undefined,
+          oldVal as AudioNode | undefined
+        );
+      }
+    );
 
     return {
       ...metering,
@@ -111,9 +119,9 @@ export default defineComponent({
     },
     cssVars() {
       return {
-        '--border-color': this.backgroundColor
-      }
-    }
+        "--border-color": this.backgroundColor,
+      };
+    },
   },
   mounted() {
     this.canvasContext = (
@@ -160,12 +168,10 @@ export default defineComponent({
       if (this.canvasContext) {
         const yRange = 0 - NOISE_FLOOR;
 
-        // todo: input won't get assigned until callback in SSR 
+        // todo: input won't get assigned until callback in SSR
         // assume 48000 sample rate until set for now,
         // will snap to actual sample rate as soon as input is set though
-        const nyquist = this.input
-          ? this.input.context.sampleRate / 2
-          : 24000;
+        const nyquist = this.input ? this.input.context.sampleRate / 2 : 24000;
 
         const dataArray = this.getFloatFrequencyData();
 
@@ -178,7 +184,8 @@ export default defineComponent({
           this.canvasContext.beginPath();
 
           this.canvasContext.lineWidth = 1;
-          this.canvasContext.strokeStyle = this.lineColor ?? theme.colors.primary;
+          this.canvasContext.strokeStyle =
+            this.lineColor ?? theme.colors.primary;
           this.canvasContext.fillStyle = this.lineColor ?? theme.colors.primary;
 
           this.canvasContext.moveTo(0, this.graphHeight);

@@ -2,7 +2,7 @@ export type SignalScalerType = {
   input: AudioNode;
   output: AudioNode;
   dispose(): void;
-}
+};
 
 /**
  * scales the incoming signal from (inputMin, inputMax) to (outputMin, outputMax)
@@ -28,11 +28,15 @@ export class SignalScaler implements SignalScalerType {
     //   + (outputMax-outputMin) * ((inputSignal-inputMin) / (inputMax-inputMin));
 
     this._minusInputMin = new ConstantSourceNode(ctx, { offset: -inputMin });
-    this._dividedByInputRange = new GainNode(ctx, { gain: 1/(inputMax - inputMin) });
-    this._multipliedByOutputRange = new GainNode(ctx, { gain: (outputMax - outputMin) });
+    this._dividedByInputRange = new GainNode(ctx, {
+      gain: 1 / (inputMax - inputMin),
+    });
+    this._multipliedByOutputRange = new GainNode(ctx, {
+      gain: outputMax - outputMin,
+    });
     this._plusOutputMin = new ConstantSourceNode(ctx, { offset: outputMin });
 
-    this._minusInputMin .start();
+    this._minusInputMin.start();
     this._plusOutputMin.start();
 
     this.input = new GainNode(ctx, { gain: 1 });

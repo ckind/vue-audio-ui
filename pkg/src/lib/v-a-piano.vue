@@ -1,24 +1,60 @@
 <template>
   <div :class="['keyboard', disabled ? 'disabled' : '']">
-    <div v-for="octave in numOctaves" :key="octave" class="octave-section" >
+    <div v-for="octave in numOctaves" :key="octave" class="octave-section">
       <!-- todo: use v-for for keys? -->
-      <div :id="`key${startingOctave*12 + (octave-1)*12 + 0}`" class="key">
-        <div :id="`key${startingOctave*12 + (octave-1)*12 + 1}`" class="black-key"></div>
+      <div
+        :id="`key${startingOctave * 12 + (octave - 1) * 12 + 0}`"
+        class="key"
+      >
+        <div
+          :id="`key${startingOctave * 12 + (octave - 1) * 12 + 1}`"
+          class="black-key"
+        ></div>
       </div>
-      <div :id="`key${startingOctave*12 + (octave-1)*12 + 2}`" class="key">
-        <div :id="`key${startingOctave*12 + (octave-1)*12 +3}`"  class="black-key"></div>
+      <div
+        :id="`key${startingOctave * 12 + (octave - 1) * 12 + 2}`"
+        class="key"
+      >
+        <div
+          :id="`key${startingOctave * 12 + (octave - 1) * 12 + 3}`"
+          class="black-key"
+        ></div>
       </div>
-      <div :id="`key${startingOctave*12 + (octave-1)*12 + 4}`"  class="key"></div>
-      <div :id="`key${startingOctave*12 + (octave-1)*12+ 5}`"  class="key">
-        <div :id="`key${startingOctave*12 + (octave-1)*12 + 6}`"  class="black-key"></div>
+      <div
+        :id="`key${startingOctave * 12 + (octave - 1) * 12 + 4}`"
+        class="key"
+      ></div>
+      <div
+        :id="`key${startingOctave * 12 + (octave - 1) * 12 + 5}`"
+        class="key"
+      >
+        <div
+          :id="`key${startingOctave * 12 + (octave - 1) * 12 + 6}`"
+          class="black-key"
+        ></div>
       </div>
-      <div :id="`key${startingOctave*12 + (octave-1)*12 + 7}`"  class="key">
-        <div :id="`key${startingOctave*12 + (octave-1)*12 + 8}`" class="black-key"></div>
+      <div
+        :id="`key${startingOctave * 12 + (octave - 1) * 12 + 7}`"
+        class="key"
+      >
+        <div
+          :id="`key${startingOctave * 12 + (octave - 1) * 12 + 8}`"
+          class="black-key"
+        ></div>
       </div>
-      <div :id="`key${startingOctave*12 + (octave-1)*12 + 9}`"  class="key">
-        <div :id="`key${startingOctave*12 + (octave-1)*12 + 10}`"  class="black-key"></div>
+      <div
+        :id="`key${startingOctave * 12 + (octave - 1) * 12 + 9}`"
+        class="key"
+      >
+        <div
+          :id="`key${startingOctave * 12 + (octave - 1) * 12 + 10}`"
+          class="black-key"
+        ></div>
       </div>
-      <div :id="`key${startingOctave*12 + (octave-1)*12 + 11}`"  class="key"></div>
+      <div
+        :id="`key${startingOctave * 12 + (octave - 1) * 12 + 11}`"
+        class="key"
+      ></div>
     </div>
   </div>
 </template>
@@ -40,14 +76,14 @@ export default defineComponent({
     "keyMouseDown",
     "keyMouseUp",
     "keyboardKeyDown",
-    "keyboardKeyUp"
+    "keyboardKeyUp",
   ],
   props: {
     disabled: { type: Boolean, required: false, default: false },
     enableKeyControls: { type: Boolean, required: false, default: true },
     startingOctave: { type: Number, required: false, default: 3 },
     numOctaves: { type: Number, required: false, default: 2 },
-    enableKeyboardControls: { type: Boolean, required: false, default: true }
+    enableKeyboardControls: { type: Boolean, required: false, default: true },
   },
   setup(props, context) {
     const keyPressedColor = "#ff2929"; // todo: use theme color (danger?)
@@ -88,7 +124,7 @@ export default defineComponent({
       });
       if (n > -1) {
         // todo: doesn't release if you change octave or transpose while holding a key
-        const keyNum = n + userOctaveOffset
+        const keyNum = n + userOctaveOffset;
         displayKeyUp(keyNum);
         context.emit("keyboardKeyUp", keyNum);
       } else if (e.code === "KeyZ") {
@@ -105,14 +141,18 @@ export default defineComponent({
     }
 
     function displayKeyDown(keyNumber: number) {
-      const key: HTMLElement | null = document.querySelector(`#key${keyNumber}`);
+      const key: HTMLElement | null = document.querySelector(
+        `#key${keyNumber}`
+      );
       if (key != null) {
         key.style.background = keyPressedColor;
       }
     }
 
     function displayKeyUp(keyNumber: number) {
-      const key: HTMLElement | null = document.querySelector(`#key${keyNumber}`);
+      const key: HTMLElement | null = document.querySelector(
+        `#key${keyNumber}`
+      );
       if (key != null) {
         key.style.background = blackKeys.includes(keyNumber % 12)
           ? "black"
@@ -132,7 +172,7 @@ export default defineComponent({
       e.stopPropagation();
       if (!props.disabled) {
         displayKeyDown(keyNum);
-        context.emit("keySlideOn", keyNum)
+        context.emit("keySlideOn", keyNum);
       }
     }
 

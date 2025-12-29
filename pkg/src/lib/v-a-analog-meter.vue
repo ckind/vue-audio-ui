@@ -87,11 +87,7 @@
       </g> -->
 
       <!-- Needle -->
-      <g
-        id="needle"
-        :transform="rotation"
-     
-      >
+      <g id="needle" :transform="rotation">
         <polygon points="160,70 158,150 162,150" fill="#c62828" />
         <circle cx="160" cy="150" r="6" fill="#333" />
         <circle cx="160" cy="150" r="3" fill="#777" />
@@ -132,7 +128,7 @@ import {
   ref,
   onMounted,
   onUnmounted,
-  watch
+  watch,
 } from "vue";
 import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
@@ -144,7 +140,7 @@ export default defineComponent({
     input: {
       required: false,
       type: Object, // type: AudioNode -- need to use Object for SSR
-      default: undefined
+      default: undefined,
     },
     type: {
       required: false,
@@ -166,9 +162,15 @@ export default defineComponent({
     const { getPeakDb, getRmsDb, getFloatTimeDomainData, onInputChanged } =
       useMetering(props.fftSize, props.input as AudioNode);
 
-    watch(() => props.input, (newVal, oldVal) => {
-      onInputChanged(newVal as AudioNode | undefined, oldVal as AudioNode | undefined);
-    });
+    watch(
+      () => props.input,
+      (newVal, oldVal) => {
+        onInputChanged(
+          newVal as AudioNode | undefined,
+          oldVal as AudioNode | undefined
+        );
+      }
+    );
 
     const { startRendering, stopRendering } = useRendering();
 

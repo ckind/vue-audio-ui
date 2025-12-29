@@ -13,9 +13,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { type CurvedRange, LinearCurvedRange, LogCurvedRange } from "@/util/curved-range.ts";
+import {
+  type CurvedRange,
+  LinearCurvedRange,
+  LogCurvedRange,
+} from "@/util/curved-range.ts";
 import { clamp, absMax } from "@/util/math-helpers.ts";
-import theme from '@/theme.ts';
+import theme from "@/theme.ts";
 
 const DEFAULT_ASPECT_RATIO = 3;
 const DRAG_RANGE = 300;
@@ -46,13 +50,13 @@ export default defineComponent({
       prevY: -1,
       prevX: -1,
       // todo: adjust curve based on sample length?
-      curedRange: new LogCurvedRange(0, 1, 8) as CurvedRange, 
+      curedRange: new LogCurvedRange(0, 1, 8) as CurvedRange,
     };
   },
   props: {
     amplitudeData: {
       required: false,
-      type: Float32Array<ArrayBuffer>
+      type: Float32Array<ArrayBuffer>,
     },
     lineColor: {
       required: false,
@@ -69,7 +73,7 @@ export default defineComponent({
     },
     height: {
       required: false,
-      type: Number
+      type: Number,
     },
   },
   computed: {
@@ -90,7 +94,7 @@ export default defineComponent({
 
       const scaledZoom = this.curedRange.getCurvedValue(this.zoom);
       // todo: this bugs out if total num samples is < 16
-      return Math.max(scaledZoom, MAX_ZOOM_SAMPLES / this.amplitudeData.length); 
+      return Math.max(scaledZoom, MAX_ZOOM_SAMPLES / this.amplitudeData.length);
     },
     // number of samples between start and end of zoom window
     zoomWindowLength() {
@@ -107,7 +111,7 @@ export default defineComponent({
     },
     canvasSelectColor() {
       return theme.colors.primary;
-    }
+    },
   },
   mounted() {
     this.canvas = this.$refs.visualizer as HTMLCanvasElement;
@@ -196,7 +200,7 @@ export default defineComponent({
       for (let i = startIndex; i < endIndex; i++) {
         sum += Math.abs(sampleData[i]!);
       }
-      return sum/(endIndex - startIndex);
+      return sum / (endIndex - startIndex);
     },
     drawMarker() {
       this.canvasContext!.fillStyle = this.canvasMarkerColor;
@@ -239,10 +243,10 @@ export default defineComponent({
       let maxy = 0;
       let min = 0;
       let max = 0;
-      let columnWidth = binWidth > 1 ? binWidth - 1: 1;
+      let columnWidth = binWidth > 1 ? binWidth - 1 : 1;
 
       // draw samples within the zoomWindow
-      for (let i = 0; i < this.graphWidth; i+=binWidth) {
+      for (let i = 0; i < this.graphWidth; i += binWidth) {
         x = i;
 
         min = this.getMinSampleValue(
@@ -265,7 +269,12 @@ export default defineComponent({
           (this.graphHeight / 2 + (max * this.graphHeight) / 2);
 
         this.canvasContext!.fillStyle = this.canvasLineColor;
-        this.canvasContext?.fillRect(x, miny, columnWidth, absMax(maxy - miny, 1));
+        this.canvasContext?.fillRect(
+          x,
+          miny,
+          columnWidth,
+          absMax(maxy - miny, 1)
+        );
       }
 
       this.drawSelection();
@@ -360,12 +369,12 @@ export default defineComponent({
     },
     drawAmplitude() {
       // zoom breakpoint for drawing dots for each sample
-      if (this.zoomWindowLength/this.graphWidth < 0.25) {
+      if (this.zoomWindowLength / this.graphWidth < 0.25) {
         this.drawAmplitudeSampleLine(true);
-      // zoom breakpoint for plotting each sample vs using aggregate drawing method
-      } else if (this.zoomWindowLength/this.graphWidth <= 2) {
+        // zoom breakpoint for plotting each sample vs using aggregate drawing method
+      } else if (this.zoomWindowLength / this.graphWidth <= 2) {
         this.drawAmplitudeSampleLine(false);
-      } else if (this.zoomWindowLength/this.graphWidth <= 128) {
+      } else if (this.zoomWindowLength / this.graphWidth <= 128) {
         this.drawAmplitudeMinMax(1);
       } else {
         // this.drawAmplitudeAvg();
@@ -382,7 +391,8 @@ export default defineComponent({
 
       // keep marker position but adjust sample index based on new zoom
       this.markerIndex =
-        Math.round(this.pixelsToSamples(this.markerPosition)) + this.zoomWindowStartIndex;
+        Math.round(this.pixelsToSamples(this.markerPosition)) +
+        this.zoomWindowStartIndex;
 
       // clear selection
       this.selectionPosition = undefined;
@@ -427,9 +437,10 @@ export default defineComponent({
 
       // todo: need to convert pixels to samples
       // create method pixelsToSamples?
-      this.selectionPosition = this.selectionPosition === undefined
-        ? this.markerPosition + diffX
-        : this.selectionPosition + diffX;
+      this.selectionPosition =
+        this.selectionPosition === undefined
+          ? this.markerPosition + diffX
+          : this.selectionPosition + diffX;
 
       // todo: shouldn't have to redraw whole graph, just selection
       // noticeably slow with larger audio files
@@ -445,12 +456,14 @@ export default defineComponent({
 
       if (this.selectionPosition) {
         // todo: this can emit negative values for start index
-        this.$emit('audioSelection', {
+        this.$emit("audioSelection", {
           startIndex: this.markerIndex,
-          endIndex: Math.round(this.pixelsToSamples(this.selectionPosition)) + this.zoomWindowStartIndex
+          endIndex:
+            Math.round(this.pixelsToSamples(this.selectionPosition)) +
+            this.zoomWindowStartIndex,
         });
       }
-      
+
       document!
         .getElementsByTagName("body")[0]!
         .classList.remove("--no-text-select");
@@ -471,8 +484,9 @@ export default defineComponent({
         if (this.prevX >= 0) {
           // moving to the right shifts the window left (negative direction)
           // and moving to the left shifts the window right (positive direction)
-          let shiftXNumSamples =
-            -Math.round((diffX / this.graphWidth) * this.zoomWindowLength);
+          let shiftXNumSamples = -Math.round(
+            (diffX / this.graphWidth) * this.zoomWindowLength
+          );
 
           // don't allowing shifting out of amplitudeData range
           const minShift = -this.zoomWindowStartIndex;
@@ -514,8 +528,8 @@ export default defineComponent({
   watch: {
     amplitudeData(newValue, oldValue) {
       window.requestAnimationFrame(this.drawZoom);
-    }
-  }
+    },
+  },
 });
 </script>
 

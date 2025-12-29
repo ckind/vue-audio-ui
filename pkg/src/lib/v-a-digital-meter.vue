@@ -3,7 +3,7 @@
     <canvas
       class="meter"
       ref="meterCanvas"
-      :height="height" 
+      :height="height"
       :width="canvasWidth"
     />
     <div class="db-markers" v-if="drawMarkers">
@@ -12,8 +12,10 @@
         v-for="(db, i) in dbMarkerValues"
         :key="i"
         :style="{
-          height: getDbMarkerHeight(db, i > 0 ? dbMarkerValues[i - 1] : undefined) + 'px', 
-          color: dbMarkerColor
+          height:
+            getDbMarkerHeight(db, i > 0 ? dbMarkerValues[i - 1] : undefined) +
+            'px',
+          color: dbMarkerColor,
         }"
       >
         <span class="db-dash">-</span>{{ Math.abs(db) }}
@@ -27,9 +29,9 @@ import { defineComponent, type PropType, watch } from "vue";
 import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
 import { type DigitalMeterType } from "@/types/vue-audio-ui-types";
-import { LogCurvedRange } from "@/util/curved-range.ts"
+import { LogCurvedRange } from "@/util/curved-range.ts";
 import { clamp } from "@/util/math-helpers.ts";
-import theme from '@/theme.ts';
+import theme from "@/theme.ts";
 
 const DB_RANGE = 90;
 const DB_PADDING_TOP = 10;
@@ -41,7 +43,7 @@ export default defineComponent({
     input: {
       required: false,
       type: Object, // type: AudioNode -- need to use Object for SSR
-      default: undefined
+      default: undefined,
     },
     type: {
       required: false,
@@ -63,11 +65,11 @@ export default defineComponent({
     },
     backgroundColor: {
       required: false,
-      type: String
+      type: String,
     },
     markerColor: {
       required: false,
-      type: String
+      type: String,
     },
     drawMarkers: {
       required: false,
@@ -83,7 +85,7 @@ export default defineComponent({
       required: false,
       type: Number,
       default: 20,
-    }
+    },
   },
   computed: {
     dbMarkerColor(): string {
@@ -96,19 +98,25 @@ export default defineComponent({
   setup(props) {
     const metering = useMetering(props.fftSize, props.input as AudioNode);
 
-    watch(() => props.input, (newVal, oldVal) => {
-      metering.onInputChanged(newVal as AudioNode | undefined, oldVal as AudioNode | undefined);
-    });
+    watch(
+      () => props.input,
+      (newVal, oldVal) => {
+        metering.onInputChanged(
+          newVal as AudioNode | undefined,
+          oldVal as AudioNode | undefined
+        );
+      }
+    );
 
     return {
       ...metering,
-      ...useRendering()
+      ...useRendering(),
     };
   },
   data() {
     return {
       canvasCxt: null as CanvasRenderingContext2D | null,
-      dbMarkerValues: [0, -10, -20, -30, -40, -60]
+      dbMarkerValues: [0, -10, -20, -30, -40, -60],
     };
   },
   mounted() {
@@ -164,8 +172,8 @@ export default defineComponent({
         this.canvasCxt.stroke();
 
         this.canvasCxt.fillStyle = clipping
-          ? (this.clippingColor ?? theme.colors.danger)
-          : (this.barColor ?? theme.colors.success);
+          ? this.clippingColor ?? theme.colors.danger
+          : this.barColor ?? theme.colors.success;
         this.canvasCxt.beginPath();
         this.canvasCxt.fillRect(
           0,
@@ -175,7 +183,7 @@ export default defineComponent({
         );
         this.canvasCxt.stroke();
       }
-    }
+    },
   },
 });
 </script>
@@ -193,7 +201,9 @@ export default defineComponent({
 .db-marker {
   display: flex;
   align-items: center;
-  transform: translateY(calc(50% - 0.1em)); /* shift the element down to center it on the exact db value */
+  transform: translateY(
+    calc(50% - 0.1em)
+  ); /* shift the element down to center it on the exact db value */
   font-size: 0.6em;
 }
 .db-dash {

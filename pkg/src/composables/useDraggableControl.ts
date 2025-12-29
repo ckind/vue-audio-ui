@@ -1,12 +1,11 @@
 import { ref, useTemplateRef } from "vue";
 
-
 // todo: could we just get height from the dragRoot element?
 export default function useDraggableControl(
   dragRootEl: string,
   height: number,
-  onDrag: (knobValue: number) => any) {
-
+  onDrag: (knobValue: number) => any
+) {
   const dragRoot = useTemplateRef(dragRootEl);
   const dragRootPageY = ref(0);
 
@@ -21,13 +20,13 @@ export default function useDraggableControl(
     document.addEventListener("touchmove", onKnobTouchDrag);
     document.addEventListener("mouseup", onDocumentMouseUp);
     document.addEventListener("touchend", onDocumentMouseUp);
-  };
+  }
   function onDocumentMouseUp() {
     document.removeEventListener("mousemove", onKnobMouseDrag);
     document.removeEventListener("touchmove", onKnobTouchDrag);
     document.removeEventListener("mouseup", onDocumentMouseUp);
     document.removeEventListener("touchend", onDocumentMouseUp);
-  };
+  }
 
   // function onKnobDblClick() {
   //   const value =
@@ -54,20 +53,19 @@ export default function useDraggableControl(
     //   "update:modelValue",
     //   this.valueCurve.getCurvedValue(knobValue)
     // );
-  };
+  }
 
   function onKnobTouchDrag(e: TouchEvent) {
     if (!e.touches[0]) return;
     onKnobDrag(e.touches[0].clientY);
-  };
+  }
 
   function onKnobMouseDrag(e: MouseEvent) {
     onKnobDrag(e.clientY);
-  };
+  }
 
   return {
     onKnobMouseDown,
     // onKnobDblClick,
   };
 }
-

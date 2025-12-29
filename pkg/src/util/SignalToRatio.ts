@@ -2,7 +2,7 @@ export type SignalToRatioType = {
   input: AudioNode;
   output: AudioNode;
   dispose(): void;
-}
+};
 
 /**
  * converts the incoming signal to a ratio (0, 1) based on the min and max
@@ -23,7 +23,9 @@ export class SignalToRatio implements SignalToRatioType {
     // outputSignal = (inputSignal-inputMin) / (inputMax-inputMin);
 
     this._minusInputMin = new ConstantSourceNode(ctx, { offset: -inputMin });
-    this._dividedByInputRange = new GainNode(ctx, { gain: 1/(inputMax - inputMin) });
+    this._dividedByInputRange = new GainNode(ctx, {
+      gain: 1 / (inputMax - inputMin),
+    });
 
     this._minusInputMin.start();
 

@@ -32,8 +32,6 @@ class BaseCurvedRange {
   }
 }
 
-
-
 /** 
  * 
 
@@ -56,8 +54,6 @@ $f5
 
 */
 
-
-
 function exp(x: number): number {
   return Math.pow(Math.E, x);
 }
@@ -70,10 +66,12 @@ function getLogCurve(
   maxOutput: number,
   curveAmt: number
 ) {
-  return (exp(((x - minInput) / (maxInput - minInput) - 1) * curveAmt) - 1)
-    / (exp(-curveAmt) - 1)
-    * (minOutput - maxOutput)
-    + maxOutput;
+  return (
+    ((exp(((x - minInput) / (maxInput - minInput) - 1) * curveAmt) - 1) /
+      (exp(-curveAmt) - 1)) *
+      (minOutput - maxOutput) +
+    maxOutput
+  );
 }
 
 function getInverseLogCurve(
@@ -84,9 +82,15 @@ function getInverseLogCurve(
   maxOutput: number,
   curveAmt: number
 ) {
-  return (((Math.log((x - maxOutput) * (exp(-curveAmt) - 1) / (minOutput - maxOutput) + 1)) / curveAmt) + 1)
-    * (maxInput - minInput)
-    + minInput;
+  return (
+    (Math.log(
+      ((x - maxOutput) * (exp(-curveAmt) - 1)) / (minOutput - maxOutput) + 1
+    ) /
+      curveAmt +
+      1) *
+      (maxInput - minInput) +
+    minInput
+  );
 }
 
 class InverseLogCurvedRange extends BaseCurvedRange {
@@ -100,13 +104,27 @@ class InverseLogCurvedRange extends BaseCurvedRange {
   getCurvedValue(value: number): number {
     this.validateInput(value);
 
-    return getInverseLogCurve(value, this.min, this.max, this.min, this.max, this.curveAmount);
+    return getInverseLogCurve(
+      value,
+      this.min,
+      this.max,
+      this.min,
+      this.max,
+      this.curveAmount
+    );
   }
 
   getLinearValue(value: number): number {
     this.validateInput(value);
 
-    return getLogCurve(value, this.min, this.max, this.min, this.max, this.curveAmount);
+    return getLogCurve(
+      value,
+      this.min,
+      this.max,
+      this.min,
+      this.max,
+      this.curveAmount
+    );
   }
 }
 
@@ -121,20 +139,31 @@ class LogCurvedRange extends BaseCurvedRange {
   getCurvedValue(value: number): number {
     this.validateInput(value);
 
-    return getLogCurve(value, this.min, this.max, this.min, this.max, this.curveAmount);
+    return getLogCurve(
+      value,
+      this.min,
+      this.max,
+      this.min,
+      this.max,
+      this.curveAmount
+    );
   }
 
   getLinearValue(value: number): number {
     this.validateInput(value);
 
-    return getInverseLogCurve(value, this.min, this.max, this.min, this.max, this.curveAmount);
+    return getInverseLogCurve(
+      value,
+      this.min,
+      this.max,
+      this.min,
+      this.max,
+      this.curveAmount
+    );
   }
 }
 
-
-
 class LinearCurvedRange extends BaseCurvedRange {
-
   constructor(min: number, max: number) {
     super(min, max);
   }
@@ -203,26 +232,29 @@ class QuadBezierCurvedRange extends BaseCurvedRange {
   getLinearValue(curvedValue: number): number {
     this.validateInput(curvedValue);
     // y(t) = (1 - t)^2*y0 + 2t*(1 - t)*y1 + t^2*y2
-    // y(t) = (y0 - 2y1 + y2)t^2 + 2(y1 + y0)t + y0 
+    // y(t) = (y0 - 2y1 + y2)t^2 + 2(y1 + y0)t + y0
     // 0    = (y0 - 2y1 + y2)t^2 + 2(y1 + y0)t + (y0 - y(t));
     // solve for t
     const yt = curvedValue - this.min;
-    const a = this.p[0]!.y - 2 * (this.p[1]!.y) + this.p[2]!.y;
+    const a = this.p[0]!.y - 2 * this.p[1]!.y + this.p[2]!.y;
     const b = 2 * (this.p[1]!.y + this.p[0]!.y);
     const c = this.p[0]!.y - yt;
     const solution = solveQuadratic(a, b, c);
-    if (solution.solution1.imaginaryPart != 0 || solution.solution2.imaginaryPart != 0) {
+    if (
+      solution.solution1.imaginaryPart != 0 ||
+      solution.solution2.imaginaryPart != 0
+    ) {
       throw "invalid bezier curve - quadratic solution is not real";
     }
     // we only care about the positive solution
-    const t = solution.solution1.realPart < 0
-      ? solution.solution2.realPart
-      : solution.solution1.realPart;
+    const t =
+      solution.solution1.realPart < 0
+        ? solution.solution2.realPart
+        : solution.solution1.realPart;
     // get value along linear interpolation using t
     const y = this.min + t * (this.max - this.min);
     return y;
   }
-
 }
 
 class Pow2CurvedRange extends BaseCurvedRange {
@@ -262,4 +294,11 @@ class Pow2CurvedRange extends BaseCurvedRange {
   }
 }
 
-export { type CurvedRange, LinearCurvedRange, Pow2CurvedRange, QuadBezierCurvedRange, LogCurvedRange, InverseLogCurvedRange };
+export {
+  type CurvedRange,
+  LinearCurvedRange,
+  Pow2CurvedRange,
+  QuadBezierCurvedRange,
+  LogCurvedRange,
+  InverseLogCurvedRange,
+};

@@ -65,11 +65,11 @@ export default defineComponent({
     },
     barColor: {
       required: false,
-      type: String
+      type: String,
     },
     backgroundColor: {
       required: false,
-      type: String
+      type: String,
     },
     markerColor: {
       required: false,

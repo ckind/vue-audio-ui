@@ -29,8 +29,8 @@ export default defineComponent({
     const on = ref(false);
     const cssVars = computed(() => {
       return {
-        '--on-color': `${props.color}`
-      }
+        "--on-color": `${props.color}`,
+      };
     });
 
     function onButtonClick() {
@@ -38,20 +38,21 @@ export default defineComponent({
     }
 
     return { on, cssVars, onButtonClick };
-  }
+  },
 });
 </script>
 
 <style scoped>
-
-button, input[type="submit"], input[type="reset"] {
-	background: none;
-	color: inherit;
-	border-radius: 4px;
+button,
+input[type="submit"],
+input[type="reset"] {
+  background: none;
+  color: inherit;
+  border-radius: 4px;
   border: solid 1px black;
-	font: inherit;
-	cursor: pointer;
-	outline: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
 }
 
 .button {

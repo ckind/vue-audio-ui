@@ -1,7 +1,7 @@
 // version of useMetering designed to be SSR compatible
 
 export function useMetering(fftSize: number, input?: AudioNode) {
-  let analyser: (AnalyserNode | undefined);
+  let analyser: AnalyserNode | undefined;
   let dataArray: Float32Array<ArrayBuffer>;
 
   // if input is defined and passed in, set up the analyzer right away
@@ -26,7 +26,10 @@ export function useMetering(fftSize: number, input?: AudioNode) {
   // return this function to used to handle changes in the input -
   // useful in cases of server side rendering, where any web audio api
   // references will have to be deferred until after components are mounted
-  function onInputChanged(newInput: AudioNode | undefined, oldInput: AudioNode | undefined) {
+  function onInputChanged(
+    newInput: AudioNode | undefined,
+    oldInput: AudioNode | undefined
+  ) {
     if (newInput) {
       // todo: memory leaks? need to clean up old analyzer?
       setupAnalyzer(newInput);
@@ -69,7 +72,7 @@ export function useMetering(fftSize: number, input?: AudioNode) {
     }
 
     return 20 * Math.log10(Math.sqrt(squareSum / buffer.length));
-  };
+  }
 
   return {
     getPeakDb,
@@ -77,6 +80,6 @@ export function useMetering(fftSize: number, input?: AudioNode) {
     getFloatTimeDomainData,
     getFloatFrequencyData,
     onInputChanged,
-    disposeMetering
+    disposeMetering,
   };
 }

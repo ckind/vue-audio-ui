@@ -151,7 +151,7 @@ interface AdsrSettings {
   release: number;
 }
 
-export default defineComponent ({
+export default defineComponent({
   emits: ["update:modelValue"],
   props: {
     modelValue: { type: Object as PropType<AdsrSettings>, required: true },
@@ -159,7 +159,7 @@ export default defineComponent ({
     decayMax: { type: Number, required: false, default: 1000 },
     releaseMax: { type: Number, required: false, default: 1000 },
     width: { type: Number, required: false, default: 200 },
-    height: { type: Number, required: false }
+    height: { type: Number, required: false },
   },
   setup(props, context) {
     const backgroundColor = ref("black");
@@ -208,7 +208,11 @@ export default defineComponent ({
     const envActive = false;
 
     const envTime = computed(() => {
-      return props.modelValue.attack + props.modelValue.decay + props.modelValue.release;
+      return (
+        props.modelValue.attack +
+        props.modelValue.decay +
+        props.modelValue.release
+      );
     });
 
     const containerWidth = computed(() => {
@@ -236,7 +240,9 @@ export default defineComponent ({
     });
 
     const attackWidth = computed(() => {
-      return attackTotalWidth.value * (props.modelValue.attack / props.attackMax);
+      return (
+        attackTotalWidth.value * (props.modelValue.attack / props.attackMax)
+      );
     });
 
     const decayTotalWidth = computed(() => {
@@ -256,7 +262,9 @@ export default defineComponent ({
     });
 
     const releaseWidth = computed(() => {
-      return releaseTotalWidth.value * (props.modelValue.release / props.releaseMax);
+      return (
+        releaseTotalWidth.value * (props.modelValue.release / props.releaseMax)
+      );
     });
 
     const adsrPath = computed(() => {
@@ -266,33 +274,49 @@ export default defineComponent ({
       attackPeakX.value = attackWidth.value + padding;
       attackPeakY.value = padding;
 
-      decayBezier1X = attackWidth.value + decayWidth.value/4 + padding;
-      decayBezier1Y = (graphHeight.value - graphHeight.value * props.modelValue.sustain)/2 + padding;
-      decayBezier2X = attackWidth.value + decayWidth.value/2 + padding;
-      decayBezier2Y = graphHeight.value - graphHeight.value * props.modelValue.sustain + padding;
+      decayBezier1X = attackWidth.value + decayWidth.value / 4 + padding;
+      decayBezier1Y =
+        (graphHeight.value - graphHeight.value * props.modelValue.sustain) / 2 +
+        padding;
+      decayBezier2X = attackWidth.value + decayWidth.value / 2 + padding;
+      decayBezier2Y =
+        graphHeight.value -
+        graphHeight.value * props.modelValue.sustain +
+        padding;
 
       decayEndX.value = attackWidth.value + decayWidth.value + padding;
-      decayEndY.value = graphHeight.value - graphHeight.value * props.modelValue.sustain + padding;
+      decayEndY.value =
+        graphHeight.value -
+        graphHeight.value * props.modelValue.sustain +
+        padding;
 
-      sustainEndX.value = attackTotalWidth.value + decayTotalWidth.value + sustainTotalWidth.value;
-      sustainEndY.value = graphHeight.value - graphHeight.value * props.modelValue.sustain + padding;
+      sustainEndX.value =
+        attackTotalWidth.value +
+        decayTotalWidth.value +
+        sustainTotalWidth.value;
+      sustainEndY.value =
+        graphHeight.value -
+        graphHeight.value * props.modelValue.sustain +
+        padding;
 
-      releaseBezier1X = attackTotalWidth.value
-        + decayTotalWidth.value
-        + sustainTotalWidth.value
-        + releaseWidth.value/4;
-      releaseBezier1Y = graphHeight.value
-        - graphHeight.value
-        * props.modelValue.sustain/2
-        + padding;
-      releaseBezier2X = attackTotalWidth.value
-        + decayTotalWidth.value
-        + sustainTotalWidth.value
-        + releaseWidth.value/2;
+      releaseBezier1X =
+        attackTotalWidth.value +
+        decayTotalWidth.value +
+        sustainTotalWidth.value +
+        releaseWidth.value / 4;
+      releaseBezier1Y =
+        graphHeight.value -
+        (graphHeight.value * props.modelValue.sustain) / 2 +
+        padding;
+      releaseBezier2X =
+        attackTotalWidth.value +
+        decayTotalWidth.value +
+        sustainTotalWidth.value +
+        releaseWidth.value / 2;
       releaseBezier2Y = graphHeight.value + padding;
 
       releaseEndX.value = sustainEndX.value + releaseWidth.value;
-      releaseEndY.value  = graphHeight.value + padding;
+      releaseEndY.value = graphHeight.value + padding;
 
       const start = `M ${startX.value} ${startY.value} `;
       const attackCurve = `L ${attackPeakX.value} ${attackPeakY.value} `;
@@ -309,12 +333,11 @@ export default defineComponent ({
         ${releaseBezier1Y} 
         ${releaseBezier2X}
         ${releaseBezier2Y}
-        ${releaseEndX.value }
-        ${releaseEndY.value }`
-      
+        ${releaseEndX.value}
+        ${releaseEndY.value}`;
+
       return start + attackCurve + decayCurve + sustainCurve + releaseCurve;
     });
-
 
     function attackAnchorMouseDown(e: MouseEvent | TouchEvent) {
       e.preventDefault ? e.preventDefault() : (e.returnValue = false);
@@ -345,7 +368,8 @@ export default defineComponent ({
             diffX = pageX - prevPageX;
             diffAttack = (diffX / attackTotalWidth.value) * props.attackMax;
             diffAttack =
-              props.modelValue.attack + diffAttack >= props.attackMax && diffAttack > 0
+              props.modelValue.attack + diffAttack >= props.attackMax &&
+              diffAttack > 0
                 ? props.attackMax - props.modelValue.attack
                 : props.modelValue.attack + diffAttack <= 0 && diffAttack < 0
                 ? 0
@@ -355,7 +379,8 @@ export default defineComponent ({
             diffX = pageX - prevPageX;
             diffDecay = (diffX / decayTotalWidth.value) * props.decayMax;
             diffDecay =
-              props.modelValue.decay + diffDecay >= props.decayMax && diffDecay > 0
+              props.modelValue.decay + diffDecay >= props.decayMax &&
+              diffDecay > 0
                 ? props.decayMax - props.modelValue.decay
                 : props.modelValue.decay + diffDecay <= 0 && diffDecay < 0
                 ? 0
@@ -373,7 +398,8 @@ export default defineComponent ({
             diffX = pageX - prevPageX;
             diffRelease = (diffX / releaseTotalWidth.value) * props.releaseMax;
             diffRelease =
-              props.modelValue.release + diffRelease >= props.releaseMax && diffRelease > 0
+              props.modelValue.release + diffRelease >= props.releaseMax &&
+              diffRelease > 0
                 ? props.releaseMax - props.modelValue.release
                 : props.modelValue.release + diffRelease <= 0 && diffRelease < 0
                 ? 0
@@ -385,7 +411,7 @@ export default defineComponent ({
           attack: props.modelValue.attack + diffAttack,
           decay: props.modelValue.decay + diffDecay,
           sustain: props.modelValue.sustain + diffSustain,
-          release: props.modelValue.release + diffRelease
+          release: props.modelValue.release + diffRelease,
         });
       }
 
@@ -398,7 +424,7 @@ export default defineComponent ({
     }
 
     function onTouchMove(e: TouchEvent) {
-      if (e.touches[0]) onMove(e.touches[0].pageX, e.touches[0].pageY)
+      if (e.touches[0]) onMove(e.touches[0].pageX, e.touches[0].pageY);
     }
 
     function onMouseUp() {
@@ -445,11 +471,10 @@ export default defineComponent ({
       onMouseLeave,
       onMove,
       onMouseMove,
-      onTouchMove
-    }
-  }
+      onTouchMove,
+    };
+  },
 });
-
 </script>
 
 <style scoped>
@@ -463,13 +488,16 @@ export default defineComponent ({
 svg {
   display: block;
 }
-#attackAnchorGhost, #attackAnchor {
+#attackAnchorGhost,
+#attackAnchor {
   cursor: ew-resize;
 }
-#decaySustainAnchorGhost, #decaySustainAnchor {
+#decaySustainAnchorGhost,
+#decaySustainAnchor {
   cursor: move;
 }
-#releaseAnchorGhost, #releaseAnchor {
+#releaseAnchorGhost,
+#releaseAnchor {
   cursor: ew-resize;
 }
 .dragging {
