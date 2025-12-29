@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "module": "es2022"
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
 }
-
