@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 260" width="300" height="130">
+  <defs>
+    <!-- Inner shadow for slot -->
+    <filter id="innerSlot" x="-30%" y="-60%" width="160%" height="220%">
+      <feOffset dx="0" dy="1" in="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="3"/>
+      <feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1"/>
+    </filter>
+
+    <!-- Slot -->
+    <linearGradient id="slotGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#050505"/>
+      <stop offset="0.55" stop-color="#161616"/>
+      <stop offset="1" stop-color="#050505"/>
+    </linearGradient>
+
+    <!-- Knob metal -->
+    <linearGradient id="knobMetal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0b0b0b"/>
+      <stop offset="0.18" stop-color="#2b2b2b"/>
+      <stop offset="0.35" stop-color="#050505"/>
+      <stop offset="0.5" stop-color="#3f3f3f"/>
+      <stop offset="0.7" stop-color="#070707"/>
+      <stop offset="1" stop-color="#0b0b0b"/>
+    </linearGradient>
+
+    <!-- Knob edge -->
+    <linearGradient id="knobEdge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000"/>
+      <stop offset="1" stop-color="#0a0a0a"/>
+    </linearGradient>
+
+    <!-- Highlight -->
+    <linearGradient id="knobHighlight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e5e5e5"/>
+      <stop offset="0.4" stop-color="#bcbcbc"/>
+      <stop offset="1" stop-color="#6f6f6f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Tick marks -->
+  <g fill="#b8b8b8">
+    <rect x="120" y="54" width="4" height="67" rx="2"/>
+    <rect x="120" y="140" width="4" height="67" rx="2"/>
+
+    <rect x="150" y="62" width="4" height="58" rx="2"/>
+    <rect x="150" y="138" width="4" height="58" rx="2"/>
+
+    <rect x="180" y="54" width="4" height="67" rx="2"/>
+    <rect x="180" y="140" width="4" height="67" rx="2"/>
+
+    <rect x="210" y="62" width="4" height="58" rx="2"/>
+    <rect x="210" y="138" width="4" height="58" rx="2"/>
+
+    <rect x="240" y="54" width="4" height="67" rx="2"/>
+    <rect x="240" y="140" width="4" height="67" rx="2"/>
+
+    <rect x="270" y="62" width="4" height="58" rx="2"/>
+    <rect x="270" y="138" width="4" height="58" rx="2"/>
+
+    <rect x="300" y="48" width="4" height="70" rx="2" fill="#cfcfcf"/>
+    <rect x="300" y="142" width="4" height="70" rx="2" fill="#cfcfcf"/>
+
+    <rect x="330" y="62" width="4" height="58" rx="2"/>
+    <rect x="330" y="138" width="4" height="58" rx="2"/>
+
+    <rect x="360" y="54" width="4" height="67" rx="2"/>
+    <rect x="360" y="140" width="4" height="67" rx="2"/>
+    
+    <rect x="390" y="62" width="4" height="58" rx="2"/>
+    <rect x="390" y="138" width="4" height="58" rx="2"/>
+
+    <rect x="420" y="54" width="4" height="67" rx="2"/>
+    <rect x="420" y="140" width="4" height="67" rx="2"/>
+
+    <rect x="450" y="62" width="4" height="58" rx="2"/>
+    <rect x="450" y="138" width="4" height="58" rx="2"/>
+
+    <rect x="480" y="54" width="4" height="67" rx="2"/>
+    <rect x="480" y="140" width="4" height="67" rx="2"/>
+  </g>
+
+  <rect x="80" y="124" width="440" height="12" rx="4" fill="#383838"/>
+</svg>

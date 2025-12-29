@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76 144" width="76" height="144">
+  <defs>
+    <!-- Knob metal -->
+    <linearGradient id="knobMetal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0b0b0b"/>
+      <stop offset="0.18" stop-color="#2b2b2b"/>
+      <stop offset="0.35" stop-color="#050505"/>
+      <stop offset="0.5" stop-color="#3f3f3f"/>
+      <stop offset="0.7" stop-color="#070707"/>
+      <stop offset="1" stop-color="#0b0b0b"/>
+    </linearGradient>
+
+    <!-- Highlight -->
+    <linearGradient id="knobHighlight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e5e5e5"/>
+      <stop offset="0.4" stop-color="#bcbcbc"/>
+      <stop offset="1" stop-color="#6f6f6f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Knob -->
+  <g>
+    <rect x="0" y="0" width="76" height="144" rx="13" fill="url(#knobMetal)"/>
+    <rect x="0" y="0" width="76" height="144" rx="13" fill="none" stroke="#000"/>
+    <rect x="30" y="10" width="16" height="124" rx="5" fill="url(#knobHighlight)"/>
+  </g>
+</svg>
