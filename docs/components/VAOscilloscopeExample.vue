@@ -39,7 +39,6 @@ onMounted(async () => {
   track.connect(analyzerInput.value);
   track.connect(ctx.destination);
 });
-
 </script>
 
 <style scoped>

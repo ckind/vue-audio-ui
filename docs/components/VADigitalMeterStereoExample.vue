@@ -1,7 +1,6 @@
 <template>
   <div>
     <div class="example">
-
       <audio controls ref="my-audio">
         <source src="/audio/waterbug.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
@@ -9,19 +8,27 @@
 
       <div class="meter">
         peak
-        <v-a-digital-meter-stereo class="ui-component" type="peak" :leftInput="leftInput" :rightInput="rightInput"
-          :drawMarkers="true" />
+        <v-a-digital-meter-stereo
+          class="ui-component"
+          type="peak"
+          :leftInput="leftInput"
+          :rightInput="rightInput"
+          :drawMarkers="true"
+        />
       </div>
 
       <div class="meter">
         rms
-        <v-a-digital-meter-stereo class="ui-component" type="rms" :leftInput="leftInput" :rightInput="rightInput"
-          :drawMarkers="true" />
+        <v-a-digital-meter-stereo
+          class="ui-component"
+          type="rms"
+          :leftInput="leftInput"
+          :rightInput="rightInput"
+          :drawMarkers="true"
+        />
       </div>
 
-      <div class="props">
-
-      </div>
+      <div class="props"></div>
     </div>
 
     <p><strong>Props</strong></p>
@@ -61,7 +68,6 @@ onMounted(async () => {
   track.connect(splitter);
   track.connect(ctx.destination);
 });
-
 </script>
 
 <style scoped>

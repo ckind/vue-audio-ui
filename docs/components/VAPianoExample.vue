@@ -30,7 +30,7 @@ import PropsTable from "./PropsTable.vue";
 
 const propsToDisplay = ref(VAPiano.props);
 const disabled = ref(false);
-const lastEvent = ref('');
+const lastEvent = ref("");
 
 function onKeyDown(keyNumber) {
   lastEvent.value = `Key Down: ${keyNumber}`;

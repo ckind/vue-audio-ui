@@ -1,13 +1,23 @@
 <template>
   <div>
-    <p>Note: audio won't play until you've clicked anywhere on this page (outside of player). See <a target="blank"
-        href="https://stackoverflow.com/questions/44613124/click-event-doesnt-fire-on-an-audio-element-in-chrome">here</a>
-      and <a target="blank"
-        href="https://qa.fmod.com/t/html5-javascript-audiocontext-requires-user-interaction/16009">here</a>
-      for details.</p>
+    <p>
+      Note: audio won't play until you've clicked anywhere on this page (outside
+      of player). See
+      <a
+        target="blank"
+        href="https://stackoverflow.com/questions/44613124/click-event-doesnt-fire-on-an-audio-element-in-chrome"
+        >here</a
+      >
+      and
+      <a
+        target="blank"
+        href="https://qa.fmod.com/t/html5-javascript-audiocontext-requires-user-interaction/16009"
+        >here</a
+      >
+      for details.
+    </p>
 
     <div class="example">
-
       <audio controls ref="my-audio">
         <source src="/audio/brink.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
@@ -15,17 +25,25 @@
 
       <div class="meter">
         peak
-        <v-a-digital-meter class="ui-component" type="peak" :input="meterInput" :drawMarkers="true" />
+        <v-a-digital-meter
+          class="ui-component"
+          type="peak"
+          :input="meterInput"
+          :drawMarkers="true"
+        />
       </div>
 
       <div class="meter">
         rms
-        <v-a-digital-meter class="ui-component" type="rms" :input="meterInput" :drawMarkers="true" />
+        <v-a-digital-meter
+          class="ui-component"
+          type="rms"
+          :input="meterInput"
+          :drawMarkers="true"
+        />
       </div>
 
-      <div class="props">
-
-      </div>
+      <div class="props"></div>
     </div>
 
     <p><strong>Props</strong></p>
@@ -56,7 +74,6 @@ onMounted(async () => {
   track.connect(meterInput.value);
   track.connect(ctx.destination);
 });
-
 </script>
 
 <style scoped>

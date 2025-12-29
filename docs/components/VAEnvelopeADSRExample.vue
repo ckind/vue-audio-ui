@@ -27,11 +27,10 @@ const envelope = ref({
   attack: 10,
   decay: 200,
   sustain: 0.6,
-  release: 200
+  release: 200,
 });
 
 const propsToDisplay = ref(VAEnvelopeAdsr.props);
-
 </script>
 
 <style scoped>

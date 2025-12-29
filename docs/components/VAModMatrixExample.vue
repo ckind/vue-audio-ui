@@ -1,9 +1,18 @@
 <template>
   <div>
-    <p>Here is a simple filtered sawtooth patch with 2 different LFO's and a white noise source for modulation.</p>
-    <button class="mute-btn" @click="toggleMute">{{ isMuted ? "Unmute" : "Mute" }}</button>
+    <p>
+      Here is a simple filtered sawtooth patch with 2 different LFO's and a
+      white noise source for modulation.
+    </p>
+    <button class="mute-btn" @click="toggleMute">
+      {{ isMuted ? "Unmute" : "Mute" }}
+    </button>
     <br />
-    <v-a-mod-matrix :sources="sources" :destinations="destinations" :loggerNode="logger" />
+    <v-a-mod-matrix
+      :sources="sources"
+      :destinations="destinations"
+      :loggerNode="logger"
+    />
 
     <!-- <v-a-oscilloscope :input="lfo1ScopeInput" :fftSize="32768" /> -->
     <!-- <v-a-oscilloscope :input="lfo2ScopeInput" :fftSize="32768" /> -->
@@ -17,7 +26,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { requestGlobalAudioContext } from "../helpers/web-audio-helpers.ts";
-import { createPowCurveNode, createDbToGainNode, createScaleNode, createLoggerNode, createWhiteNoiseNode } from "../helpers/audio-worklet-factory.ts"
+import {
+  createPowCurveNode,
+  createDbToGainNode,
+  createScaleNode,
+  createLoggerNode,
+  createWhiteNoiseNode,
+} from "../helpers/audio-worklet-factory.ts";
 import { type ModMatrixSource, type ModMatrixDestination } from "vue-audio-ui";
 
 const sources = ref<Array<ModMatrixSource>>([]);
@@ -70,17 +85,15 @@ async function setupMatrix() {
   sources.value = [
     setupLFO(ctx, 10, "triangle", "LFO 1", lfo1ScopeInput.value),
     setupLFO(ctx, 0.5, "sine", "LFO 2", lfo2ScopeInput.value),
-    setupNoise(ctx, "Noise", lfo3ScopeInput.value)
+    setupNoise(ctx, "Noise", lfo3ScopeInput.value),
   ];
-  destinations.value = [
-    ...setupFilteredOscillator(ctx, 100)
-  ];
+  destinations.value = [...setupFilteredOscillator(ctx, 100)];
 
   mainOutput.value!.connect(ctx.destination);
 }
 
 function disconnectMatrix() {
-  nodes.forEach(node => {
+  nodes.forEach((node) => {
     if (node instanceof OscillatorNode) {
       node.stop();
     }
@@ -91,7 +104,13 @@ function disconnectMatrix() {
   destinations.value = [];
 }
 
-function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, name: string, scopeInput?: AudioNode, ): ModMatrixSource {
+function setupLFO(
+  ctx: AudioContext,
+  frequency: number,
+  type: OscillatorType,
+  name: string,
+  scopeInput?: AudioNode
+): ModMatrixSource {
   const osc = ctx.createOscillator();
   osc.type = type;
   osc.frequency.value = frequency;
@@ -105,7 +124,11 @@ function setupLFO(ctx: AudioContext, frequency: number, type: OscillatorType, na
   return { node: osc, minValue: -1, maxValue: 1, name };
 }
 
-function setupNoise(ctx: AudioContext, name: string, scopeInput?: AudioNode): ModMatrixSource {
+function setupNoise(
+  ctx: AudioContext,
+  name: string,
+  scopeInput?: AudioNode
+): ModMatrixSource {
   const noise = createWhiteNoiseNode(ctx);
   noise.start();
   nodes.push(noise);
@@ -117,7 +140,10 @@ function setupNoise(ctx: AudioContext, name: string, scopeInput?: AudioNode): Mo
   return { node: noise, minValue: -1, maxValue: 1, name };
 }
 
-function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<ModMatrixDestination> {
+function setupFilteredOscillator(
+  ctx: AudioContext,
+  frequency: number
+): Array<ModMatrixDestination> {
   const osc = ctx.createOscillator();
   const pitchNode = createPowCurveNode(ctx, 20, 20000, 2);
   const filter = new BiquadFilterNode(ctx, { type: "lowpass", frequency: 20 });
@@ -144,10 +170,9 @@ function setupFilteredOscillator(ctx: AudioContext, frequency: number): Array<Mo
   return [
     // { node: volumeNode, minValue: -60, maxValue: 0, name: "amp" },
     { node: pitchNode, minValue: 20, maxValue: 20000, name: "pitch" },
-    { node: filterCutoffNode, minValue: 20, maxValue: 18000, name: "filter" }
+    { node: filterCutoffNode, minValue: 20, maxValue: 18000, name: "filter" },
   ];
 }
-
 </script>
 
 <style scoped>

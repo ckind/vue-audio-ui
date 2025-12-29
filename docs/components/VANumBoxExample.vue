@@ -2,7 +2,12 @@
   <div>
     <div class="example">
       <div class="knob">
-        <v-a-num-box v-model="modelValue" :width="60" :minValue="minValue" :maxValue="maxValue" />
+        <v-a-num-box
+          v-model="modelValue"
+          :width="60"
+          :minValue="minValue"
+          :maxValue="maxValue"
+        />
       </div>
 
       <div class="props">

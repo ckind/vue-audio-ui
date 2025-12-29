@@ -17,7 +17,6 @@
         borderColor="black"
         fillStyle="none"
       />
-
     </div>
 
     <p><strong>Props</strong></p>
@@ -48,7 +47,6 @@ onMounted(async () => {
   track.connect(analyzerInput.value);
   track.connect(ctx.destination);
 });
-
 </script>
 
 <style scoped>

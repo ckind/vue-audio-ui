@@ -2,14 +2,25 @@
   <div>
     <div class="example">
       <div class="fader-container">
-        <v-a-fader v-model="modelValue" :minValue="minValue" :maxValue="maxValue" :default="defaultValue" class="fader">
-        </v-a-fader>
-        <v-a-fader v-model="modelValue" :minValue="minValue" :maxValue="maxValue" :default="defaultValue" class="fader">
+        <v-a-fader
+          v-model="modelValue"
+          :minValue="minValue"
+          :maxValue="maxValue"
+          :default="defaultValue"
+          class="fader"
+        />
+        <v-a-fader
+          v-model="modelValue"
+          :minValue="minValue"
+          :maxValue="maxValue"
+          :default="defaultValue"
+          class="fader"
+        >
           <template #faderBackground>
-            <img src="/assets/faderBackground_variant.svg" alt="My SVG image">
+            <img src="/assets/faderBackground_variant.svg" alt="My SVG image" />
           </template>
           <template #faderHead>
-            <img src="/assets/faderHead_variant.svg" alt="My SVG image">
+            <img src="/assets/faderHead_variant.svg" alt="My SVG image" />
           </template>
         </v-a-fader>
       </div>
@@ -66,7 +77,6 @@ const height = ref(200);
 const width = ref(46);
 const defaultValue = ref(50);
 const propsToDisplay = ref(VAFader.props);
-
 </script>
 
 <style scoped>

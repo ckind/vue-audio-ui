@@ -23,7 +23,7 @@
           :default="defaultValue"
           :step="step"
         >
-          <img src="/assets/knob1.svg" alt="My SVG image">
+          <img src="/assets/knob1.svg" alt="My SVG image" />
         </v-a-knob>
       </div>
 

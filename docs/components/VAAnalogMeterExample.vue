@@ -7,7 +7,11 @@
     <div class="example">
       <div class="meter">
         peak
-        <v-a-analog-meter class="ui-component" type="peak" :input="meterInput" />
+        <v-a-analog-meter
+          class="ui-component"
+          type="peak"
+          :input="meterInput"
+        />
       </div>
       <div class="meter">
         rms
@@ -43,7 +47,6 @@ onMounted(async () => {
   track.connect(meterInput.value);
   track.connect(ctx.destination);
 });
-
 </script>
 
 <style scoped>

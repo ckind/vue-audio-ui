@@ -11,9 +11,9 @@
     <tbody>
       <tr v-for="(settings, prop) in propsToDisplay" :key="prop">
         <td>{{ prop }}</td>
-        <td>{{ settings.type?.name ?? 'any' }}</td>
+        <td>{{ settings.type?.name ?? "any" }}</td>
         <td>{{ settings.required }}</td>
-        <td>{{ settings.default ?? '...' }}</td>
+        <td>{{ settings.default ?? "..." }}</td>
       </tr>
     </tbody>
   </table>
@@ -25,9 +25,7 @@ import { defineProps, onMounted } from "vue";
 const props = defineProps({
   propsToDisplay: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 });
 </script>
-
-# My Dynamic Table

@@ -22,7 +22,7 @@ import { ref, onMounted } from "vue";
 import { VAAudioFileVisualizer } from "vue-audio-ui";
 
 import PropsTable from "./PropsTable.vue";
-import { requestGlobalAudioContext } from "../helpers/web-audio-helpers";
+import { requestGlobalAudioContext } from "../helpers/web-audio-helpers.ts";
 
 const amplitudeData = ref<Float32Array<ArrayBuffer>>();
 const propsToDisplay = ref(VAAudioFileVisualizer.props);
@@ -41,20 +41,19 @@ function loadSampleDataSine() {
   }
 
   amplitudeData.value = data;
-};
+}
 
 async function loadSampleDataFile() {
   const ctx = await requestGlobalAudioContext();
 
-  const response = await fetch('/audio/brink.mp3');
+  const response = await fetch("/audio/brink.mp3");
   const arrayBuffer = await response.arrayBuffer();
   const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
   amplitudeData.value = audioBuffer.getChannelData(0);
 }
 
 function onAudioSelection(data: any) {
-  audioSelectedDisplay.value =
-    `@audioSelection - ${JSON.stringify(data)}`
+  audioSelectedDisplay.value = `@audioSelection - ${JSON.stringify(data)}`;
 }
 
 onMounted(() => {
