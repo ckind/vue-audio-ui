@@ -22,6 +22,7 @@
       v-if="manualInput"
       id="manualInputEl"
       ref="manualInputEl"
+      class="manualInput"
       type="number"
       :min="minValue"
       :max="maxValue"
@@ -210,10 +211,17 @@ function onNumBoxMouseDrag(e: MouseEvent) {
   text-overflow: ellipsis; /* optional */
 }
 
-input[type="number"] {
+.manualInput {
   font-family: inherit;
   font-size: inherit;
-  /* You may also want to set the width to a specific value if needed */
+  flex: 1 1 auto;        /* take remaining space */
+  min-width: 0;          /* IMPORTANT: allows shrinking */
+  overflow: hidden;
+  white-space: nowrap;  /* optional */
+  text-overflow: ellipsis; /* optional */
+  border: none;
+  background: transparent;
+  outline: none;
 }
 
 </style>
