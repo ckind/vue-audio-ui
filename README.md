@@ -5,6 +5,8 @@
 
 A library of rich UI components for web-based audio applications built with Vue 3 and TypeScript.
 
+View the documenation with interactive examples [here](https://purple-ocean-0ca0d4410.1.azurestaticapps.net/).
+
 Sleek, accessible, and audio-focused components — knobs, faders, meters, analyzers and more — designed for DAW-like and pro-audio interfaces.
 
 ## Features
@@ -15,18 +17,6 @@ Sleek, accessible, and audio-focused components — knobs, faders, meters, analy
 - **Customizable**: Highly customizable styling and behavior
 - **Lightweight**: Minimal dependencies, optimized for performance
 - **SSR Compatible**: Designed to work with server-side rendering frameworks
-
-## Components
-
-- `v-a-fader` - Hardware-style fader control
-- `v-a-knob` - Rotary knob control with customizable assets
-- `v-a-analog-meter` - Analog-style level meter
-- `v-a-analog-meter-stereo` - Stereo analog level meter
-- `v-a-digital-meter` - Digital dB meter
-- `v-a-digital-meter-stereo` - Stereo digital dB meter
-- `v-a-spectrum-analyzer` - Real-time spectrum analyzer
-- `v-a-audio-file-visualizer` - Audio file waveform visualizer
-- `v-a-toggle-button` - Toggle button for on/off states
 
 ## Installation
 
@@ -96,7 +86,7 @@ To run the docs:
 cd pkg
 npm run publish-local #publishes the package to a local directory for testing
 cd docs
-npm link-package #link docs to local publish, only need to do this once
+npm link-package #link docs to local publish
 npm install
 npm run docs:dev
 ```
@@ -107,7 +97,7 @@ To run the app:
 cd app
 npm run publish-local #publishes the package to a local directory for testing
 cd docs
-npm link-package #link docs to local publish, only need to do this once
+npm link-package #link docs to local publish
 npm install
 npm run dev
 ```
