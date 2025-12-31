@@ -153,9 +153,11 @@ function onHeadDblClick() {
 }
 
 function onHeadDrag(deltaX: number, deltaY: number) {
-  let faderValue =
-    linearValue.value + (-deltaY / faderDragRange.value) * valueRange.value;
-  faderValue = clamp(faderValue, props.minValue, props.maxValue);
+  const faderValue = clamp(
+    linearValue.value + (-deltaY / faderDragRange.value) * valueRange.value,
+    props.minValue,
+    props.maxValue
+  );
 
   emit("update:modelValue", valueCurve.value.getCurvedValue(faderValue));
 }

@@ -96,15 +96,16 @@ function roundToStep(x: number) {
 }
 
 function onKnobDrag(deltaX: number, deltaY: number) {
-  let knobValue =
-    unsteppedValue.value + (-deltaY / dragRange.value) * (valueRange.value / 2);
-  knobValue = clamp(knobValue, props.minValue, props.maxValue);
+  const knobValue = clamp(
+    unsteppedValue.value + (-deltaY / dragRange.value) * (valueRange.value / 2),
+    props.minValue,
+    props.maxValue
+  );
 
   unsteppedValue.value = knobValue;
   const steppedValue =
-    props.step === 0
-      ? unsteppedValue.value
-      : roundToStep(unsteppedValue.value);
+    props.step === 0 ? unsteppedValue.value : roundToStep(unsteppedValue.value);
+
   emit("update:modelValue", valueCurve.value.getCurvedValue(steppedValue));
 }
 
