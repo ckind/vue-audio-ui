@@ -3,8 +3,8 @@
     <div class="knob-row">
       <!-- default knob -->
       <span
-        @mousedown="onKnobMouseDown"
-        @touchstart="onKnobMouseDown"
+        @mousedown="onDragElementStart"
+        @touchstart="onDragElementStart"
         @dblclick="onKnobDblClick"
         class="knob-container"
         :style="`transform: rotate(${knobRotation}rad); width: ${size}px; height: ${size}px;`"
@@ -22,7 +22,7 @@ import { computed, watch, ref } from "vue";
 import { LinearCurvedRange } from "@/util/curved-range.ts";
 import { clamp } from "@/util/math-helpers.ts";
 import defaultKnob from "@/lib/components/default-knob.vue";
-import { type PropType } from "vue";
+import useDragging from "@/composables/useDragging";
 
 // type CurveType = "linear" | "exp";
 // type KnobModelValueType = number | AudioParam;
@@ -73,28 +73,12 @@ const valueRange = computed<number>(() => {
 
 const rotationMax = ref((3 * Math.PI) / 4);
 const dragRange = ref(70);
-const prevY = ref(-1);
 const valueCurve = ref(new LinearCurvedRange(props.minValue, props.maxValue));
 const linearValue = ref(props.modelValue);
 const curvedValue = ref(valueCurve.value.getCurvedValue(linearValue.value));
 const unsteppedValue = ref(curvedValue.value);
 // const audioParamValue = ref<AudioParam | null>(null); // todo: allow AudioParam input
 
-function onKnobMouseDown(e: MouseEvent | TouchEvent) {
-  e.preventDefault();
-  document.addEventListener("mousemove", onKnobMouseDrag);
-  document.addEventListener("touchmove", onKnobTouchDrag);
-  document.addEventListener("mouseup", onDocumentMouseUp);
-  document.addEventListener("touchend", onDocumentMouseUp);
-}
-
-function onDocumentMouseUp() {
-  document.removeEventListener("mousemove", onKnobMouseDrag);
-  document.removeEventListener("touchmove", onKnobTouchDrag);
-  document.removeEventListener("mouseup", onDocumentMouseUp);
-  document.removeEventListener("touchend", onDocumentMouseUp);
-  prevY.value = -1;
-}
 function onKnobDblClick() {
   const value =
     typeof props.default === "undefined" ? midValue.value : props.default;
@@ -111,33 +95,20 @@ function roundToStep(x: number) {
   return clamp(roundedValue, props.minValue, props.maxValue);
 }
 
-function onKnobDrag(currY: number) {
-  if (prevY.value >= 0) {
-    const diffY = prevY.value - currY;
-    let knobValue =
-      unsteppedValue.value + (diffY / dragRange.value) * (valueRange.value / 2);
-    knobValue = clamp(knobValue, props.minValue, props.maxValue);
+function onKnobDrag(deltaX: number, deltaY: number) {
+  let knobValue =
+    unsteppedValue.value + (-deltaY / dragRange.value) * (valueRange.value / 2);
+  knobValue = clamp(knobValue, props.minValue, props.maxValue);
 
-    unsteppedValue.value = knobValue;
-    const steppedValue =
-      props.step === 0
-        ? unsteppedValue.value
-        : roundToStep(unsteppedValue.value);
-    emit("update:modelValue", valueCurve.value.getCurvedValue(steppedValue));
-  }
+  unsteppedValue.value = knobValue;
+  const steppedValue =
+    props.step === 0
+      ? unsteppedValue.value
+      : roundToStep(unsteppedValue.value);
+  emit("update:modelValue", valueCurve.value.getCurvedValue(steppedValue));
 }
 
-function onKnobTouchDrag(e: TouchEvent) {
-  if (e.touches[0]) {
-    onKnobDrag(e.touches[0].pageY);
-    prevY.value = e.touches[0].pageY;
-  }
-}
-
-function onKnobMouseDrag(e: MouseEvent) {
-  onKnobDrag(e.pageY);
-  prevY.value = e.pageY;
-}
+const { onDragElementStart } = useDragging(onKnobDrag);
 
 watch(
   () => props.modelValue,
