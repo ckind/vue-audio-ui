@@ -142,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, computed, type PropType } from "vue";
+import { ref, computed, type PropType } from "vue";
 
 interface AdsrSettings {
   attack: number;

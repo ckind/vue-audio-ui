@@ -21,7 +21,6 @@
 
 <script setup lang="ts">
 import {
-  defineComponent,
   ref,
   useTemplateRef,
   computed,
