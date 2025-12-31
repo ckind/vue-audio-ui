@@ -24,8 +24,15 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType, watch } from "vue";
+<script setup lang="ts">
+import {
+  type PropType,
+  watch,
+  computed,
+  ref,
+  onMounted,
+  useTemplateRef,
+} from "vue";
 import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
 import { type DigitalMeterType } from "@/types/vue-audio-ui-types";
@@ -37,155 +44,147 @@ const DB_RANGE = 90;
 const DB_PADDING_TOP = 10;
 const curve = new LogCurvedRange(0, DB_RANGE, 2);
 
-export default defineComponent({
-  name: "VADigitalMeter",
-  props: {
-    input: {
-      required: false,
-      type: Object, // type: AudioNode -- need to use Object for SSR
-      default: undefined,
-    },
-    type: {
-      required: false,
-      type: String as PropType<DigitalMeterType>,
-      default: "peak",
-    },
-    fftSize: {
-      required: false,
-      type: Number,
-      default: 2048,
-    },
-    clippingColor: {
-      required: false,
-      type: String,
-    },
-    barColor: {
-      required: false,
-      type: String,
-    },
-    backgroundColor: {
-      required: false,
-      type: String,
-    },
-    markerColor: {
-      required: false,
-      type: String,
-    },
-    drawMarkers: {
-      required: false,
-      type: Boolean,
-      default: false,
-    },
-    height: {
-      required: false,
-      type: Number,
-      default: 200,
-    },
-    width: {
-      required: false,
-      type: Number,
-      default: 20,
-    },
+const props = defineProps({
+  input: {
+    required: false,
+    type: Object as PropType<AudioNode | undefined>, // type: AudioNode -- need to use Object for SSR
+    default: undefined,
   },
-  computed: {
-    dbMarkerColor(): string {
-      return this.markerColor ?? theme.colors.muted;
-    },
-    canvasWidth(): number {
-      return this.width;
-    },
+  type: {
+    required: false,
+    type: String as PropType<DigitalMeterType>,
+    default: "peak",
   },
-  setup(props) {
-    const metering = useMetering(props.fftSize, props.input as AudioNode);
-
-    watch(
-      () => props.input,
-      (newVal, oldVal) => {
-        metering.onInputChanged(
-          newVal as AudioNode | undefined,
-          oldVal as AudioNode | undefined
-        );
-      }
-    );
-
-    return {
-      ...metering,
-      ...useRendering(),
-    };
+  fftSize: {
+    required: false,
+    type: Number,
+    default: 2048,
   },
-  data() {
-    return {
-      canvasCxt: null as CanvasRenderingContext2D | null,
-      dbMarkerValues: [0, -10, -20, -30, -40, -60],
-    };
+  clippingColor: {
+    required: false,
+    type: String,
   },
-  mounted() {
-    const canvas = this.$refs.meterCanvas as HTMLCanvasElement;
-    this.canvasCxt = canvas.getContext("2d");
-    this.startRendering(this.draw);
+  barColor: {
+    required: false,
+    type: String,
   },
-  methods: {
-    getDbMarkerHeight(db: number, previousDb?: number) {
-      // for top marker, calculate total height from top
-      if (previousDb === undefined) {
-        return this.height - this.getMeterHeight(this.scaleY(db));
-      }
-
-      // else calculate height difference from previous marker
-      const y = this.height - this.getMeterHeight(this.scaleY(db));
-      const prevY = this.height - this.getMeterHeight(this.scaleY(previousDb));
-      return y - prevY;
-    },
-    // convert dB to height from the bottom of the graph in pixels
-    getMeterHeight(db: number) {
-      return (
-        this.height *
-        ((DB_RANGE + db) / DB_RANGE) *
-        (DB_RANGE / (DB_RANGE + DB_PADDING_TOP))
-      );
-    },
-    scaleY(db: number): number {
-      return curve.getCurvedValue(db + DB_RANGE) - DB_RANGE;
-    },
-    draw(): void {
-      if (this.canvasCxt) {
-        const dataArray = this.getFloatTimeDomainData();
-
-        let db = -DB_RANGE;
-
-        if (this.type === "peak" && dataArray) {
-          db = this.getPeakDb(dataArray);
-        } else if (this.type === "rms" && dataArray) {
-          db = this.getRmsDb(dataArray);
-        }
-
-        const clipping = db > 0;
-        db = clamp(db, -DB_RANGE, 0);
-
-        const meterHeight = this.getMeterHeight(this.scaleY(db));
-
-        this.canvasCxt.clearRect(0, 0, this.canvasWidth, this.height);
-
-        this.canvasCxt.fillStyle = this.backgroundColor ?? theme.colors.light;
-        this.canvasCxt.beginPath();
-        this.canvasCxt.fillRect(0, 0, this.width, this.height);
-        this.canvasCxt.stroke();
-
-        this.canvasCxt.fillStyle = clipping
-          ? this.clippingColor ?? theme.colors.danger
-          : this.barColor ?? theme.colors.success;
-        this.canvasCxt.beginPath();
-        this.canvasCxt.fillRect(
-          0,
-          this.height - meterHeight,
-          this.width,
-          meterHeight
-        );
-        this.canvasCxt.stroke();
-      }
-    },
+  backgroundColor: {
+    required: false,
+    type: String,
+  },
+  markerColor: {
+    required: false,
+    type: String,
+  },
+  drawMarkers: {
+    required: false,
+    type: Boolean,
+    default: false,
+  },
+  height: {
+    required: false,
+    type: Number,
+    default: 200,
+  },
+  width: {
+    required: false,
+    type: Number,
+    default: 20,
   },
 });
+
+const canvasCtx = ref<CanvasRenderingContext2D | null>(null);
+const dbMarkerValues = ref([0, -10, -20, -30, -40, -60]);
+const meterCanvas = useTemplateRef("meterCanvas");
+
+const dbMarkerColor = computed(() => {
+  return props.markerColor ?? theme.colors.muted;
+});
+const canvasWidth = computed(() => {
+  return props.width;
+});
+
+const metering = useMetering(props.fftSize, props.input as AudioNode);
+const rendering = useRendering();
+
+watch(
+  () => props.input,
+  (newVal, oldVal) => {
+    metering.onInputChanged(
+      newVal as AudioNode | undefined,
+      oldVal as AudioNode | undefined
+    );
+  }
+);
+
+onMounted(() => {
+  const canvas = meterCanvas.value as HTMLCanvasElement;
+  canvasCtx.value = canvas.getContext("2d");
+  rendering.startRendering(draw);
+});
+
+function getDbMarkerHeight(db: number, previousDb?: number) {
+  // for top marker, calculate total height from top
+  if (previousDb === undefined) {
+    return props.height - getMeterHeight(scaleY(db));
+  }
+
+  // else calculate height difference from previous marker
+  const y = props.height - getMeterHeight(scaleY(db));
+  const prevY = props.height - getMeterHeight(scaleY(previousDb));
+  return y - prevY;
+}
+
+// convert dB to height from the bottom of the graph in pixels
+function getMeterHeight(db: number) {
+  return (
+    props.height *
+    ((DB_RANGE + db) / DB_RANGE) *
+    (DB_RANGE / (DB_RANGE + DB_PADDING_TOP))
+  );
+}
+
+function scaleY(db: number): number {
+  return curve.getCurvedValue(db + DB_RANGE) - DB_RANGE;
+}
+
+function draw(): void {
+  if (canvasCtx.value) {
+    const dataArray = metering.getFloatTimeDomainData();
+
+    let db = -DB_RANGE;
+
+    if (props.type === "peak" && dataArray) {
+      db = metering.getPeakDb(dataArray);
+    } else if (props.type === "rms" && dataArray) {
+      db = metering.getRmsDb(dataArray);
+    }
+
+    const clipping = db > 0;
+    db = clamp(db, -DB_RANGE, 0);
+
+    const meterHeight = getMeterHeight(scaleY(db));
+
+    canvasCtx.value.clearRect(0, 0, canvasWidth.value, props.height);
+
+    canvasCtx.value.fillStyle = props.backgroundColor ?? theme.colors.light;
+    canvasCtx.value.beginPath();
+    canvasCtx.value.fillRect(0, 0, props.width, props.height);
+    canvasCtx.value.stroke();
+
+    canvasCtx.value.fillStyle = clipping
+      ? props.clippingColor ?? theme.colors.danger
+      : props.barColor ?? theme.colors.success;
+    canvasCtx.value.beginPath();
+    canvasCtx.value.fillRect(
+      0,
+      props.height - meterHeight,
+      props.width,
+      meterHeight
+    );
+    canvasCtx.value.stroke();
+  }
+}
 </script>
 
 <style scoped>
