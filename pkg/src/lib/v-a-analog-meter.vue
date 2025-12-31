@@ -120,9 +120,8 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
-  defineComponent,
   type PropType,
   computed,
   ref,
@@ -134,85 +133,74 @@ import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
 import { type AnalogMeterType } from "@/types/vue-audio-ui-types";
 
-export default defineComponent({
-  name: "VAAnalogMeter",
-  props: {
-    input: {
-      required: false,
-      type: Object, // type: AudioNode -- need to use Object for SSR
-      default: undefined,
-    },
-    type: {
-      required: false,
-      type: String as PropType<AnalogMeterType>,
-      default: "peak",
-    },
-    fftSize: {
-      required: false,
-      type: Number,
-      default: 2048,
-    },
-    width: {
-      required: false,
-      type: Number,
-      default: 300,
-    },
+const props = defineProps({
+  input: {
+    required: false,
+    type: Object, // type: AudioNode -- need to use Object for SSR
+    default: undefined,
   },
-  setup(props) {
-    const { getPeakDb, getRmsDb, getFloatTimeDomainData, onInputChanged } =
-      useMetering(props.fftSize, props.input as AudioNode);
+  type: {
+    required: false,
+    type: String as PropType<AnalogMeterType>,
+    default: "peak",
+  },
+  fftSize: {
+    required: false,
+    type: Number,
+    default: 2048,
+  },
+  width: {
+    required: false,
+    type: Number,
+    default: 300,
+  },
+});
 
-    watch(
-      () => props.input,
-      (newVal, oldVal) => {
-        onInputChanged(
-          newVal as AudioNode | undefined,
-          oldVal as AudioNode | undefined
-        );
-      }
+const { getPeakDb, getRmsDb, getFloatTimeDomainData, onInputChanged } =
+  useMetering(props.fftSize, props.input as AudioNode);
+
+watch(
+  () => props.input,
+  (newVal, oldVal) => {
+    onInputChanged(
+      newVal as AudioNode | undefined,
+      oldVal as AudioNode | undefined
     );
+  }
+);
 
-    const { startRendering, stopRendering } = useRendering();
+const { startRendering, stopRendering } = useRendering();
 
-    const value = ref(-1);
-    const color = ref("black");
+const value = ref(-1);
 
-    const rotation = computed(() => {
-      return isNaN(value.value)
-        ? "rotate(0 160 150)"
-        : `rotate(${50 * value.value} 160 150)`;
-    });
+const rotation = computed(() => {
+  return isNaN(value.value)
+    ? "rotate(0 160 150)"
+    : `rotate(${50 * value.value} 160 150)`;
+});
 
-    onMounted(() => {
-      startRendering(() => {
-        const dataArray = getFloatTimeDomainData();
+onMounted(() => {
+  startRendering(() => {
+    const dataArray = getFloatTimeDomainData();
 
-        let db = 0;
+    let db = 0;
 
-        if (props.type === "peak" && dataArray) {
-          db = getPeakDb(dataArray);
-        } else if (props.type === "rms" && dataArray) {
-          db = getRmsDb(dataArray);
-        }
+    if (props.type === "peak" && dataArray) {
+      db = getPeakDb(dataArray);
+    } else if (props.type === "rms" && dataArray) {
+      db = getRmsDb(dataArray);
+    }
 
-        const dbRange = 80;
-        db = db < -dbRange ? -dbRange : db;
-        const mult = (dbRange + db) / dbRange;
+    const dbRange = 80;
+    db = db < -dbRange ? -dbRange : db;
+    const mult = (dbRange + db) / dbRange;
 
-        value.value = mult * 2 - 1;
-      });
-    });
+    value.value = mult * 2 - 1;
+  });
+});
 
-    onUnmounted(() => {
-      stopRendering();
-    });
-
-    return {
-      color,
-      rotation,
-      value,
-    };
-  },
+onUnmounted(() => {
+  stopRendering();
 });
 </script>
 
