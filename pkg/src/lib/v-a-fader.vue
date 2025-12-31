@@ -19,199 +19,195 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, useTemplateRef } from "vue";
+<script setup lang="ts">
+import {
+  defineComponent,
+  ref,
+  useTemplateRef,
+  computed,
+  onMounted,
+  onUnmounted,
+  watch,
+} from "vue";
 import defaultFaderHead from "@/lib/components/default-fader-head.vue";
 import defaultFaderBackground from "./components/default-fader-background.vue";
 import { LinearCurvedRange } from "@/util/curved-range";
 
-export default defineComponent({
-  name: "VAFader",
-  components: {
-    defaultFaderHead,
-    defaultFaderBackground,
+const emit = defineEmits(["update:modelValue"]);
+
+const props = defineProps({
+  modelValue: {
+    required: true,
+    type: Number,
   },
-  emits: ["update:modelValue"],
-  setup(props) {
-    // todo: should refactor all these and stop using a combination of composition and options api
-    const valueCurve = ref(
-      new LinearCurvedRange(props.minValue, props.maxValue)
-    );
-    const faderContainerY = ref(0);
-    const linearValue = ref(props.modelValue);
-    const curvedValue = ref(valueCurve.value.getCurvedValue(props.modelValue));
-
-    // const faderContainer = useTemplateRef("fader-container");
-    // const faderBackground = useTemplateRef("fader-background");
-    // const faderHead = useTemplateRef("fader-head");
-    const faderHeadHeight = ref(0);
-    const resizeObserver = ref<ResizeObserver | undefined>(undefined);
-
-    return {
-      valueCurve,
-      faderContainerY,
-      linearValue,
-      curvedValue,
-
-      // faderContainer,
-      // faderBackground,
-      // faderHead,
-      faderHeadHeight,
-      resizeObserver,
-    };
+  minValue: {
+    required: true,
+    type: Number,
   },
-  props: {
-    modelValue: {
-      required: true,
-      type: Number,
-    },
-    minValue: {
-      required: true,
-      type: Number,
-    },
-    maxValue: {
-      required: true,
-      type: Number,
-    },
-    height: {
-      required: false,
-      type: Number,
-      default: 200,
-    },
-    width: {
-      required: false,
-      type: Number,
-      default: 46,
-    },
-    default: {
-      required: false,
-      type: Number,
-    },
+  maxValue: {
+    required: true,
+    type: Number,
   },
-  computed: {
-    midValue(): number {
-      return this.minValue + this.valueRange / 2;
-    },
-    valueRange(): number {
-      return this.maxValue - this.minValue;
-    },
-    faderDragRange(): number {
-      return Math.abs(this.height - this.faderHeadHeight);
-    },
-    faderHeadTop(): number {
-      // set top position prop of fader head based on value of control
-      // need to invert so highest value is top: 0
-      const valueRatio =
-        (this.linearValue - this.minValue) / (this.maxValue - this.minValue);
-      return this.faderDragRange - valueRatio * this.faderDragRange;
-    },
-    cssVars() {
-      return {
-        "--fader-height": `${this.height}px`,
-        "--fader-width": `${this.width}px`,
-        "--fader-head-top": `${this.faderHeadTop}px`,
-      };
-    },
+  height: {
+    required: false,
+    type: Number,
+    default: 200,
   },
-  mounted() {
-    this.resizeObserver = new ResizeObserver(
-      (entries: ResizeObserverEntry[], observer: ResizeObserver) => {
-        this.faderHeadHeight = this.getFaderHeadHeight();
-      }
-    );
-
-    this.resizeObserver.observe(this.$refs.faderHead as HTMLElement);
+  width: {
+    required: false,
+    type: Number,
+    default: 46,
   },
-  unmounted() {
-    this.resizeObserver?.disconnect();
-  },
-  methods: {
-    getContainedImgOrSvg(el: HTMLElement) {
-      if (el.children.length == 1) {
-        if (el.children.item(0) instanceof SVGElement) {
-          return el.children.item(0);
-        } else if (el.children.item(0) instanceof HTMLImageElement) {
-          return el.children.item(0);
-        }
-      }
-
-      return undefined;
-    },
-    getFaderHeadHeight() {
-      const faderHead = this.$refs.faderHead as HTMLElement;
-
-      // look for underlying img or svg to get exact height
-      // todo: could probably just get the container height
-      // to match the img or svg height exactly with proper css
-      const headImg = this.getContainedImgOrSvg(faderHead);
-
-      return headImg
-        ? headImg.getBoundingClientRect().height
-        : faderHead.getBoundingClientRect().height;
-    },
-    onHeadMouseDown(e: MouseEvent | TouchEvent) {
-      e.preventDefault();
-
-      // todo: should access this via comp api instead of using $refs
-      this.faderContainerY = (
-        this.$refs.faderContainer as HTMLElement
-      ).getBoundingClientRect().y;
-
-      this.faderHeadHeight = this.getFaderHeadHeight();
-
-      document.addEventListener("mousemove", this.onHeadMouseDrag);
-      document.addEventListener("touchmove", this.onHeadTouchDrag);
-      document.addEventListener("mouseup", this.onDocumentMouseUp);
-      document.addEventListener("touchend", this.onDocumentMouseUp);
-    },
-    onDocumentMouseUp() {
-      document.removeEventListener("mousemove", this.onHeadMouseDrag);
-      document.removeEventListener("touchmove", this.onHeadTouchDrag);
-      document.removeEventListener("mouseup", this.onDocumentMouseUp);
-      document.removeEventListener("touchend", this.onDocumentMouseUp);
-    },
-    onHeadDblClick() {
-      const value =
-        typeof this.default === "undefined" ? this.midValue : this.default;
-      this.$emit("update:modelValue", this.valueCurve.getCurvedValue(value));
-    },
-    onHeadDrag(currPageY: number) {
-      let currSvgY = currPageY - this.faderContainerY;
-
-      if (currSvgY > this.height) {
-        currSvgY = this.height;
-      } else if (currSvgY < 0) {
-        currSvgY = 0;
-      }
-
-      const mult = (this.height - currSvgY) / this.height;
-      const faderValue = mult * this.valueRange + this.minValue;
-
-      this.$emit(
-        "update:modelValue",
-        this.valueCurve.getCurvedValue(faderValue)
-      );
-    },
-    onHeadTouchDrag(e: TouchEvent) {
-      if (e.touches[0]) this.onHeadDrag(e.touches[0].clientY);
-    },
-    onHeadMouseDrag(e: MouseEvent) {
-      this.onHeadDrag(e.clientY);
-    },
-  },
-  watch: {
-    modelValue(newValue: number): void {
-      this.curvedValue = newValue;
-      this.linearValue = this.valueCurve.getLinearValue(this.curvedValue);
-    },
-    minValue(newValue: number) {
-      this.valueCurve = new LinearCurvedRange(newValue, this.maxValue);
-    },
-    maxValue(newValue: number) {
-      this.valueCurve = new LinearCurvedRange(this.minValue, newValue);
-    },
+  default: {
+    required: false,
+    type: Number,
   },
 });
+
+const valueCurve = ref(new LinearCurvedRange(props.minValue, props.maxValue));
+const faderContainerY = ref(0);
+const linearValue = ref(props.modelValue);
+const curvedValue = ref(valueCurve.value.getCurvedValue(props.modelValue));
+
+const faderContainer = useTemplateRef("faderContainer");
+const faderBackground = useTemplateRef("faderBackground");
+const faderHead = useTemplateRef("faderHead");
+const faderHeadHeight = ref(0);
+// todo: does this need to be a ref?
+const resizeObserver = ref<ResizeObserver | undefined>(undefined);
+const valueRange = computed(() => {
+  return props.maxValue - props.minValue;
+});
+
+const midValue = computed(() => {
+  return props.minValue + valueRange.value / 2;
+});
+
+const faderDragRange = computed(() => {
+  return Math.abs(props.height - faderHeadHeight.value);
+});
+
+const faderHeadTop = computed(() => {
+  // set top position prop of fader head based on value of control
+  // need to invert so highest value is top: 0
+  const valueRatio = (linearValue.value - props.minValue) / valueRange.value;
+  return faderDragRange.value - valueRatio * faderDragRange.value;
+});
+
+const cssVars = computed(() => {
+  return {
+    "--fader-height": `${props.height}px`,
+    "--fader-width": `${props.width}px`,
+    "--fader-head-top": `${faderHeadTop.value}px`,
+  };
+});
+
+onMounted(() => {
+  resizeObserver.value = new ResizeObserver(
+    (entries: ResizeObserverEntry[], observer: ResizeObserver) => {
+      faderHeadHeight.value = getFaderHeadHeight();
+    }
+  );
+
+  resizeObserver.value.observe(faderHead.value as HTMLElement);
+});
+
+onUnmounted(() => {
+  resizeObserver.value?.disconnect();
+});
+
+function getContainedImgOrSvg(el: HTMLElement) {
+  if (el.children.length == 1) {
+    if (el.children.item(0) instanceof SVGElement) {
+      return el.children.item(0);
+    } else if (el.children.item(0) instanceof HTMLImageElement) {
+      return el.children.item(0);
+    }
+  }
+
+  return undefined;
+}
+
+function getFaderHeadHeight() {
+  if (!faderHead.value) return 0;
+
+  // look for underlying img or svg to get exact height
+  // todo: could probably just get the container height
+  // to match the img or svg height exactly with proper css
+  const headImg = getContainedImgOrSvg(faderHead.value as HTMLElement);
+
+  return headImg
+    ? headImg.getBoundingClientRect().height
+    : faderHead.value.getBoundingClientRect().height;
+}
+
+function onHeadMouseDown(e: MouseEvent | TouchEvent) {
+  e.preventDefault();
+
+  faderContainerY.value = (
+    faderContainer.value as HTMLElement
+  ).getBoundingClientRect().y;
+
+  faderHeadHeight.value = getFaderHeadHeight();
+  document.addEventListener("mousemove", onHeadMouseDrag);
+  document.addEventListener("touchmove", onHeadTouchDrag);
+  document.addEventListener("mouseup", onDocumentMouseUp);
+  document.addEventListener("touchend", onDocumentMouseUp);
+}
+function onDocumentMouseUp() {
+  document.removeEventListener("mousemove", onHeadMouseDrag);
+  document.removeEventListener("touchmove", onHeadTouchDrag);
+  document.removeEventListener("mouseup", onDocumentMouseUp);
+  document.removeEventListener("touchend", onDocumentMouseUp);
+}
+
+function onHeadDblClick() {
+  const value =
+    typeof props.default === "undefined" ? midValue.value : props.default;
+  emit("update:modelValue", valueCurve.value.getCurvedValue(value));
+}
+function onHeadDrag(currPageY: number) {
+  let currSvgY = currPageY - faderContainerY.value;
+
+  if (currSvgY > props.height) {
+    currSvgY = props.height;
+  } else if (currSvgY < 0) {
+    currSvgY = 0;
+  }
+
+  const mult = (props.height - currSvgY) / props.height;
+  const faderValue = mult * valueRange.value + props.minValue;
+
+  emit("update:modelValue", valueCurve.value.getCurvedValue(faderValue));
+}
+function onHeadTouchDrag(e: TouchEvent) {
+  if (e.touches[0]) onHeadDrag(e.touches[0].clientY);
+}
+function onHeadMouseDrag(e: MouseEvent) {
+  onHeadDrag(e.clientY);
+}
+
+watch(
+  () => props.modelValue,
+  (newValue: number) => {
+    curvedValue.value = newValue;
+    linearValue.value = valueCurve.value.getLinearValue(curvedValue.value);
+  }
+);
+
+watch(
+  () => props.minValue,
+  (newValue: number) => {
+    valueCurve.value = new LinearCurvedRange(newValue, props.maxValue);
+  }
+);
+
+watch(
+  () => props.maxValue,
+  (newValue: number) => {
+    valueCurve.value = new LinearCurvedRange(props.minValue, newValue);
+  }
+);
 </script>
 
 <style scoped>
