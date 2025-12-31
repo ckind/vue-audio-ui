@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, computed, watch, ref } from "vue";
+import { computed, watch, ref } from "vue";
 import { LinearCurvedRange } from "@/util/curved-range.ts";
 import { clamp } from "@/util/math-helpers.ts";
 import defaultKnob from "@/lib/components/default-knob.vue";
