@@ -7,17 +7,21 @@
 
     <br />
 
-    <div class="example">
-      <v-a-spectrum-analyzer
-        :input="analyzerInput"
-        :width="500"
-        :fftSize="4096"
-        gridColor="gray"
-        backgroundColor="black"
-        borderColor="black"
-        fillStyle="none"
-      />
-    </div>
+    <v-a-spectrum-analyzer
+      :input="analyzerInput"
+      :width="500"
+      :fftSize="4096"
+      fillStyle="none"
+    />
+
+    <br />
+
+    <v-a-spectrum-analyzer
+      :input="analyzerInput"
+      :width="500"
+      :fftSize="4096"
+      fillStyle="solid"
+    />
 
     <p><strong>Props</strong></p>
     <PropsTable :propsToDisplay="propsToDisplay" />

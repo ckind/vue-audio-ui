@@ -1,15 +1,39 @@
 <template>
-  <canvas
-    :width="graphWidth"
-    :height="graphHeight"
-    ref="analyserCanvas"
-    class="analyser-canvas"
-    :style="cssVars"
-  ></canvas>
+  <div class="analyser-container">
+    <canvas
+      :width="graphWidth"
+      :height="graphHeight"
+      ref="analyserCanvas"
+      class="analyser-canvas"
+      :style="cssVars"
+    ></canvas>
+    <span
+      v-for="dbLabel in dbLabels"
+      :key="dbLabel"
+      class="db-label"
+      :style="{
+        top: getDbLabelTop(dbLabel) + 'px',
+        color: dbColor ?? themeColors.muted,
+      }"
+    >
+      {{ formatDbLabel(dbLabel) }}
+    </span>
+    <span
+      v-for="frequency in frequencyLabels"
+      :key="frequency"
+      class="frequency-label"
+      :style="{
+        left: scaleX(frequency, highPassCutoff, nyquist, graphWidth) + 'px',
+        color: hzColor ?? themeColors.white,
+      }"
+    >
+      {{ formatFrequencyLabel(frequency) }}
+    </span>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType, watch } from "vue";
+import { defineComponent, type PropType, watch, ref } from "vue";
 import { useMetering } from "@/composables/useMetering";
 import { useRendering } from "@/composables/useRendering";
 import { isPowerOfTwo } from "@/util/math-helpers";
@@ -28,6 +52,8 @@ export default defineComponent({
       continueDrawing: false,
       canvas: null as HTMLCanvasElement | null,
       canvasContext: null as CanvasRenderingContext2D | null,
+      highPassCutoff: 20,
+      themeColors: theme.colors,
     };
   },
   props: {
@@ -65,28 +91,18 @@ export default defineComponent({
     backgroundColor: {
       type: String,
       required: false,
-      default: "black",
     },
     gridColor: {
       type: String,
       required: false,
-      default: "gray",
     },
     dbColor: {
       type: String,
       required: false,
-      default: "gray",
     },
     hzColor: {
       type: String,
       required: false,
-      default: "white",
-    },
-
-    font: {
-      required: false,
-      type: String,
-      default: "Helvetica, sans-serif",
     },
   },
   setup(props) {
@@ -95,9 +111,12 @@ export default defineComponent({
       props.input as AudioNode | undefined
     );
 
+    const nyquist = ref(24000);
+
     watch(
       () => props.input,
       (newVal, oldVal) => {
+        nyquist.value = newVal ? newVal.context.sampleRate / 2 : 24000;
         metering.onInputChanged(
           newVal as AudioNode | undefined,
           oldVal as AudioNode | undefined
@@ -108,6 +127,7 @@ export default defineComponent({
     return {
       ...metering,
       ...useRendering(),
+      nyquist,
     };
   },
   computed: {
@@ -118,9 +138,36 @@ export default defineComponent({
       return this.height ? this.height : this.width / DEFAULT_ASPECT_RATIO;
     },
     cssVars() {
+      // return {
+      //   "--border-color": this.backgroundColor ?? theme.colors.black,
+      //   "--db-color": this.dbColor ?? theme.colors.muted,
+      //   "--hz-color": this.hzColor ?? theme.colors.white,
+      // };
       return {
-        "--border-color": this.backgroundColor,
+        "--border-color": theme.colors.black,
+        "--db-color": theme.colors.muted,
+        "--hz-color": theme.colors.white,
       };
+    },
+    frequencyLabels(): number[] {
+      const labels = [20, 50, 2000, 10000];
+      if (this.graphWidth > 300) {
+        labels.push(500);
+        labels.push(5000);
+      }
+      if (this.graphWidth > 600) {
+        labels.push(200);
+        labels.push(1000);
+        labels.push(7000);
+        labels.push(15000);
+      }
+      if (this.graphWidth > 800) {
+        labels.push(20000);
+      }
+      return labels;
+    },
+    dbLabels(): number[] {
+      return [-20, -40, -60, -80, -100];
     },
   },
   mounted() {
@@ -177,7 +224,8 @@ export default defineComponent({
 
         this.canvasContext.clearRect(0, 0, this.graphWidth, this.graphHeight);
 
-        this.canvasContext.fillStyle = this.backgroundColor;
+        this.canvasContext.fillStyle =
+          this.backgroundColor ?? theme.colors.black;
         this.canvasContext.fillRect(0, 0, this.graphWidth, this.graphHeight);
 
         if (dataArray) {
@@ -241,67 +289,53 @@ export default defineComponent({
           this.graphHeight -
           ((NOISE_FLOOR - db) / NOISE_FLOOR) * this.graphHeight;
 
-        this.canvasContext.strokeStyle = this.dbColor;
+        this.canvasContext.strokeStyle = this.dbColor ?? theme.colors.muted;
         this.canvasContext.beginPath();
         this.canvasContext.moveTo(0, y);
         this.canvasContext.lineTo(this.graphWidth, y);
         this.canvasContext.stroke();
-
-        this.canvasContext.font = `12px ${this.font}`;
-        this.canvasContext.fillStyle = this.gridColor;
-        this.canvasContext.fillText(`${db}db`, 10, y);
       }
     },
     drawFrequencyMarkers(nyquist: number) {
-      this.drawFrequencyMarker(
-        HIGH_PASS_CUTOFF,
-        nyquist,
-        this.graphWidth > 300,
-        false
-      );
       this.drawFrequencyMarker(25, nyquist);
-      this.drawFrequencyMarker(50, nyquist, true);
+      this.drawFrequencyMarker(50, nyquist);
       this.drawFrequencyMarker(100, nyquist);
-      this.drawFrequencyMarker(200, nyquist, this.graphWidth > 600);
-      this.drawFrequencyMarker(500, nyquist, this.graphWidth > 300);
-      this.drawFrequencyMarker(1000, nyquist, this.graphWidth > 600);
+      this.drawFrequencyMarker(200, nyquist);
+      this.drawFrequencyMarker(500, nyquist);
+      this.drawFrequencyMarker(1000, nyquist);
       this.drawFrequencyMarker(1500, nyquist);
-      this.drawFrequencyMarker(2000, nyquist, true);
-      this.drawFrequencyMarker(3000, nyquist, this.graphWidth > 600);
-      this.drawFrequencyMarker(5000, nyquist, this.graphWidth > 300);
-      this.drawFrequencyMarker(7000, nyquist, this.graphWidth > 600);
-      this.drawFrequencyMarker(10000, nyquist, true);
-      this.drawFrequencyMarker(15000, nyquist, this.graphWidth > 600);
-      this.drawFrequencyMarker(20000, nyquist, this.graphWidth > 800);
+      this.drawFrequencyMarker(2000, nyquist);
+      this.drawFrequencyMarker(3000, nyquist);
+      this.drawFrequencyMarker(5000, nyquist);
+      this.drawFrequencyMarker(7000, nyquist);
+      this.drawFrequencyMarker(10000, nyquist);
+      this.drawFrequencyMarker(15000, nyquist);
+      this.drawFrequencyMarker(20000, nyquist);
     },
-    drawFrequencyMarker(
-      f: number,
-      nyquist: number,
-      drawLabel: boolean = false,
-      drawGridLine: boolean = true
-    ) {
+    drawFrequencyMarker(f: number, nyquist: number) {
       if (this.canvasContext && f >= HIGH_PASS_CUTOFF) {
         const x = this.scaleX(f, HIGH_PASS_CUTOFF, nyquist, this.graphWidth);
-
-        if (drawGridLine) {
-          this.canvasContext.strokeStyle = this.gridColor;
-          this.canvasContext.beginPath();
-          this.canvasContext.moveTo(x, 0);
-          this.canvasContext.lineTo(x, this.graphWidth);
-          this.canvasContext.stroke();
-        }
-
-        if (drawLabel) {
-          this.canvasContext.font = `14px ${this.font}`;
-
-          this.canvasContext.fillStyle = this.hzColor ?? theme.colors.primary;
-          if (f < 1000) {
-            this.canvasContext.fillText(`${f}hz`, x, 50);
-          } else {
-            this.canvasContext.fillText(`${f / 1000}khz`, x, 50);
-          }
-        }
+        this.canvasContext.strokeStyle = this.gridColor ?? theme.colors.muted;
+        this.canvasContext.beginPath();
+        this.canvasContext.moveTo(x, 0);
+        this.canvasContext.lineTo(x, this.graphWidth);
+        this.canvasContext.stroke();
       }
+    },
+    formatFrequencyLabel(f: number): string {
+      if (f < 1000) {
+        return `${f}Hz`;
+      } else {
+        return `${(f / 1000).toFixed(1)}kHz`;
+      }
+    },
+    formatDbLabel(db: number): string {
+      return `${db}dB`;
+    },
+    getDbLabelTop(db: number): number {
+      return (
+        this.graphHeight - ((NOISE_FLOOR - db) / NOISE_FLOOR) * this.graphHeight
+      );
     },
   },
 });
@@ -312,5 +346,20 @@ export default defineComponent({
   display: block;
   border: 1px solid;
   border-color: var(--border-color);
+}
+.analyser-container {
+  position: relative;
+}
+.frequency-label {
+  top: 3em;
+  position: absolute;
+  font-size: 0.75em;
+  margin-left: 2px;
+}
+.db-label {
+  left: 1em;
+  position: absolute;
+  font-size: 0.75em;
+  transform: translateY(-80%);
 }
 </style>
