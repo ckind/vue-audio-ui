@@ -59,219 +59,209 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from "vue";
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+
+const emit = defineEmits([
+  "keySlideOn",
+  "keySlideOff",
+  "keyMouseDown",
+  "keyMouseUp",
+  "keyboardKeyDown",
+  "keyboardKeyUp",
+]);
+
+const props = defineProps({
+  disabled: { type: Boolean, required: false, default: false },
+  enableKeyControls: { type: Boolean, required: false, default: true },
+  startingOctave: { type: Number, required: false, default: 3 },
+  numOctaves: { type: Number, required: false, default: 2 },
+  enableKeyboardControls: { type: Boolean, required: false, default: true },
+});
 
 const isMouseDown = ref(false);
 
-export interface IDomPiano {
-  displayKeyDown(keyNumber: number): void;
-  displayKeyUp(keyNumber: number): void;
+const keyPressedColor = "#ff2929"; // todo: use theme color (danger?)
+const blackKeys = [1, 3, 6, 8, 10];
+const noteKeyCodes = [
+  "KeyA",
+  "KeyW",
+  "KeyS",
+  "KeyE",
+  "KeyD",
+  "KeyF",
+  "KeyT",
+  "KeyG",
+  "KeyY",
+  "KeyH",
+  "KeyU",
+  "KeyJ",
+  "KeyK",
+  "KeyO",
+  "KeyL",
+];
+let userOctaveOffset = props.startingOctave * 12;
+
+function userKeyPressed(e: KeyboardEvent) {
+  const n = noteKeyCodes.findIndex((c) => {
+    return c === e.code;
+  });
+  if (n > -1) {
+    const keyNum = n + userOctaveOffset;
+    displayKeyDown(keyNum);
+    emit("keyboardKeyDown", keyNum);
+  }
 }
 
-export default defineComponent({
-  emits: [
-    "keySlideOn",
-    "keySlideOff",
-    "keyMouseDown",
-    "keyMouseUp",
-    "keyboardKeyDown",
-    "keyboardKeyUp",
-  ],
-  props: {
-    disabled: { type: Boolean, required: false, default: false },
-    enableKeyControls: { type: Boolean, required: false, default: true },
-    startingOctave: { type: Number, required: false, default: 3 },
-    numOctaves: { type: Number, required: false, default: 2 },
-    enableKeyboardControls: { type: Boolean, required: false, default: true },
-  },
-  setup(props, context) {
-    const keyPressedColor = "#ff2929"; // todo: use theme color (danger?)
-    const blackKeys = [1, 3, 6, 8, 10];
-    const noteKeyCodes = [
-      "KeyA",
-      "KeyW",
-      "KeyS",
-      "KeyE",
-      "KeyD",
-      "KeyF",
-      "KeyT",
-      "KeyG",
-      "KeyY",
-      "KeyH",
-      "KeyU",
-      "KeyJ",
-      "KeyK",
-      "KeyO",
-      "KeyL",
-    ];
-    let userOctaveOffset = props.startingOctave * 12;
+function userKeyReleased(e: KeyboardEvent) {
+  const n = noteKeyCodes.findIndex((c) => {
+    return c === e.code;
+  });
+  if (n > -1) {
+    // todo: doesn't release if you change octave or transpose while holding a key
+    const keyNum = n + userOctaveOffset;
+    displayKeyUp(keyNum);
+    emit("keyboardKeyUp", keyNum);
+  } else if (e.code === "KeyZ") {
+    // go down an octave
+    userOctaveOffset -= 12;
+  } else if (e.code === "KeyX") {
+    // go up an octave
+    userOctaveOffset += 12;
+  } else if (e.code === "KeyC") {
+    // todo: transpose down a step?
+  } else if (e.code === "KeyV") {
+    // todo: transpose up a step?
+  }
+}
 
-    function userKeyPressed(e: KeyboardEvent) {
-      const n = noteKeyCodes.findIndex((c) => {
-        return c === e.code;
-      });
-      if (n > -1) {
-        const keyNum = n + userOctaveOffset;
-        displayKeyDown(keyNum);
-        context.emit("keyboardKeyDown", keyNum);
-      }
-    }
+function displayKeyDown(keyNumber: number) {
+  const key: HTMLElement | null = document.querySelector(`#key${keyNumber}`);
+  if (key != null) {
+    key.style.background = keyPressedColor;
+  }
+}
 
-    function userKeyReleased(e: KeyboardEvent) {
-      const n = noteKeyCodes.findIndex((c) => {
-        return c === e.code;
-      });
-      if (n > -1) {
-        // todo: doesn't release if you change octave or transpose while holding a key
-        const keyNum = n + userOctaveOffset;
-        displayKeyUp(keyNum);
-        context.emit("keyboardKeyUp", keyNum);
-      } else if (e.code === "KeyZ") {
-        // go down an octave
-        userOctaveOffset -= 12;
-      } else if (e.code === "KeyX") {
-        // go up an octave
-        userOctaveOffset += 12;
-      } else if (e.code === "KeyC") {
-        // todo: transpose down a step?
-      } else if (e.code === "KeyV") {
-        // todo: transpose up a step?
-      }
-    }
+function displayKeyUp(keyNumber: number) {
+  const key: HTMLElement | null = document.querySelector(`#key${keyNumber}`);
+  if (key != null) {
+    key.style.background = blackKeys.includes(keyNumber % 12)
+      ? "black"
+      : "white";
+  }
+}
 
-    function displayKeyDown(keyNumber: number) {
-      const key: HTMLElement | null = document.querySelector(
-        `#key${keyNumber}`
-      );
-      if (key != null) {
-        key.style.background = keyPressedColor;
-      }
-    }
+function getKeyNum(e: Event) {
+  const el = e.target as HTMLElement;
+  return parseInt(el.id.replace("key", ""));
+}
 
-    function displayKeyUp(keyNumber: number) {
-      const key: HTMLElement | null = document.querySelector(
-        `#key${keyNumber}`
-      );
-      if (key != null) {
-        key.style.background = blackKeys.includes(keyNumber % 12)
-          ? "black"
-          : "white";
-      }
-    }
+function keySlideOn(e: Event) {
+  if (!isMouseDown.value) return;
 
-    function getKeyNum(e: Event) {
-      const el = e.target as HTMLElement;
-      return parseInt(el.id.replace("key", ""));
-    }
+  const keyNum = getKeyNum(e);
+  e.stopPropagation();
+  if (!props.disabled) {
+    displayKeyDown(keyNum);
+    emit("keySlideOn", keyNum);
+  }
+}
 
-    function keySlideOn(e: Event) {
-      if (!isMouseDown.value) return;
+function keySlideOff(e: Event) {
+  if (!isMouseDown.value) return;
 
-      const keyNum = getKeyNum(e);
-      e.stopPropagation();
-      if (!props.disabled) {
-        displayKeyDown(keyNum);
-        context.emit("keySlideOn", keyNum);
-      }
-    }
+  e.stopPropagation();
+  const keyNum = getKeyNum(e);
+  if (!props.disabled) {
+    displayKeyUp(keyNum);
+    emit("keySlideOff", keyNum);
+  }
+}
 
-    function keySlideOff(e: Event) {
-      if (!isMouseDown.value) return;
+function keyMouseDown(e: Event) {
+  e.stopPropagation();
+  isMouseDown.value = true;
+  const keyNum = getKeyNum(e);
+  if (!props.disabled) {
+    displayKeyDown(keyNum);
+    emit("keyMouseDown", keyNum);
+  }
+}
 
-      e.stopPropagation();
-      const keyNum = getKeyNum(e);
-      if (!props.disabled) {
-        displayKeyUp(keyNum);
-        context.emit("keySlideOff", keyNum);
-      }
-    }
+function keyMouseUp(e: Event) {
+  e.stopPropagation();
+  isMouseDown.value = false;
+  const keyNum = getKeyNum(e);
+  if (!props.disabled) {
+    displayKeyUp(keyNum);
+    emit("keyMouseUp", getKeyNum(e));
+  }
+}
 
-    function keyMouseDown(e: Event) {
-      e.stopPropagation();
-      isMouseDown.value = true;
-      const keyNum = getKeyNum(e);
-      if (!props.disabled) {
-        displayKeyDown(keyNum);
-        context.emit("keyMouseDown", keyNum);
-      }
-    }
+function documentMouseDown() {
+  isMouseDown.value = true;
+}
 
-    function keyMouseUp(e: Event) {
-      e.stopPropagation();
-      isMouseDown.value = false;
-      const keyNum = getKeyNum(e);
-      if (!props.disabled) {
-        displayKeyUp(keyNum);
-        context.emit("keyMouseUp", getKeyNum(e));
-      }
-    }
+function documentMouseUp() {
+  isMouseDown.value = false;
+}
 
-    function documentMouseDown() {
-      isMouseDown.value = true;
-    }
+function assignKeyboardListeners() {
+  document.addEventListener("mousedown", documentMouseDown);
+  document.addEventListener("mouseup", documentMouseUp);
 
-    function documentMouseUp() {
-      isMouseDown.value = false;
-    }
+  document.addEventListener("keydown", userKeyPressed);
+  document.addEventListener("keyup", userKeyReleased);
 
-    function assignKeyboardListeners() {
-      document.addEventListener("mousedown", documentMouseDown);
-      document.addEventListener("mouseup", documentMouseUp);
+  const keys = document.querySelectorAll(
+    "div.keyboard div.key, div.keyboard div.black-key"
+  );
+  for (const key of keys) {
+    key.addEventListener("mousedown", keyMouseDown);
+    key.addEventListener("mouseup", keyMouseUp);
+    key.addEventListener("mouseover", keySlideOn);
+    key.addEventListener("mouseout", keySlideOff);
+    key.addEventListener("touchstart", keyMouseDown);
+    key.addEventListener("touchend", keyMouseUp);
+    // todo: need to implement keySlideOn and keySlideOff for touch events - see: https://gist.github.com/VehpuS/6fd5dca2ea8cd0eb0471
+  }
+}
 
-      document.addEventListener("keydown", userKeyPressed);
-      document.addEventListener("keyup", userKeyReleased);
+function clearKeyboardListeners() {
+  document.removeEventListener("mousedown", documentMouseDown);
+  document.removeEventListener("mouseup", documentMouseUp);
 
-      const keys = document.querySelectorAll(
-        "div.keyboard div.key, div.keyboard div.black-key"
-      );
-      for (const key of keys) {
-        key.addEventListener("mousedown", keyMouseDown);
-        key.addEventListener("mouseup", keyMouseUp);
-        key.addEventListener("mouseover", keySlideOn);
-        key.addEventListener("mouseout", keySlideOff);
-        key.addEventListener("touchstart", keyMouseDown);
-        key.addEventListener("touchend", keyMouseUp);
-        // todo: need to implement keySlideOn and keySlideOff for touch events - see: https://gist.github.com/VehpuS/6fd5dca2ea8cd0eb0471
-      }
-    }
+  document.removeEventListener("keydown", userKeyPressed);
+  document.removeEventListener("keyup", userKeyReleased);
 
-    function clearKeyboardListeners() {
-      document.removeEventListener("mousedown", documentMouseDown);
-      document.removeEventListener("mouseup", documentMouseUp);
+  const keys = document.querySelectorAll(
+    "div.keyboard div.key, div.keyboard div.black-key"
+  );
+  for (const key of keys) {
+    key.removeEventListener("mousedown", keyMouseDown);
+    key.removeEventListener("mouseup", keyMouseUp);
+    key.removeEventListener("mouseover", keySlideOn);
+    key.removeEventListener("mouseout", keySlideOff);
+    key.removeEventListener("touchstart", keyMouseDown);
+    key.removeEventListener("touchend", keyMouseUp);
+  }
+}
 
-      document.removeEventListener("keydown", userKeyPressed);
-      document.removeEventListener("keyup", userKeyReleased);
+function resetKeyboardListeners() {
+  clearKeyboardListeners();
+  assignKeyboardListeners();
+}
 
-      const keys = document.querySelectorAll(
-        "div.keyboard div.key, div.keyboard div.black-key"
-      );
-      for (const key of keys) {
-        key.removeEventListener("mousedown", keyMouseDown);
-        key.removeEventListener("mouseup", keyMouseUp);
-        key.removeEventListener("mouseover", keySlideOn);
-        key.removeEventListener("mouseout", keySlideOff);
-        key.removeEventListener("touchstart", keyMouseDown);
-        key.removeEventListener("touchend", keyMouseUp);
-      }
-    }
-
-    function resetKeyboardListeners() {
-      clearKeyboardListeners();
-      assignKeyboardListeners();
-    }
-
-    onMounted(() => {
-      assignKeyboardListeners();
-    });
-
-    onBeforeUnmount(() => {
-      clearKeyboardListeners();
-    });
-
-    watch(() => props.numOctaves, resetKeyboardListeners);
-  },
+onMounted(() => {
+  assignKeyboardListeners();
 });
+
+onBeforeUnmount(() => {
+  clearKeyboardListeners();
+});
+
+watch(() => props.numOctaves, resetKeyboardListeners);
+watch(() => props.startingOctave, resetKeyboardListeners);
 </script>
 
 <style scoped>
