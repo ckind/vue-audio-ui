@@ -5,6 +5,7 @@ export default function useDragging(
 ) {
   const prevY = ref(-1);
   const prevX = ref(-1);
+  const dragging = ref(false);
 
   function onDragElementStart(e: MouseEvent | TouchEvent) {
     e.preventDefault();
@@ -20,6 +21,7 @@ export default function useDragging(
     document.removeEventListener("touchend", onDocumentUp);
     prevY.value = -1;
     prevX.value = -1;
+    dragging.value = false;
   }
   function onMouseDrag(e: MouseEvent) {
     onDrag(e.pageX, e.pageY);
@@ -34,6 +36,7 @@ export default function useDragging(
     }
   }
   function onDrag(currX: number, currY: number) {
+    dragging.value = true;
     if (prevY.value > -1) {
       const deltaX = currX - prevX.value;
       const deltaY = currY - prevY.value;
@@ -43,6 +46,7 @@ export default function useDragging(
   }
 
   return {
-    onDragElementStart
+    onDragElementStart,
+    dragging
   };
 }
