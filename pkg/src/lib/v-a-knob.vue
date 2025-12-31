@@ -75,8 +75,8 @@ const rotationMax = ref((3 * Math.PI) / 4);
 const dragRange = ref(70);
 const valueCurve = ref(new LinearCurvedRange(props.minValue, props.maxValue));
 const linearValue = ref(props.modelValue);
-const curvedValue = ref(valueCurve.value.getCurvedValue(linearValue.value));
-const unsteppedValue = ref(curvedValue.value);
+const curvedValue = ref(valueCurve.value.getCurvedValue(props.modelValue));
+const unsteppedValue = ref(props.modelValue);
 // const audioParamValue = ref<AudioParam | null>(null); // todo: allow AudioParam input
 
 function onKnobDblClick() {

@@ -8,8 +8,8 @@
     <div
       ref="faderHead"
       class="fader-head"
-      @mousedown="onHeadMouseDown"
-      @touchstart="onHeadMouseDown"
+      @mousedown="onDragElementStart"
+      @touchstart="onDragElementStart"
       @dblclick="onHeadDblClick"
     >
       <slot name="faderHead">
@@ -31,6 +31,8 @@ import {
 import defaultFaderHead from "@/lib/components/default-fader-head.vue";
 import defaultFaderBackground from "./components/default-fader-background.vue";
 import { LinearCurvedRange } from "@/util/curved-range";
+import { clamp } from "@/util/math-helpers.ts";
+import useDragging from "@/composables/useDragging";
 
 const emit = defineEmits(["update:modelValue"]);
 
@@ -64,16 +66,12 @@ const props = defineProps({
 });
 
 const valueCurve = ref(new LinearCurvedRange(props.minValue, props.maxValue));
-const faderContainerY = ref(0);
 const linearValue = ref(props.modelValue);
 const curvedValue = ref(valueCurve.value.getCurvedValue(props.modelValue));
-
-const faderContainer = useTemplateRef("faderContainer");
-const faderBackground = useTemplateRef("faderBackground");
 const faderHead = useTemplateRef("faderHead");
 const faderHeadHeight = ref(0);
-// todo: does this need to be a ref?
-const resizeObserver = ref<ResizeObserver | undefined>(undefined);
+const resizeObserver = ref<ResizeObserver | undefined>(undefined); // todo: does this need to be a ref?
+
 const valueRange = computed(() => {
   return props.maxValue - props.minValue;
 });
@@ -101,19 +99,27 @@ const cssVars = computed(() => {
   };
 });
 
-onMounted(() => {
-  resizeObserver.value = new ResizeObserver(
-    (entries: ResizeObserverEntry[], observer: ResizeObserver) => {
-      faderHeadHeight.value = getFaderHeadHeight();
-    }
-  );
+watch(
+  () => props.modelValue,
+  (newValue: number) => {
+    curvedValue.value = newValue;
+    linearValue.value = valueCurve.value.getLinearValue(curvedValue.value);
+  }
+);
 
-  resizeObserver.value.observe(faderHead.value as HTMLElement);
-});
+watch(
+  () => props.minValue,
+  (newValue: number) => {
+    valueCurve.value = new LinearCurvedRange(newValue, props.maxValue);
+  }
+);
 
-onUnmounted(() => {
-  resizeObserver.value?.disconnect();
-});
+watch(
+  () => props.maxValue,
+  (newValue: number) => {
+    valueCurve.value = new LinearCurvedRange(props.minValue, newValue);
+  }
+);
 
 function getContainedImgOrSvg(el: HTMLElement) {
   if (el.children.length == 1) {
@@ -140,73 +146,35 @@ function getFaderHeadHeight() {
     : faderHead.value.getBoundingClientRect().height;
 }
 
-function onHeadMouseDown(e: MouseEvent | TouchEvent) {
-  e.preventDefault();
-
-  faderContainerY.value = (
-    faderContainer.value as HTMLElement
-  ).getBoundingClientRect().y;
-
-  faderHeadHeight.value = getFaderHeadHeight();
-  document.addEventListener("mousemove", onHeadMouseDrag);
-  document.addEventListener("touchmove", onHeadTouchDrag);
-  document.addEventListener("mouseup", onDocumentMouseUp);
-  document.addEventListener("touchend", onDocumentMouseUp);
-}
-function onDocumentMouseUp() {
-  document.removeEventListener("mousemove", onHeadMouseDrag);
-  document.removeEventListener("touchmove", onHeadTouchDrag);
-  document.removeEventListener("mouseup", onDocumentMouseUp);
-  document.removeEventListener("touchend", onDocumentMouseUp);
-}
-
 function onHeadDblClick() {
   const value =
     typeof props.default === "undefined" ? midValue.value : props.default;
   emit("update:modelValue", valueCurve.value.getCurvedValue(value));
 }
-function onHeadDrag(currPageY: number) {
-  let currSvgY = currPageY - faderContainerY.value;
 
-  if (currSvgY > props.height) {
-    currSvgY = props.height;
-  } else if (currSvgY < 0) {
-    currSvgY = 0;
-  }
-
-  const mult = (props.height - currSvgY) / props.height;
-  const faderValue = mult * valueRange.value + props.minValue;
+function onHeadDrag(deltaX: number, deltaY: number) {
+  let faderValue =
+    linearValue.value + (-deltaY / faderDragRange.value) * valueRange.value;
+  faderValue = clamp(faderValue, props.minValue, props.maxValue);
 
   emit("update:modelValue", valueCurve.value.getCurvedValue(faderValue));
 }
-function onHeadTouchDrag(e: TouchEvent) {
-  if (e.touches[0]) onHeadDrag(e.touches[0].clientY);
-}
-function onHeadMouseDrag(e: MouseEvent) {
-  onHeadDrag(e.clientY);
-}
 
-watch(
-  () => props.modelValue,
-  (newValue: number) => {
-    curvedValue.value = newValue;
-    linearValue.value = valueCurve.value.getLinearValue(curvedValue.value);
-  }
-);
+const { onDragElementStart, dragging } = useDragging(onHeadDrag);
 
-watch(
-  () => props.minValue,
-  (newValue: number) => {
-    valueCurve.value = new LinearCurvedRange(newValue, props.maxValue);
-  }
-);
+onMounted(() => {
+  resizeObserver.value = new ResizeObserver(
+    (entries: ResizeObserverEntry[], observer: ResizeObserver) => {
+      faderHeadHeight.value = getFaderHeadHeight();
+    }
+  );
 
-watch(
-  () => props.maxValue,
-  (newValue: number) => {
-    valueCurve.value = new LinearCurvedRange(props.minValue, newValue);
-  }
-);
+  resizeObserver.value.observe(faderHead.value as HTMLElement);
+});
+
+onUnmounted(() => {
+  resizeObserver.value?.disconnect();
+});
 </script>
 
 <style scoped>
