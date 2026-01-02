@@ -10,15 +10,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 
 function handleKeyDown(keyNumber) {
-  console.log('Key pressed:', keyNumber);
+  console.log("Key pressed:", keyNumber);
   // Trigger note on
 }
 
 function handleKeyUp(keyNumber) {
-  console.log('Key released:', keyNumber);
+  console.log("Key released:", keyNumber);
   // Trigger note off
 }
 </script>

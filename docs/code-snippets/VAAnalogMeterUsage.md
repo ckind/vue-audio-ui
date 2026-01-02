@@ -32,6 +32,5 @@ onMounted(() => {
   track.connect(meterInput.value);
   track.connect(ctx.destination);
 });
-
 </script>
 ```

@@ -2,15 +2,15 @@
 
 ```vue
 <template>
-	<v-a-spectrum-analyzer
-		:input="analyzerInput"
-		:width="500"
-		gridColor="gray"
-		lineColor="white"
-		backgroundColor="black"
-		borderColor="black"
-		fillStyle="none"
-	/>
+  <v-a-spectrum-analyzer
+    :input="analyzerInput"
+    :width="500"
+    gridColor="gray"
+    lineColor="white"
+    backgroundColor="black"
+    borderColor="black"
+    fillStyle="none"
+  />
 </template>
 
 <script setup lang="ts">
@@ -37,6 +37,5 @@ onMounted(() => {
   track.connect(analyzerInput.value);
   track.connect(ctx.destination);
 });
-
 </script>
 ```

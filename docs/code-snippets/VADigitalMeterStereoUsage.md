@@ -5,7 +5,11 @@
   <audio controls ref="my-audio">
     <source src="a-banger.mp3" type="audio/mpeg" />
   </audio>
-  <v-a-digital-stereo-meter type="rms" :leftInput="leftInput" :rightInput="rightInput" />
+  <v-a-digital-stereo-meter
+    type="rms"
+    :leftInput="leftInput"
+    :rightInput="rightInput"
+  />
 </template>
 
 <script setup>
@@ -41,6 +45,5 @@ onMounted(() => {
   track.connect(splitter);
   track.connect(ctx.destination);
 });
-
 </script>
 ```

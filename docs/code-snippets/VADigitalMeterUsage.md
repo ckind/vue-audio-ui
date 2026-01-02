@@ -5,7 +5,12 @@
   <audio controls ref="my-audio">
     <source src="a-banger.mp3" type="audio/mpeg" />
   </audio>
-  <v-a-digital-meter class="ui-component" type="rms" :input="meterInput" :drawMarkers="true" />
+  <v-a-digital-meter
+    class="ui-component"
+    type="rms"
+    :input="meterInput"
+    :drawMarkers="true"
+  />
 </template>
 
 <script setup>
@@ -32,6 +37,5 @@ onMounted(() => {
   track.connect(meterInput.value);
   track.connect(ctx.destination);
 });
-
 </script>
 ```

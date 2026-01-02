@@ -5,7 +5,7 @@
   <audio controls ref="my-audio">
     <source src="a-banger.mp3" type="audio/mpeg" />
   </audio>
-	<v-a-oscilloscope :input="analyzerInput" />
+  <v-a-oscilloscope :input="analyzerInput" />
 </template>
 
 <script setup lang="ts">
@@ -32,6 +32,5 @@ onMounted(() => {
   track.connect(analyzerInput.value);
   track.connect(ctx.destination);
 });
-
 </script>
 ```

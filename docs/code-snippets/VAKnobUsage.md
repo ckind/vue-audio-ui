@@ -21,7 +21,7 @@
     :default="5"
     :step="1"
   >
-    <img src="./path-to/custom-knob.svg">
+    <img src="./path-to/custom-knob.svg" />
   </v-a-knob>
 </template>
 

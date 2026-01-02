@@ -2,7 +2,7 @@
 
 ```vue
 <template>
-    <v-a-num-box v-model="modelValue" />
+  <v-a-num-box v-model="modelValue" />
 </template>
 
 <script setup>

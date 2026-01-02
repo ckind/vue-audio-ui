@@ -2,7 +2,7 @@
 
 ```vue
 <template>
-    <v-a-envelope-adsr v-model="envelope" :width="300" />
+  <v-a-envelope-adsr v-model="envelope" :width="300" />
 </template>
 
 <script setup>
@@ -12,7 +12,7 @@ const envelope = ref({
   attack: 10,
   decay: 200,
   sustain: 0.6,
-  release: 200
+  release: 200,
 });
 </script>
 ```

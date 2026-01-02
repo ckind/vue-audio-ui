@@ -2,7 +2,7 @@
 
 ```vue
 <template>
-    <v-a-mod-matrix :sources="sources" :destinations="destinations" />
+  <v-a-mod-matrix :sources="sources" :destinations="destinations" />
 </template>
 
 <script setup lang="ts">
