@@ -156,8 +156,14 @@ const props = defineProps({
   },
 });
 
-const { getPeakDb, getRmsDb, getFloatTimeDomainData, onInputChanged } =
-  useMetering(props.fftSize, props.input as AudioNode);
+const {
+  getPeakDb,
+  getRmsDb,
+  getFloatTimeDomainData,
+  onInputChanged,
+  disposeMetering,
+} = useMetering(props.fftSize, props.input as AudioNode);
+const { startRendering, stopRendering } = useRendering();
 
 watch(
   () => props.input,
@@ -169,8 +175,6 @@ watch(
   }
 );
 
-const { startRendering, stopRendering } = useRendering();
-
 const value = ref(-1);
 
 const rotation = computed(() => {
@@ -179,27 +183,30 @@ const rotation = computed(() => {
     : `rotate(${50 * value.value} 160 150)`;
 });
 
+function draw() {
+  const dataArray = getFloatTimeDomainData();
+
+  let db = 0;
+
+  if (props.type === "peak" && dataArray) {
+    db = getPeakDb(dataArray);
+  } else if (props.type === "rms" && dataArray) {
+    db = getRmsDb(dataArray);
+  }
+
+  const dbRange = 80;
+  db = db < -dbRange ? -dbRange : db;
+  const mult = (dbRange + db) / dbRange;
+
+  value.value = mult * 2 - 1;
+}
+
 onMounted(() => {
-  startRendering(() => {
-    const dataArray = getFloatTimeDomainData();
-
-    let db = 0;
-
-    if (props.type === "peak" && dataArray) {
-      db = getPeakDb(dataArray);
-    } else if (props.type === "rms" && dataArray) {
-      db = getRmsDb(dataArray);
-    }
-
-    const dbRange = 80;
-    db = db < -dbRange ? -dbRange : db;
-    const mult = (dbRange + db) / dbRange;
-
-    value.value = mult * 2 - 1;
-  });
+  startRendering(draw);
 });
 
 onUnmounted(() => {
+  disposeMetering(props.input as AudioNode);
   stopRendering();
 });
 </script>

@@ -31,6 +31,7 @@ import {
   computed,
   ref,
   onMounted,
+  onUnmounted,
   useTemplateRef,
 } from "vue";
 import { useMetering } from "@/composables/useMetering";
@@ -104,13 +105,19 @@ const canvasWidth = computed(() => {
   return props.width;
 });
 
-const metering = useMetering(props.fftSize, props.input as AudioNode);
-const rendering = useRendering();
+const {
+  getPeakDb,
+  getRmsDb,
+  getFloatTimeDomainData,
+  onInputChanged,
+  disposeMetering,
+} = useMetering(props.fftSize, props.input as AudioNode);
+const { startRendering, stopRendering } = useRendering();
 
 watch(
   () => props.input,
   (newVal, oldVal) => {
-    metering.onInputChanged(
+    onInputChanged(
       newVal as AudioNode | undefined,
       oldVal as AudioNode | undefined
     );
@@ -120,7 +127,12 @@ watch(
 onMounted(() => {
   const canvas = meterCanvas.value as HTMLCanvasElement;
   canvasCtx.value = canvas.getContext("2d");
-  rendering.startRendering(draw);
+  startRendering(draw);
+});
+
+onUnmounted(() => {
+  disposeMetering(props.input as AudioNode);
+  stopRendering();
 });
 
 function getDbMarkerHeight(db: number, previousDb?: number) {
@@ -150,14 +162,14 @@ function scaleY(db: number): number {
 
 function draw(): void {
   if (canvasCtx.value) {
-    const dataArray = metering.getFloatTimeDomainData();
+    const dataArray = getFloatTimeDomainData();
 
     let db = -DB_RANGE;
 
     if (props.type === "peak" && dataArray) {
-      db = metering.getPeakDb(dataArray);
+      db = getPeakDb(dataArray);
     } else if (props.type === "rms" && dataArray) {
-      db = metering.getRmsDb(dataArray);
+      db = getRmsDb(dataArray);
     }
 
     const clipping = db > 0;

@@ -45,16 +45,19 @@ const props = defineProps({
   },
 });
 
-const metering = useMetering(
-  props.fftSize,
-  props.input as AudioNode | undefined
-);
-const rendering = useRendering();
+const {
+  getPeakDb,
+  getRmsDb,
+  getFloatTimeDomainData,
+  onInputChanged,
+  disposeMetering,
+} = useMetering(props.fftSize, props.input as AudioNode);
+const { startRendering, stopRendering } = useRendering();
 
 watch(
   () => props.input,
   (newVal, oldVal) => {
-    metering.onInputChanged(
+    onInputChanged(
       newVal as AudioNode | undefined,
       oldVal as AudioNode | undefined
     );
@@ -66,21 +69,20 @@ let canvasContext: CanvasRenderingContext2D;
 
 onMounted(() => {
   canvasContext = analyserCanvas.value?.getContext("2d")!;
-  rendering.startRendering(drawTimeDomain);
+  startRendering(drawTimeDomain);
 });
 
-onUnmounted(dispose);
+onUnmounted(() => {
+  disposeMetering(props.input as AudioNode | undefined);
+  stopRendering();
+});
 
 const graphHeight = computed(() => {
   return props.height ? props.height : props.width / DEFAULT_ASPECT_RATIO;
 });
 
-function dispose() {
-  metering.disposeMetering(props.input as AudioNode | undefined);
-}
-
 function drawTimeDomain() {
-  let dataArray = metering.getFloatTimeDomainData();
+  let dataArray = getFloatTimeDomainData();
 
   // console.log(dataArray);
 

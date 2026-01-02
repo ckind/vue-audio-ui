@@ -176,6 +176,10 @@ export default defineComponent({
     ).getContext("2d");
     this.startRendering(this.drawFrequencyDomain);
   },
+  unmounted() {
+    this.disposeMetering(this.input as AudioNode | undefined);
+    this.stopRendering();
+  },
   methods: {
     scaleX(
       f: number,
