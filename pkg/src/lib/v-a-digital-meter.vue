@@ -1,24 +1,26 @@
 <template>
-  <div class="meter-container">
-    <canvas
-      class="meter"
-      ref="meterCanvas"
-      :height="height"
-      :width="canvasWidth"
-    />
-    <div class="db-markers" v-if="drawMarkers">
-      <div
-        class="db-marker"
-        v-for="(db, i) in dbMarkerValues"
-        :key="i"
-        :style="{
-          height:
-            getDbMarkerHeight(db, i > 0 ? dbMarkerValues[i - 1] : undefined) +
-            'px',
-          color: dbMarkerColor,
-        }"
-      >
-        <span class="db-dash">-</span>{{ Math.abs(db) }}
+  <div>
+    <div class="meter-container">
+      <canvas
+        class="meter"
+        ref="meterCanvas"
+        :height="height"
+        :width="canvasWidth"
+      />
+      <div class="db-markers" v-if="drawMarkers">
+        <div
+          class="db-marker"
+          v-for="(db, i) in dbMarkerValues"
+          :key="i"
+          :style="{
+            height:
+              getDbMarkerHeight(db, i > 0 ? dbMarkerValues[i - 1] : undefined) +
+              'px',
+            color: dbMarkerColor,
+          }"
+        >
+          <span class="db-dash">-</span>{{ Math.abs(db) }}
+        </div>
       </div>
     </div>
   </div>

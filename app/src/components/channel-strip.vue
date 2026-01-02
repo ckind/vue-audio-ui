@@ -26,7 +26,7 @@
 
     <div class="volume-container">
       <v-a-fader v-model="faderGain" :minValue="0" :maxValue="1" class="fader"></v-a-fader>
-      <v-a-digital-meter class="ui-component" type="peak" :input="postGain" :drawMarkers="true" />
+      <v-a-digital-meter class="ui-component meter" type="peak" :input="postGain" :drawMarkers="true"/>
     </div>
 
     <!-- <v-a-toggle-button :label="'mute'" :color="'red'" />
@@ -114,6 +114,9 @@ export default defineComponent({
 }
 
 .fader {
+  display: inline-block;
+}
+.meter {
   display: inline-block;
 }
 
