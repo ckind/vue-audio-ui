@@ -1,13 +1,13 @@
 <template>
-  <div ref="faderContainer" class="fader-container" :style="cssVars">
-    <div ref="faderBackground" class="fader-background">
+  <div ref="faderContainer" class="v-a-fader-container" :style="cssVars">
+    <div ref="faderBackground" :class="['fader-background', props.orientation]">
       <slot name="faderBackground">
         <defaultFaderBackground />
       </slot>
     </div>
     <div
       ref="faderHead"
-      class="fader-head"
+      :class="['fader-head', props.orientation]"
       @mousedown="onDragElementStart"
       @touchstart="onDragElementStart"
       @dblclick="onHeadDblClick"
@@ -27,12 +27,15 @@ import {
   onMounted,
   onUnmounted,
   watch,
+  type PropType,
 } from "vue";
 import defaultFaderHead from "@/lib/components/default-fader-head.vue";
 import defaultFaderBackground from "./components/default-fader-background.vue";
 import { LinearCurvedRange } from "@/util/curved-range";
 import { clamp } from "@/util/math-helpers.ts";
 import useDragging from "@/composables/useDragging";
+
+export type FaderOrientationType = "vertical" | "horizontal";
 
 const emit = defineEmits(["update:modelValue"]);
 
@@ -63,6 +66,11 @@ const props = defineProps({
     required: false,
     type: Number,
   },
+  orientation: {
+    required: false,
+    type: String as PropType<FaderOrientationType>,
+    default: "vertical",
+  },
 });
 
 const valueCurve = ref(new LinearCurvedRange(props.minValue, props.maxValue));
@@ -70,7 +78,18 @@ const linearValue = ref(props.modelValue);
 const curvedValue = ref(valueCurve.value.getCurvedValue(props.modelValue));
 const faderHead = useTemplateRef("faderHead");
 const faderHeadHeight = ref(0);
+const faderHeadWidth = ref(0);
 const resizeObserver = ref<ResizeObserver | undefined>(undefined); // todo: does this need to be a ref?
+
+const faderHeight = computed(() => {
+  // return props.orientation === "horizontal" ? props.width : props.height;
+  return props.height;
+});
+
+const faderWidth = computed(() => {
+  // return props.orientation === "horizontal" ? props.height : props.width;
+  return props.width;
+});
 
 const valueRange = computed(() => {
   return props.maxValue - props.minValue;
@@ -81,7 +100,11 @@ const midValue = computed(() => {
 });
 
 const faderDragRange = computed(() => {
-  return Math.abs(props.height - faderHeadHeight.value);
+  if (props.orientation === "horizontal") {
+    return Math.abs(faderWidth.value - faderHeadWidth.value);
+  }
+
+  return Math.abs(faderHeight.value - faderHeadHeight.value);
 });
 
 const faderHeadTop = computed(() => {
@@ -91,11 +114,18 @@ const faderHeadTop = computed(() => {
   return faderDragRange.value - valueRatio * faderDragRange.value;
 });
 
+const faderHeadLeft = computed(() => {
+  // set left position prop of fader head based on value of control
+  const valueRatio = (linearValue.value - props.minValue) / valueRange.value;
+  return valueRatio * faderDragRange.value;
+});
+
 const cssVars = computed(() => {
   return {
-    "--fader-height": `${props.height}px`,
-    "--fader-width": `${props.width}px`,
+    "--fader-height": `${faderHeight.value}px`,
+    "--fader-width": `${faderWidth.value}px`,
     "--fader-head-top": `${faderHeadTop.value}px`,
+    "--fader-head-left": `${faderHeadLeft.value}px`,
   };
 });
 
@@ -133,8 +163,8 @@ function getContainedImgOrSvg(el: HTMLElement) {
   return undefined;
 }
 
-function getFaderHeadHeight() {
-  if (!faderHead.value) return 0;
+function getFaderHeadSize() {
+  if (!faderHead.value) return { height: 0, width: 0 };
 
   // look for underlying img or svg to get exact height
   // todo: could probably just get the container height
@@ -142,8 +172,14 @@ function getFaderHeadHeight() {
   const headImg = getContainedImgOrSvg(faderHead.value as HTMLElement);
 
   return headImg
-    ? headImg.getBoundingClientRect().height
-    : faderHead.value.getBoundingClientRect().height;
+    ? {
+        height: headImg.getBoundingClientRect().height,
+        width: headImg.getBoundingClientRect().width,
+      }
+    : {
+        height: faderHead.value.getBoundingClientRect().height,
+        width: faderHead.value.getBoundingClientRect().width,
+      };
 }
 
 function onHeadDblClick() {
@@ -153,8 +189,10 @@ function onHeadDblClick() {
 }
 
 function onHeadDrag(deltaX: number, deltaY: number) {
+  const delta = props.orientation === "horizontal" ? deltaX : -deltaY;
+
   const faderValue = clamp(
-    linearValue.value + (-deltaY / faderDragRange.value) * valueRange.value,
+    linearValue.value + (delta / faderDragRange.value) * valueRange.value,
     props.minValue,
     props.maxValue
   );
@@ -167,7 +205,9 @@ const { onDragElementStart, dragging } = useDragging(onHeadDrag);
 onMounted(() => {
   resizeObserver.value = new ResizeObserver(
     (entries: ResizeObserverEntry[], observer: ResizeObserver) => {
-      faderHeadHeight.value = getFaderHeadHeight();
+      const size = getFaderHeadSize();
+      faderHeadWidth.value = size.width;
+      faderHeadHeight.value = size.height;
     }
   );
 
@@ -180,7 +220,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.fader-container {
+.v-a-fader-container {
   width: var(--fader-width);
   height: var(--fader-height);
   position: relative;
@@ -192,11 +232,7 @@ onUnmounted(() => {
   max-height: var(--fader-height);
   cursor: move;
   position: absolute;
-  top: var(--fader-head-top);
-  left: 50%;
-  translate: -50% 0;
 }
-
 .fader-head ::v-deep img {
   max-width: var(--fader-width);
   max-height: var(--fader-height);
@@ -206,18 +242,25 @@ onUnmounted(() => {
   -moz-user-drag: none;
   -o-user-drag: none;
 }
-
 .fader-head ::v-deep svg {
   max-width: var(--fader-width);
   max-height: var(--fader-height);
 }
-
-.fader-background {
-  width: var(--fader-width);
-  height: var(--fader-height);
-  position: absolute;
+.fader-head.vertical {
+  top: var(--fader-head-top);
+  left: 50%;
+  translate: -50% 0;
+}
+.fader-head.horizontal {
+  left: var(--fader-head-left);
+  top: 50%;
+  transform: rotate(90deg) translateY(-100%) translateX(-50%);
+  transform-origin: top left;
 }
 
+.fader-background {
+  position: absolute;
+}
 .fader-background ::v-deep img {
   width: 100% !important;
   height: 100% !important;
@@ -227,16 +270,21 @@ onUnmounted(() => {
   -moz-user-drag: none;
   -o-user-drag: none;
 }
-
 .fader-background ::v-deep svg {
   width: 100% !important;
   height: 100% !important;
   display: block;
 }
-
-.spacer {
+.fader-background.vertical {
   width: var(--fader-width);
   height: var(--fader-height);
-  visibility: hidden;
+}
+.fader-background.horizontal {
+  /* need to flip height and width since we're rotating 90 degrees */
+  height: var(--fader-width);
+  width: var(--fader-height);
+  transform: rotate(90deg) translateY(-100%);
+  transform-origin: top left;
+  /* transform: rotate(90deg); */
 }
 </style>

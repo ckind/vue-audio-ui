@@ -1,30 +1,31 @@
 <template>
   <div>
     <div class="example">
-      <div class="fader-container">
-        <v-a-fader
-          v-model="modelValue"
-          :minValue="minValue"
-          :maxValue="maxValue"
-          :default="defaultValue"
-          class="fader"
-        />
-        <v-a-fader
-          v-model="modelValue"
-          :minValue="minValue"
-          :maxValue="maxValue"
-          :default="defaultValue"
-          :width="120"
-          class="fader"
-        >
-          <template #faderBackground>
-            <img src="/assets/faderBackground_variant.svg" alt="My SVG image" />
-          </template>
-          <template #faderHead>
-            <img src="/assets/faderHead_variant.svg" alt="My SVG image" />
-          </template>
-        </v-a-fader>
-      </div>
+      <v-a-fader
+        v-model="modelValue"
+        :minValue="minValue"
+        :maxValue="maxValue"
+        :default="defaultValue"
+        class="fader"
+      />
+
+      <v-a-fader
+        v-model="modelValue"
+        :minValue="minValue"
+        :maxValue="maxValue"
+        :default="defaultValue"
+        :height="120"
+        :width="200"
+        class="fader"
+        orientation="horizontal"
+      >
+        <template #faderBackground>
+          <img src="/assets/faderBackground_variant.svg" alt="My SVG image" />
+        </template>
+        <template #faderHead>
+          <img src="/assets/faderHead_variant.svg" alt="My SVG image" />
+        </template>
+      </v-a-fader>
 
       <div class="example-props">
         <div>
@@ -39,7 +40,9 @@
 
         <div>
           <label for="modelValue">modelValue: </label>
-          <span id="modelValue" name="modelValue"> {{ modelValue.toFixed(4) }}</span>
+          <span id="modelValue" name="modelValue">
+            {{ modelValue.toFixed(4) }}</span
+          >
         </div>
 
         <div>
