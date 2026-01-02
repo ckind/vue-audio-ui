@@ -15,6 +15,7 @@ coverage
 *.local
 vue-audio-ui-*.tgz
 _publish_local
+*.pem
 
 # Editor directories and files
 .vscode/*

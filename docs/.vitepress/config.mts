@@ -1,39 +1,55 @@
-import { defineConfig } from 'vitepress'
-import { fileURLToPath } from 'node:url'
+import { defineConfig } from "vitepress";
+import { fileURLToPath } from "node:url";
+import fs from "node:fs";
+import path from "node:path";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const certPath = path.resolve(__dirname, "cert.pem");
+const keyPath = path.resolve(__dirname, "key.pem");
+const useHttps = fs.existsSync(certPath) && fs.existsSync(keyPath);
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "vue-audio-ui",
   description: "Official Documentation for vue-audio-ui",
   head: [
-    ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }]
+    ["link", { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }],
   ],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Components', link: '/pages/component-library' }
+      { text: "Home", link: "/" },
+      { text: "Components", link: "/pages/component-library" },
     ],
 
     sidebar: [
       {
         // text: 'Examples',
         items: [
-          { text: 'Getting Started', link: '/pages/getting-started' },
-          { text: 'Components', link: '/pages/component-library' },
-          { text: 'Web Audio API and SSR', link: '/pages/web-audio-api-and-ssr' },
-          { text: 'Contributing', link: '/pages/contributing' }
-        ]
-      }
+          { text: "Getting Started", link: "/pages/getting-started" },
+          { text: "Components", link: "/pages/component-library" },
+          {
+            text: "Web Audio API and SSR",
+            link: "/pages/web-audio-api-and-ssr",
+          },
+          { text: "Contributing", link: "/pages/contributing" },
+        ],
+      },
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/ckind/vue-audio-ui' }
-    ]
+      { icon: "github", link: "https://github.com/ckind/vue-audio-ui" },
+    ],
   },
   vite: {
     resolve: {
-      alias: {}
-    }
-  }
-})
+      alias: {},
+    },
+    server: useHttps ? {
+      https: {
+        cert: fs.readFileSync(certPath),
+        key: fs.readFileSync(keyPath)
+      },
+    } : undefined,
+  },
+});
