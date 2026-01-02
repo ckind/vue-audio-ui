@@ -63,23 +63,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.example {
-  display: flex;
-  align-items: flex-start;
-  gap: 2em;
-}
-
 .visualizer-container {
   flex: 0 0 auto;
-}
-
-.props {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.props input {
-  width: 9rem;
 }
 </style>

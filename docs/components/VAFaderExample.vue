@@ -26,7 +26,7 @@
         </v-a-fader>
       </div>
 
-      <div class="props">
+      <div class="example-props">
         <div>
           <label for="maxValue">maxValue: </label>
           <span id="maxValue" name="maxValue"> {{ maxValue }}</span>
@@ -39,7 +39,7 @@
 
         <div>
           <label for="modelValue">modelValue: </label>
-          <span id="modelValue" name="modelValue"> {{ modelValue }}</span>
+          <span id="modelValue" name="modelValue"> {{ modelValue.toFixed(4) }}</span>
         </div>
 
         <div>
@@ -81,28 +81,11 @@ const propsToDisplay = ref(VAFader.props);
 </script>
 
 <style scoped>
-.example {
-  display: flex;
-  align-items: center;
-  gap: 2em;
-}
-
 .fader-container {
   flex: 0 0 auto;
 }
-
 .fader {
   display: inline-block;
   margin: 0.25em;
-}
-
-.props {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.props input {
-  width: 9rem;
 }
 </style>

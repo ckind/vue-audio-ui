@@ -27,7 +27,7 @@
         </v-a-knob>
       </div>
 
-      <div class="props">
+      <div class="example-props">
         <div>
           <label for="maxValue">maxValue: </label>
           <span id="maxValue" name="maxValue"> {{ maxValue }}</span>
@@ -80,22 +80,9 @@ const defaultValue = ref(5);
 const step = ref(2);
 const propsToDisplay = ref(VAKnob.props);
 </script>
-
 <style scoped>
-.example {
-  display: flex;
-  align-items: center;
-  gap: 2em;
-}
+
 .knob {
   flex: 0 0 auto;
-}
-.props {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.props input {
-  width: 9rem;
 }
 </style>

@@ -58,12 +58,6 @@ function onKeyboardKeyUp(keyNumber) {
 </script>
 
 <style scoped>
-.example {
-  display: flex;
-  align-items: center;
-  gap: 2em;
-}
-
 .piano {
   flex: 0 0 auto;
 }

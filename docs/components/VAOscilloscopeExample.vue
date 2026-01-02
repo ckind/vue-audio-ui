@@ -41,24 +41,4 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
-.example {
-  display: flex;
-  align-items: center;
-  gap: 2em;
-}
-
-.meter {
-  flex: 0 0 auto;
-}
-
-.props {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.props input {
-  width: 9rem;
-}
-</style>
+<style scoped></style>

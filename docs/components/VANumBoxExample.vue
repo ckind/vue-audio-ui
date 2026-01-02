@@ -10,7 +10,7 @@
         />
       </div>
 
-      <div class="props">
+      <div class="example-props">
         <div>
           <label for="modelValue">modelValue: </label>
           <span id="modelValue" name="modelValue"> {{ modelValue }}</span>
@@ -45,23 +45,7 @@ const propsToDisplay = ref(VANumBox.props);
 </script>
 
 <style scoped>
-.example {
-  display: flex;
-  align-items: center;
-  gap: 2em;
-}
-
 .knob {
   flex: 0 0 auto;
-}
-
-.props {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.props input {
-  width: 9rem;
 }
 </style>

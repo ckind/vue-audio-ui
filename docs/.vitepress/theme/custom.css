@@ -1,0 +1,14 @@
+.example {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2em;
+}
+.example-props {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.example-props input {
+  width: 9rem;
+}

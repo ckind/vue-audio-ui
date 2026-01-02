@@ -1,34 +1,36 @@
 <template>
   <div>
     <div class="example">
-      <audio controls ref="my-audio">
+      <audio controls ref="my-audio" class="audio-player">
         <source src="/audio/waterbug.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
       </audio>
 
-      <div class="meter">
-        peak
-        <v-a-digital-meter-stereo
-          class="ui-component"
-          type="peak"
-          :leftInput="leftInput"
-          :rightInput="rightInput"
-          :drawMarkers="true"
-        />
+      <div class="meters">
+        <div>
+          <span class="meter-label">peak</span>
+          <v-a-digital-meter-stereo
+            class="ui-component"
+            type="peak"
+            :leftInput="leftInput"
+            :rightInput="rightInput"
+            :drawMarkers="true"
+          />
+        </div>
+
+        <div>
+          <span class="meter-label">rms</span>
+          <v-a-digital-meter-stereo
+            class="ui-component"
+            type="rms"
+            :leftInput="leftInput"
+            :rightInput="rightInput"
+            :drawMarkers="true"
+          />
+        </div>
       </div>
 
-      <div class="meter">
-        rms
-        <v-a-digital-meter-stereo
-          class="ui-component"
-          type="rms"
-          :leftInput="leftInput"
-          :rightInput="rightInput"
-          :drawMarkers="true"
-        />
-      </div>
-
-      <div class="props"></div>
+      <div class="example-props"></div>
     </div>
 
     <p><strong>Props</strong></p>
@@ -71,23 +73,17 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.example {
+.meters {
   display: flex;
-  align-items: center;
+  justify-content: center;
   gap: 2em;
 }
-
-.meter {
+.meter-label {
+  display: block;
+  margin-bottom: 0.5em;
+}
+.audio-player {
   flex: 0 0 auto;
-}
-
-.props {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.props input {
-  width: 9rem;
+  min-width: 200px;
 }
 </style>

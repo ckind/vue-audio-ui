@@ -176,12 +176,6 @@ function setupFilteredOscillator(
 </script>
 
 <style scoped>
-.example {
-  display: flex;
-  align-items: center;
-  gap: 2em;
-}
-
 .mute-btn {
   padding: 0.5rem;
   margin: 1rem 0;
