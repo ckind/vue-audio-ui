@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, ref } from "vue";
+import { computed, watch, ref, type PropType } from "vue";
 import { LinearCurvedRange } from "@/util/curved-range.ts";
 import { clamp } from "@/util/math-helpers.ts";
 import defaultKnob from "@/lib/components/default-knob.vue";
@@ -33,6 +33,16 @@ const props = defineProps({
   modelValue: {
     required: true,
     type: Number,
+  },
+  input: {
+    required: false,
+    type: Object as PropType<AudioParam | undefined>,
+    default: undefined,
+  },
+  audioContext: {
+    required: false,
+    type: Object as PropType<AudioContext | undefined>,
+    default: undefined,
   },
   minValue: {
     required: true,
@@ -80,9 +90,19 @@ const unsteppedValue = ref(props.modelValue);
 // const audioParamValue = ref<AudioParam | null>(null); // todo: allow AudioParam input
 
 function onKnobDblClick() {
+  // todo: could refactor to share a lot of this logic with fader,
+  // numbox, etc... in composable
   const value =
     typeof props.default === "undefined" ? midValue.value : props.default;
   unsteppedValue.value = value;
+
+  if (props.input && props.audioContext) {
+    props.input.linearRampToValueAtTime(
+      value,
+      props.audioContext.currentTime + 0.01
+    );
+  }
+
   emit("update:modelValue", valueCurve.value.getCurvedValue(value));
 }
 
@@ -105,6 +125,13 @@ function onKnobDrag(deltaX: number, deltaY: number) {
   unsteppedValue.value = knobValue;
   const steppedValue =
     props.step === 0 ? unsteppedValue.value : roundToStep(unsteppedValue.value);
+
+  if (props.input && props.audioContext) {
+    props.input.linearRampToValueAtTime(
+      steppedValue,
+      props.audioContext.currentTime + 0.01
+    );
+  }
 
   emit("update:modelValue", valueCurve.value.getCurvedValue(steppedValue));
 }

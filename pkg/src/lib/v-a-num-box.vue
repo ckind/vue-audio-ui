@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, useTemplateRef, nextTick } from 'vue';
+import { computed, ref, watch, useTemplateRef, nextTick, type PropType } from 'vue';
 import theme from '@/theme.ts';
 import { round, clamp } from '@/util/math-helpers.ts';
 import useDragging from '@/composables/useDragging';
@@ -45,6 +45,16 @@ const props = defineProps({
   modelValue: {
     required: true,
     type: Number
+  },
+  input: {
+    required: false,
+    type: Object as PropType<AudioParam | undefined>,
+    default: undefined,
+  },
+  audioContext: {
+    required: false,
+    type: Object as PropType<AudioContext | undefined>,
+    default: undefined,
   },
   minValue: {
     type: Number,
@@ -118,25 +128,43 @@ function onManualInputKeyDown(e: KeyboardEvent) {
 }
 
 function commitManualInput() {
-  emit("update:modelValue",
-    clamp(
-      round(manualInputValue.value, props.fixedDecimals),
-      props.minValue,
-      props.maxValue
-    )
+  const value = clamp(
+    round(manualInputValue.value, props.fixedDecimals),
+    props.minValue,
+    props.maxValue
   );
+
+  if (props.input && props.audioContext) {
+    props.input.linearRampToValueAtTime(
+      value,
+      props.audioContext.currentTime + 0.01
+    );
+  }
+
+  emit("update:modelValue", value);
+
   manualInput.value = false;
   document.removeEventListener('mouseup', onManualInputDocumentMouseUp);
 }
 
 function onNumBoxDrag(deltaX: number, deltaY: number) {
-  const value = clamp(
-    props.modelValue + (-deltaY / DRAG_RANGE) * (valueRange.value / 2),
-    props.minValue,
-    props.maxValue
+  const value = round(
+    clamp(
+      props.modelValue + (-deltaY / DRAG_RANGE) * (valueRange.value / 2),
+      props.minValue,
+      props.maxValue
+    ),
+    props.fixedDecimals
   );
 
-  emit("update:modelValue", round(value, props.fixedDecimals));
+  if (props.input && props.audioContext) {
+    props.input.linearRampToValueAtTime(
+      value,
+      props.audioContext.currentTime + 0.01
+    );
+  }
+
+  emit("update:modelValue", value);
 }
 
 const { onDragElementStart, dragging } = useDragging(onNumBoxDrag);

@@ -12,7 +12,14 @@
 
       <br />
 
-      <v-a-fader v-model="faderGainValue" :minValue="0" :maxValue="1" class="inline-block"/>
+      <v-a-fader
+        v-model="faderGainValue"
+        :minValue="0"
+        :maxValue="1"
+        class="inline-block"
+        :input="faderGainNode.gain"
+        :audioContext="faderGainNode.context"
+      />
       <v-a-digital-meter-stereo
         class="ui-component inline-block"
         type="rms"
@@ -21,7 +28,11 @@
         :drawMarkers="true"
       />
 
-      <v-a-analog-meter :input="faderGainNode" :width="300" class="inline-block"/>
+      <v-a-analog-meter
+        :input="faderGainNode"
+        :width="300"
+        class="inline-block"
+      />
     </div>
   </div>
 </template>
@@ -75,16 +86,7 @@ export default defineComponent({
     (
       this.$refs.container as HTMLElement
     ).style.backgroundImage = `url(${this.backgroundImg})`;
-  },
-  watch: {
-    // todo: rampTo? sounds clicking when making sudden changes
-    faderGainValue(value: number) {
-      this.faderGainNode.gain.setValueAtTime(
-        value,
-        this.input.context.currentTime
-      );
-    },
-  },
+  }
 });
 </script>
 

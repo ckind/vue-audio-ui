@@ -1,23 +1,56 @@
 <template>
   <div class="channel-strip-container" ref="container">
-
     <div class="eq-container">
       <div class="eq-band-container">
         high
-        <v-a-knob class="eq-knob" v-model="highEqGain" :size="50" :minValue="-10" :maxValue="10">
-          <img src="@/assets/svg/knob1.svg" alt="My SVG image">
+        <v-a-knob
+          class="eq-knob"
+          v-model="highEqGain"
+          :input="highshelf.gain"
+          :audioContext="highshelf.context"
+          :size="50"
+          :minValue="-10"
+          :maxValue="10"
+        >
+          <img src="@/assets/svg/knob1.svg" alt="My SVG image" />
         </v-a-knob>
       </div>
       <div class="eq-band-container">
         mid
-        <v-a-knob class="eq-knob" v-model="midEqGain" :size="50" :minValue="-20" :maxValue="20">
-          <img src="@/assets/svg/knob2.svg" alt="My SVG image" width="50" height="50">
+        <v-a-knob
+          class="eq-knob"
+          v-model="midEqGain"
+          :input="midpeaking.gain"
+          :audioContext="midpeaking.context"
+          :size="50"
+          :minValue="-20"
+          :maxValue="20"
+        >
+          <img
+            src="@/assets/svg/knob2.svg"
+            alt="My SVG image"
+            width="50"
+            height="50"
+          />
         </v-a-knob>
       </div>
       <div class="eq-band-container">
         low
-        <v-a-knob class="eq-knob" v-model="lowEqGain" :size="50" :minValue="-20" :maxValue="20">
-          <img src="@/assets/svg/knob3.svg" alt="My SVG image" width="50" height="50">
+        <v-a-knob
+          class="eq-knob"
+          v-model="lowEqGain"
+          :input="lowshelf.gain"
+          :audioContext="lowshelf.context"
+          :size="50"
+          :minValue="-20"
+          :maxValue="20"
+        >
+          <img
+            src="@/assets/svg/knob3.svg"
+            alt="My SVG image"
+            width="50"
+            height="50"
+          />
         </v-a-knob>
       </div>
     </div>
@@ -25,13 +58,24 @@
     <br />
 
     <div class="volume-container">
-      <v-a-fader v-model="faderGain" :minValue="0" :maxValue="1" class="fader"></v-a-fader>
-      <v-a-digital-meter class="ui-component meter" type="peak" :input="postGain" :drawMarkers="true"/>
+      <v-a-fader
+        v-model="faderGain"
+        :input="postGain.gain"
+        :audioContext="postGain.context"
+        :minValue="0"
+        :maxValue="1"
+        class="fader"
+      ></v-a-fader>
+      <v-a-digital-meter
+        class="ui-component meter"
+        type="peak"
+        :input="postGain"
+        :drawMarkers="true"
+      />
     </div>
 
     <!-- <v-a-toggle-button :label="'mute'" :color="'red'" />
     <v-a-toggle-button :label="'solo'" :color="'blue'" /> -->
-
   </div>
 </template>
 
@@ -47,9 +91,18 @@ export default defineComponent({
     const lowEqGain = 0;
     const faderGain = 1;
 
-    const lowshelf = new BiquadFilterNode(props.input.context, { type: "lowshelf", gain: lowEqGain });
-    const midpeaking = new BiquadFilterNode(props.input.context, { type: "peaking", gain: midEqGain });
-    const highshelf = new BiquadFilterNode(props.input.context, { type: "highshelf", gain: highEqGain });
+    const lowshelf = new BiquadFilterNode(props.input.context, {
+      type: "lowshelf",
+      gain: lowEqGain,
+    });
+    const midpeaking = new BiquadFilterNode(props.input.context, {
+      type: "peaking",
+      gain: midEqGain,
+    });
+    const highshelf = new BiquadFilterNode(props.input.context, {
+      type: "highshelf",
+      gain: highEqGain,
+    });
     const postGain = new GainNode(props.input.context, { gain: faderGain });
 
     props.input.connect(lowshelf);
@@ -66,8 +119,8 @@ export default defineComponent({
       midEqGain: midEqGain,
       lowEqGain: lowEqGain,
       postGain: postGain,
-      faderGain: faderGain
-    })
+      faderGain: faderGain,
+    });
   },
   props: {
     input: {
@@ -82,25 +135,12 @@ export default defineComponent({
   computed: {
     backgroundImg() {
       return backgroundImg;
-    }
+    },
   },
   mounted() {
-    (this.$refs.container as HTMLElement).style.backgroundImage = `url(${this.backgroundImg})`;
-  },
-  watch: {
-    // todo: rampTo? sounds clicking when making sudden changes
-    highEqGain(value: number) {
-      this.highshelf.gain.setValueAtTime(value, this.input.context.currentTime);
-    },
-    midEqGain(value: number) {
-      this.midpeaking.gain.setValueAtTime(value, this.input.context.currentTime);
-    },
-    lowEqGain(value: number) {
-      this.lowshelf.gain.setValueAtTime(value, this.input.context.currentTime);
-    },
-    faderGain(value: number) {
-      this.postGain.gain.setValueAtTime(value, this.input.context.currentTime);
-    },
+    (
+      this.$refs.container as HTMLElement
+    ).style.backgroundImage = `url(${this.backgroundImg})`;
   }
 });
 </script>
