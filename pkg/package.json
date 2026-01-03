@@ -1,6 +1,6 @@
 {
   "name": "vue-audio-ui",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "audio ui component library for vue.js",
   "type": "module",
   "files": ["dist", "./package.json"],
