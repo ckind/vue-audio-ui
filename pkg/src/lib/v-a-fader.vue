@@ -44,6 +44,16 @@ const props = defineProps({
     required: true,
     type: Number,
   },
+  input: {
+    required: false,
+    type: Object as PropType<AudioParam | undefined>,
+    default: undefined,
+  },
+  audioContext: {
+    required: false,
+    type: Object as PropType<AudioContext | undefined>,
+    default: undefined,
+  },
   minValue: {
     required: true,
     type: Number,
@@ -185,6 +195,14 @@ function getFaderHeadSize() {
 function onHeadDblClick() {
   const value =
     typeof props.default === "undefined" ? midValue.value : props.default;
+
+  if (props.input && props.audioContext) {
+    props.input.linearRampToValueAtTime(
+      value,
+      props.audioContext.currentTime + 0.01
+    );
+  }
+
   emit("update:modelValue", valueCurve.value.getCurvedValue(value));
 }
 
@@ -196,6 +214,13 @@ function onHeadDrag(deltaX: number, deltaY: number) {
     props.minValue,
     props.maxValue
   );
+
+  if (props.input && props.audioContext) {
+    props.input.linearRampToValueAtTime(
+      faderValue,
+      props.audioContext.currentTime + 0.01
+    );
+  }
 
   emit("update:modelValue", valueCurve.value.getCurvedValue(faderValue));
 }
